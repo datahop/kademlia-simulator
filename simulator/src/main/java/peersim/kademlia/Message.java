@@ -1,7 +1,5 @@
 package peersim.kademlia;
 
-import java.math.BigInteger;
-
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
  * messages (messages from application level sender destinated to another application level).<br>
@@ -35,14 +33,36 @@ public class Message extends SimpleEvent {
   /** Message Type: STORE (Stores a (key, value) pair in one node) */
   public static final int MSG_STORE = 1;
 
-  /** Message Type: FINDNODE (message regarding node find) */
-  public static final int MSG_FINDNODE = 2;
+  /** Message Type: INIT_FIND (command to a node to start looking for a node) */
+  public static final int MSG_INIT_FIND = 2;
 
   /** Message Type: FINDVALUE (message regarding value find) */
-  public static final int MSG_ROUTE = 3;
+  public static final int MSG_FIND = 3;
 
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
   public static final int MSG_RESPONSE = 4;
+
+  /** Message Type: REGISTER (register the node under a topic) */
+  public static final int MSG_REGISTER = 5;
+
+  /** Message Type: INIT_REGISTER (start registering under a topic) */
+  public static final int MSG_INIT_REGISTER = 6;
+  /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
+  public static final int MSG_TICKET_REQUEST = 7;
+
+  /** Message Type: TICKET_RESPONSE (return a ticket back to the origin) */
+  public static final int MSG_TICKET_RESPONSE = 8;
+
+  /** Message Type: TOPIC_QUERY (send a query for topics) */
+  public static final int MSG_TOPIC_QUERY = 9;
+
+  /** Message Type: REGISTER_RESPONSE (response to register request) */
+  public static final int MSG_REGISTER_RESPONSE = 10;
+
+  /** Message Type: TOPIC_QUERY_REPLY (respond to topic queries) */
+  public static final int MSG_TOPIC_QUERY_REPLY = 11;
+
+  public static final int MSG_INIT_TOPIC_LOOKUP = 12;
 
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
@@ -57,11 +77,11 @@ public class Message extends SimpleEvent {
   /** Id of the search operation */
   public long operationId;
 
-  /** Recipient address of the message */
-  public BigInteger dest;
+  /** Recipient node of the message */
+  public KademliaNode dest;
 
-  /** Source address of the message: has to be filled at application level */
-  public BigInteger src;
+  /** Source node of the message: has to be filled at application level */
+  public KademliaNode src;
 
   /** Available to count the number of hops the message did. */
   protected int nrHops = 0;
@@ -115,8 +135,8 @@ public class Message extends SimpleEvent {
    * @param body Object
    * @return Message
    */
-  public static final Message makeFindNode(Object body) {
-    return new Message(MSG_FINDNODE, body);
+  public static final Message makeInitFindNode(Object body) {
+    return new Message(MSG_INIT_FIND, body);
   }
 
   // ______________________________________________________________________________________________
@@ -155,10 +175,28 @@ public class Message extends SimpleEvent {
         return "MSG_EMPTY";
       case MSG_STORE:
         return "MSG_STORE";
-      case MSG_FINDNODE:
-        return "MSG_FINDNODE";
-      case MSG_ROUTE:
-        return "MSG_FINDVALUE";
+      case MSG_INIT_FIND:
+        return "MSG_INIT_FIND";
+      case MSG_FIND:
+        return "MSG_FIND";
+      case MSG_RESPONSE:
+        return "MSG_RESPONSE";
+      case MSG_REGISTER:
+        return "MSG_REGISTER";
+      case MSG_INIT_REGISTER:
+        return "MSG_INIT_REGISTER";
+      case MSG_TICKET_REQUEST:
+        return "MSG_TICKET_REQUEST";
+      case MSG_TICKET_RESPONSE:
+        return "MSG_TICKET_RESPONSE";
+      case MSG_TOPIC_QUERY:
+        return "MSG_TOPIC_QUERY";
+      case MSG_TOPIC_QUERY_REPLY:
+        return "MSG_TOPIC_QUERY_REPLY";
+      case MSG_REGISTER_RESPONSE:
+        return "MSG_REGISTER_RESPONSE";
+      case MSG_INIT_TOPIC_LOOKUP:
+        return "MSG_INIT_TOPIC_LOOKUP";
       default:
         return "UNKNOW:" + type;
     }

@@ -1,5 +1,6 @@
 package peersim.kademlia;
 
+import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -24,6 +25,7 @@ public class TrafficGenerator implements Control {
   /** MSPastry Protocol ID to act */
   private final int pid;
 
+  private boolean first = true;
   // ______________________________________________________________________________________________
   public TrafficGenerator(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
@@ -36,15 +38,15 @@ public class TrafficGenerator implements Control {
    * @return Message
    */
   private Message generateFindNodeMessage() {
-    Message m = Message.makeFindNode("Automatically Generated Traffic");
-    m.timestamp = CommonState.getTime();
-
     // existing active destination node
     Node n = Network.get(CommonState.r.nextInt(Network.size()));
     while (!n.isUp()) {
       n = Network.get(CommonState.r.nextInt(Network.size()));
     }
-    m.dest = ((KademliaProtocol) (n.getProtocol(pid))).nodeId;
+    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getNode().getId();
+
+    Message m = Message.makeInitFindNode(dst);
+    m.timestamp = CommonState.getTime();
 
     return m;
   }
@@ -56,6 +58,8 @@ public class TrafficGenerator implements Control {
    * @return boolean
    */
   public boolean execute() {
+
+    // if (first) {
     Node start;
     do {
       start = Network.get(CommonState.r.nextInt(Network.size()));
@@ -63,7 +67,8 @@ public class TrafficGenerator implements Control {
 
     // send message
     EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-
+    first = false;
+    // }
     return false;
   }
 

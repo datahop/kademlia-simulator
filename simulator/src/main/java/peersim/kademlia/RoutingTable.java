@@ -13,7 +13,7 @@ import java.util.TreeMap;
 public class RoutingTable implements Cloneable {
 
   // node ID of the node
-  public BigInteger nodeId = null;
+  private BigInteger nodeId = null;
 
   // k-buckets
   public TreeMap<Integer, KBucket> k_buckets = null;
@@ -106,6 +106,14 @@ public class RoutingTable implements Cloneable {
    */
   public String toString() {
     return "";
+  }
+
+  public void setNodeId(BigInteger id) {
+    this.nodeId = id;
+  }
+
+  public BigInteger getNodeId() {
+    return this.nodeId;
   }
   // ______________________________________________________________________________________________
 

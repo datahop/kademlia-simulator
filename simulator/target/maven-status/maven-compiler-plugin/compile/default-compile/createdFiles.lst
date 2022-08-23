@@ -17,6 +17,7 @@ peersim/reports/ConnectivityObserver.class
 peersim/core/Linkable.class
 peersim/Simulator.class
 peersim/kademlia/Message.class
+peersim/kademlia/KademliaProtocol$1.class
 peersim/util/FileNameGenerator.class
 peersim/util/StringListParser.class
 peersim/cdsim/CDSimulator.class
@@ -35,7 +36,6 @@ peersim/config/CheckConfig.class
 peersim/util/ExtendedRandom.class
 peersim/graph/BitMatrixGraph.class
 peersim/util/IncrementalFreq.class
-peersim/kademlia/TrafficGenerator.class
 peersim/dynamics/WireKOut.class
 peersim/dynamics/WireRegRootedTree.class
 peersim/kademlia/Turbulence.class

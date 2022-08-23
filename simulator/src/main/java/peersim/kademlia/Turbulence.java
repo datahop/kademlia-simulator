@@ -101,7 +101,7 @@ public class Turbulence implements Control {
 
     System.err.println(
         String.format(
-            "Turbolence: [p_idle=%f] [p_add=%f] [(min,max)=(%d,%d)]",
+            "Turbulence: [p_idle=%f] [p_add=%f] [(min,max)=(%d,%d)]",
             p_idle, p_add, maxsize, minsize));
   }
 
@@ -115,7 +115,7 @@ public class Turbulence implements Control {
             Node n2 = (Node) o2;
             KademliaProtocol p1 = (KademliaProtocol) (n1.getProtocol(kademliaid));
             KademliaProtocol p2 = (KademliaProtocol) (n2.getProtocol(kademliaid));
-            return Util.put0(p1.nodeId).compareTo(Util.put0(p2.nodeId));
+            return Util.put0(p1.getNode().getId()).compareTo(Util.put0(p2.getNode().getId()));
           }
 
           // ______________________________________________________________________________________
@@ -126,6 +126,7 @@ public class Turbulence implements Control {
         });
   }
 
+  /*
   // ______________________________________________________________________________________________
   public boolean add() {
 
@@ -154,10 +155,12 @@ public class Turbulence implements Control {
     // create auto-search message (searc message with destination my own Id)
     Message m = Message.makeFindNode("Bootstrap traffic");
     m.timestamp = CommonState.getTime();
-    m.dest = newKad.nodeId;
+    m.dest = newKad.getNodeId();
 
     // perform initialization
-    newKad.routingTable.addNeighbour(((KademliaProtocol) (start.getProtocol(kademliaid))).nodeId);
+    newKad
+        .getRoutingTable()
+        .addNeighbour(((KademliaProtocol) (start.getProtocol(kademliaid))).getNodeId());
 
     // start auto-search
     EDSimulator.add(0, m, newNode, kademliaid);
@@ -166,6 +169,58 @@ public class Turbulence implements Control {
     Message m1 = Message.makeFindNode("Bootstrap traffic");
     m1.timestamp = CommonState.getTime();
     m1.dest = urg.generate();
+
+    return false;
+  }*/
+
+  // ______________________________________________________________________________________________
+  public boolean add() {
+
+    // Add Node
+    Node newNode = (Node) Network.prototype.clone();
+    for (int j = 0; j < inits.length; ++j) inits[j].initialize(newNode);
+    Network.add(newNode);
+
+    int count = 0;
+    for (int i = 0; i < Network.size(); ++i) if (Network.get(i).isUp()) count++;
+
+    System.out.println("Adding node " + count);
+
+    // get kademlia protocol of new node
+    KademliaProtocol newKad = (KademliaProtocol) (newNode.getProtocol(kademliaid));
+    newNode.setKademliaProtocol(newKad);
+    newKad.setProtocolID(kademliaid);
+    // newNode.setProtocol(kademliaid, newKad);
+    // set node Id
+    UniformRandomGenerator urg =
+        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    KademliaNode node = new KademliaNode(urg.generate(), "127.0.0.1", 0);
+    ((KademliaProtocol) (newNode.getProtocol(kademliaid))).setNode(node);
+
+    // sort network
+    sortNet();
+
+    // select one random bootstrap node
+    Node start;
+    do {
+      start = Network.get(CommonState.r.nextInt(Network.size()));
+    } while ((start == null) || (!start.isUp()));
+
+    // create auto-search message (search message with destination my own Id)
+    Message m = Message.makeInitFindNode(newKad.getNode().getId());
+    m.timestamp = CommonState.getTime();
+
+    // perform initialization
+    newKad
+        .getRoutingTable()
+        .addNeighbour(((KademliaProtocol) (start.getProtocol(kademliaid))).getNode().getId());
+
+    // start auto-search
+    EDSimulator.add(0, m, newNode, kademliaid);
+
+    // find another random node (this is to enrich the k-buckets)
+    Message m1 = Message.makeInitFindNode(urg.generate());
+    m1.timestamp = CommonState.getTime();
 
     return false;
   }

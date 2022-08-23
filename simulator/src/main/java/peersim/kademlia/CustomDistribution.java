@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
+import peersim.core.Node;
 
 /**
  * This control initializes the whole network (that was already created by peersim) assigning a
@@ -31,10 +32,22 @@ public class CustomDistribution implements peersim.core.Control {
    * @return boolean always false
    */
   public boolean execute() {
-    BigInteger tmp;
+    // BigInteger tmp;
     for (int i = 0; i < Network.size(); ++i) {
-      tmp = urg.generate();
-      ((KademliaProtocol) (Network.get(i).getProtocol(protocolID))).setNodeId(tmp);
+      Node generalNode = Network.get(i);
+      BigInteger id;
+      // BigInteger attackerID = null;
+      KademliaNode node;
+      // String ip_address;
+      id = urg.generate();
+      // node = new KademliaNode(id, randomIpAddress(r), 0);
+      node = new KademliaNode(id, "0.0.0.0", 0);
+
+      KademliaProtocol kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolID)));
+
+      generalNode.setKademliaProtocol(kadProt);
+      kadProt.setNode(node);
+      kadProt.setProtocolID(protocolID);
     }
 
     return false;
