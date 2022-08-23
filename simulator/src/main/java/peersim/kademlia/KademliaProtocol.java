@@ -173,10 +173,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       BigInteger[] neighbours = (BigInteger[]) m.body;
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
-      if (Arrays.asList(neighbours).contains(fop.destNode)) {
+      if (!fop.isFinished() && Arrays.asList(neighbours).contains(fop.destNode)) {
         logger.warning("Found node " + fop.destNode);
 
         KademliaObserver.find_ok.add(1);
+        fop.setFinished(true);
         return;
       }
 
@@ -232,7 +233,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private void handleFind(Message m, int myPid) {
     // get the ALPHA closest node to destNode
 
-    logger.warning("handleFind " + (BigInteger) m.body);
+    logger.info("handleFind " + (BigInteger) m.body);
 
     BigInteger[] neighbours = this.routingTable.getNeighbours((BigInteger) m.body, m.src.getId());
 
@@ -256,7 +257,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   private void handleInitFind(Message m, int myPid) {
 
-    logger.warning("handleInitFind " + (BigInteger) m.body);
+    logger.info("handleInitFind " + (BigInteger) m.body);
     KademliaObserver.find_op.add(1);
 
     // create find operation and add to operations array
@@ -281,8 +282,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
       BigInteger nextNode = fop.getNeighbour();
       if (nextNode != null) {
-        logger.warning("sending message to " + nextNode);
-
         m.dest =
             nodeIdtoNode(nextNode).getKademliaProtocol().getNode(); // new KademliaNode(nextNode);
         sendMessage(m.copy(), nextNode, myPid);
@@ -341,23 +340,17 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     switch (((SimpleEvent) event).getType()) {
       case Message.MSG_RESPONSE:
         m = (Message) event;
-        logger.warning("Receivedr response " + m.dest.getId());
-
         sentMsg.remove(m.ackId);
         handleResponse(m, myPid);
         break;
 
       case Message.MSG_INIT_FIND:
         m = (Message) event;
-        logger.warning("Received " + m);
-
         handleInitFind(m, myPid);
         break;
 
       case Message.MSG_FIND:
         m = (Message) event;
-        logger.warning("Received find " + m.dest.getId());
-
         handleFind(m, myPid);
         break;
 

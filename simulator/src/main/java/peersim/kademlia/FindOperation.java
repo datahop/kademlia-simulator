@@ -34,6 +34,8 @@ public class FindOperation {
   /** Number of hops the message did */
   protected int nrHops = 0;
 
+  /** Boolean to indicate whether the operation is completed because the node is found */
+  protected boolean finished;
   /**
    * This map contains the K closest nodes and corresponding boolean value that indicates if the
    * nodes has been already queried or not
@@ -133,5 +135,13 @@ public class FindOperation {
     }
 
     return res;
+  }
+
+  public boolean isFinished() {
+    return this.finished;
+  }
+
+  public void setFinished(boolean finished) {
+    this.finished = finished;
   }
 }
