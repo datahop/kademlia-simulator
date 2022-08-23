@@ -10,6 +10,7 @@ peersim/reports/DegreeStats.class
 peersim/config/ClassFinder.class
 peersim/dynamics/WireScaleFreeBA.class
 peersim/cdsim/Shuffle.class
+peersim/kademlia/KademliaNode.class
 peersim/vector/ValueDumper.class
 peersim/kademlia/FindOperation.class
 peersim/reports/ConnectivityObserver.class
