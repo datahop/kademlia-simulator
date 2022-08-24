@@ -3,6 +3,9 @@ package peersim.kademlia;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -39,36 +42,56 @@ public class KademliaObserver implements Control {
   /** Successfull find operations */
   public static IncrementalStats find_ok = new IncrementalStats();
 
-  /** Protocol id */
-  private int pid;
+  private static HashMap<String, Map<String, Object>> messages =
+      new HashMap<String, Map<String, Object>>();
 
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
 
-  /** Prefix to be printed in output */
-  private String prefix;
-
   /** The time granularity of reporting metrics */
   private static int observerStep;
-  /** Message writer object */
-  private static FileWriter msgWriter;
 
   public KademliaObserver(String prefix) {
-    this.prefix = prefix;
-    pid = Configuration.getPid(prefix + "." + PAR_PROT);
-    this.observerStep = Configuration.getInt(prefix + "." + PAR_STEP);
+    observerStep = Configuration.getInt(prefix + "." + PAR_STEP);
 
-    this.logFolderName = "./logs";
+    logFolderName = "./logs";
+  }
 
-    File directory = new File(this.logFolderName);
+  private static void writeMap(Map<String, Map<String, Object>> map, String filename) {
+    try (FileWriter writer = new FileWriter(filename)) {
+      Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
+      String header = "";
+      for (Object key : keySet) {
+        header += key + ",";
+      }
+      // remove the last comma
+      header = header.substring(0, header.length() - 1);
+      header += "\n";
+      writer.write(header);
+
+      for (Map<String, Object> entry : messages.values()) {
+        String line = "";
+        for (Object key : keySet) {
+          line += "," + entry.get(key).toString();
+        }
+        // remove the last comma
+        line = line.substring(0, line.length() - 1);
+        line += "\n";
+        writer.write(line);
+      }
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void writeOut() {
+    File directory = new File(logFolderName);
     if (!directory.exists()) {
       directory.mkdir();
     }
-    try {
-      msgWriter = new FileWriter(this.logFolderName + "/" + "messages.csv");
-      msgWriter.write("id,type,src,dst,sent/received\n");
-    } catch (IOException e) {
-      e.printStackTrace();
+    if (!messages.isEmpty()) {
+      writeMap(messages, logFolderName + "/" + "messages.csv");
     }
   }
 
@@ -97,8 +120,9 @@ public class KademliaObserver implements Control {
             (int) timeStore.getMax(),
             (int) find_op.getSum());
 
-    if (CommonState.getEndTime() <= (this.observerStep + CommonState.getTime())) {
+    if (CommonState.getEndTime() <= (observerStep + CommonState.getTime())) {
       // Last execute cycle of the experiment
+      writeOut();
     }
 
     System.err.println(s);
@@ -107,21 +131,6 @@ public class KademliaObserver implements Control {
   }
 
   public static void reportMsg(Message m, boolean sent) {
-    try {
-
-      String result = "";
-      if (m.src == null) return; // ignore init messages
-      result += m.id + "," + m.messageTypetoString() + "," + m.src + "," + m.dest + ",";
-      if (sent) {
-        result += "sent\n";
-      } else {
-        result += "received\n";
-      }
-      msgWriter.write(result);
-      msgWriter.flush();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    messages.put(String.valueOf(m.id), m.toMap(sent));
   }
 }
