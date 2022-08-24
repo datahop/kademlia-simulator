@@ -131,6 +131,7 @@ public class KademliaObserver implements Control {
   }
 
   public static void reportMsg(Message m, boolean sent) {
+    assert (messages.keySet().contains(String.valueOf(m.id)));
     messages.put(String.valueOf(m.id), m.toMap(sent));
   }
 }
