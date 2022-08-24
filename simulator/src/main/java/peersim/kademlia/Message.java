@@ -212,8 +212,8 @@ public class Message extends SimpleEvent {
     Map<String, Object> result = new HashMap<String, Object>();
     result.put("id", this.id);
     result.put("type", this.typeToString());
-    result.put("src", this.src);
-    result.put("dst", this.dst);
+    result.put("src", this.src.getId());
+    result.put("dst", this.dst.getId());
     if (sent) {
       result.put("status", "sent");
     } else {
