@@ -9,11 +9,14 @@ package peersim.kademlia;
  */
 public class KademliaCommonConfig {
 
-  public static int BITS = 256; // length of Id (default is 160)
+  public static int BITS = 256; // length of Id
 
-  public static int K = 16; // dimension of k-buckets (default is 20)
-  public static int ALPHA = 3; // number of simultaneous lookup (default is 3)
+  public static int K = 16; // dimension of k-buckets
+  public static int ALPHA = 3; // number of simultaneous lookup messages
 
+  public static int NBUCKETS = 256; // number of buckets in the routing table
+
+  public static int MAXREPLACEMENT = 10; // number of items in the replacement list for each bucket
   /**
    * short information about current mspastry configuration
    *

@@ -80,7 +80,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     _init();
 
-    routingTable = new RoutingTable();
+    routingTable =
+        new RoutingTable(
+            KademliaCommonConfig.NBUCKETS,
+            KademliaCommonConfig.K,
+            KademliaCommonConfig.MAXREPLACEMENT);
 
     sentMsg = new TreeMap<Long, Long>();
 

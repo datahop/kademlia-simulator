@@ -22,11 +22,13 @@ public class KBucket implements Cloneable {
   }
 
   // add a neighbour to this k-bucket
-  public void addNeighbour(BigInteger node) {
+  public boolean addNeighbour(BigInteger node) {
     long time = CommonState.getTime();
     if (neighbours.size() < KademliaCommonConfig.K) { // k-bucket isn't full
       neighbours.put(node, time); // add neighbour to the tail of the list
+      return true;
     }
+    return false;
   }
 
   // remove a neighbour from this k-bucket
