@@ -36,8 +36,14 @@ public class Message extends SimpleEvent {
   /** Message Type: INIT_FIND (command to a node to start looking for a node) */
   public static final int MSG_INIT_FIND = 2;
 
+  /** Message Type: INIT_FIND (command to a node to start looking for a node by distance) */
+  public static final int MSG_INIT_FIND_DIST = 13;
+
   /** Message Type: FINDVALUE (message regarding value find) */
   public static final int MSG_FIND = 3;
+
+  /** Message Type: FINDVALUE (message regarding value find) finding by distance */
+  public static final int MSG_FIND_DIST = 14;
 
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
   public static final int MSG_RESPONSE = 4;
@@ -137,6 +143,17 @@ public class Message extends SimpleEvent {
    */
   public static final Message makeInitFindNode(Object body) {
     return new Message(MSG_INIT_FIND, body);
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a find node request by distance
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitFindNodeDist(Object body) {
+    return new Message(MSG_INIT_FIND_DIST, body);
   }
 
   // ______________________________________________________________________________________________
