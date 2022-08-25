@@ -19,6 +19,7 @@ public class KademliaCommonConfig {
   public static int MAXREPLACEMENT = 10; // number of items in the replacement list for each bucket
 
   public static int FINDMODE = 0; // find mode: 0 find by node id / 1 find by distance to node
+
   /**
    * short information about current mspastry configuration
    *

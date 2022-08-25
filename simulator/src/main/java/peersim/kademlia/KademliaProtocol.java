@@ -197,10 +197,13 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         if (neighbour != null) {
           // create a new request to send to neighbour
           Message request = new Message(Message.MSG_FIND);
+          if (KademliaCommonConfig.FINDMODE == 1) request = new Message(Message.MSG_FIND_DIST);
           request.operationId = m.operationId;
           request.src = this.getNode();
           request.dest = m.dest;
           request.body = fop.destNode;
+          if (KademliaCommonConfig.FINDMODE == 1)
+            request.body = Util.distance(fop.destNode, (BigInteger) fop.body);
           // increment hop count
           fop.nrHops++;
 
@@ -241,10 +244,14 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private void handleFind(Message m, int myPid) {
     // get the ALPHA closest node to destNode
 
-    logger.info("handleFind " + (BigInteger) m.body);
+    logger.info("handleFind received");
 
-    BigInteger[] neighbours = this.routingTable.getNeighbours((BigInteger) m.body, m.src.getId());
-
+    BigInteger[] neighbours = new BigInteger[KademliaCommonConfig.K];
+    if (m.getType() == Message.MSG_FIND) {
+      neighbours = this.routingTable.getNeighbours((BigInteger) m.body, m.src.getId());
+    } else if (m.getType() == Message.MSG_FIND_DIST) {
+      neighbours = this.routingTable.getNeighbours((int) m.body);
+    }
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
     Message response = new Message(Message.MSG_RESPONSE, neighbours);
@@ -284,7 +291,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // set message operation id
     m.operationId = fop.operationId;
-    m.type = Message.MSG_FIND;
+
     m.src = this.getNode();
 
     // send ALPHA messages
@@ -293,6 +300,12 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (nextNode != null) {
         m.dest =
             nodeIdtoNode(nextNode).getKademliaProtocol().getNode(); // new KademliaNode(nextNode);
+        // set message type depending on find mode
+        if (KademliaCommonConfig.FINDMODE == 0) m.type = Message.MSG_FIND;
+        else {
+          m.type = Message.MSG_FIND_DIST;
+          m.body = Util.distance(nextNode, (BigInteger) fop.body);
+        }
 
         logger.info("sendMessage to " + nextNode);
 
@@ -325,7 +338,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
     transport.send(src, dest, m, kademliaid);
 
-    if (m.getType() == Message.MSG_FIND) { // is a request
+    if (m.getType() == Message.MSG_FIND || m.getType() == Message.MSG_FIND_DIST) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
 
@@ -362,6 +375,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         break;
 
       case Message.MSG_FIND:
+      case Message.MSG_FIND_DIST:
         m = (Message) event;
         handleFind(m, myPid);
         break;
