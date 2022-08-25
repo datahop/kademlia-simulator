@@ -32,6 +32,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   final String PAR_K = "K";
   final String PAR_ALPHA = "ALPHA";
   final String PAR_BITS = "BITS";
+  final String PAR_FINDMODE = "FINDMODE";
 
   private static final String PAR_TRANSPORT = "transport";
   private static String prefix = null;
@@ -108,6 +109,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         Configuration.getInt(prefix + "." + PAR_ALPHA, KademliaCommonConfig.ALPHA);
     KademliaCommonConfig.BITS =
         Configuration.getInt(prefix + "." + PAR_BITS, KademliaCommonConfig.BITS);
+
+    KademliaCommonConfig.FINDMODE =
+        Configuration.getInt(prefix + "." + PAR_FINDMODE, KademliaCommonConfig.FINDMODE);
 
     _ALREADY_INSTALLED = true;
   }

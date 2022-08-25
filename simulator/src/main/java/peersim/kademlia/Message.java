@@ -36,39 +36,36 @@ public class Message extends SimpleEvent {
   /** Message Type: INIT_FIND (command to a node to start looking for a node) */
   public static final int MSG_INIT_FIND = 2;
 
-  /** Message Type: INIT_FIND (command to a node to start looking for a node by distance) */
-  public static final int MSG_INIT_FIND_DIST = 13;
-
   /** Message Type: FINDVALUE (message regarding value find) */
   public static final int MSG_FIND = 3;
 
   /** Message Type: FINDVALUE (message regarding value find) finding by distance */
-  public static final int MSG_FIND_DIST = 14;
+  public static final int MSG_FIND_DIST = 4;
 
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
-  public static final int MSG_RESPONSE = 4;
+  public static final int MSG_RESPONSE = 5;
 
   /** Message Type: REGISTER (register the node under a topic) */
-  public static final int MSG_REGISTER = 5;
+  public static final int MSG_REGISTER = 6;
 
   /** Message Type: INIT_REGISTER (start registering under a topic) */
-  public static final int MSG_INIT_REGISTER = 6;
+  public static final int MSG_INIT_REGISTER = 7;
   /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
-  public static final int MSG_TICKET_REQUEST = 7;
+  public static final int MSG_TICKET_REQUEST = 8;
 
   /** Message Type: TICKET_RESPONSE (return a ticket back to the origin) */
-  public static final int MSG_TICKET_RESPONSE = 8;
+  public static final int MSG_TICKET_RESPONSE = 9;
 
   /** Message Type: TOPIC_QUERY (send a query for topics) */
-  public static final int MSG_TOPIC_QUERY = 9;
+  public static final int MSG_TOPIC_QUERY = 10;
 
   /** Message Type: REGISTER_RESPONSE (response to register request) */
-  public static final int MSG_REGISTER_RESPONSE = 10;
+  public static final int MSG_REGISTER_RESPONSE = 11;
 
   /** Message Type: TOPIC_QUERY_REPLY (respond to topic queries) */
-  public static final int MSG_TOPIC_QUERY_REPLY = 11;
+  public static final int MSG_TOPIC_QUERY_REPLY = 12;
 
-  public static final int MSG_INIT_TOPIC_LOOKUP = 12;
+  public static final int MSG_INIT_TOPIC_LOOKUP = 13;
 
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
@@ -143,17 +140,6 @@ public class Message extends SimpleEvent {
    */
   public static final Message makeInitFindNode(Object body) {
     return new Message(MSG_INIT_FIND, body);
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * Encapsulates the creation of a find node request by distance
-   *
-   * @param body Object
-   * @return Message
-   */
-  public static final Message makeInitFindNodeDist(Object body) {
-    return new Message(MSG_INIT_FIND_DIST, body);
   }
 
   // ______________________________________________________________________________________________
