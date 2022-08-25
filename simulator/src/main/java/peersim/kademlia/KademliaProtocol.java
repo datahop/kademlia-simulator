@@ -237,6 +237,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     BigInteger[] neighbours = this.routingTable.getNeighbours((BigInteger) m.body, m.src.getId());
 
+    // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
     Message response = new Message(Message.MSG_RESPONSE, neighbours);
     response.operationId = m.operationId;
@@ -284,6 +285,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (nextNode != null) {
         m.dest =
             nodeIdtoNode(nextNode).getKademliaProtocol().getNode(); // new KademliaNode(nextNode);
+
+        logger.info("sendMessage to " + nextNode);
+
         sendMessage(m.copy(), nextNode, myPid);
         fop.nrHops++;
       }
