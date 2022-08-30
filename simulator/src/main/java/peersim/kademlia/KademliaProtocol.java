@@ -76,6 +76,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param prefix String
    */
   public KademliaProtocol(String prefix) {
+
     this.node = null; // empty nodeId
     KademliaProtocol.prefix = prefix;
 
@@ -114,42 +115,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         Configuration.getInt(prefix + "." + PAR_FINDMODE, KademliaCommonConfig.FINDMODE);
 
     _ALREADY_INSTALLED = true;
-  }
-
-  /**
-   * Search through the network the Node having a specific node Id, by performing binary serach (we
-   * concern about the ordering of the network).
-   *
-   * @param searchNodeId BigInteger
-   * @return Node
-   */
-  private Node nodeIdtoNode(BigInteger searchNodeId) {
-    if (searchNodeId == null) return null;
-
-    int inf = 0;
-    int sup = Network.size() - 1;
-    int m;
-
-    while (inf <= sup) {
-      m = (inf + sup) / 2;
-
-      BigInteger mId =
-          ((KademliaProtocol) Network.get(m).getProtocol(kademliaid)).getNode().getId();
-
-      if (mId.equals(searchNodeId)) return Network.get(m);
-
-      if (mId.compareTo(searchNodeId) < 0) inf = m + 1;
-      else sup = m - 1;
-    }
-
-    // perform a traditional search for more reliability (maybe the network is not ordered)
-    BigInteger mId;
-    for (int i = Network.size() - 1; i >= 0; i--) {
-      mId = ((KademliaProtocol) Network.get(i).getProtocol(kademliaid)).getNode().getId();
-      if (mId.equals(searchNodeId)) return Network.get(i);
-    }
-
-    return null;
   }
 
   /**
@@ -299,7 +264,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       BigInteger nextNode = fop.getNeighbour();
       if (nextNode != null) {
         m.dest =
-            nodeIdtoNode(nextNode).getKademliaProtocol().getNode(); // new KademliaNode(nextNode);
+            Util.nodeIdtoNode(nextNode, myPid)
+                .getKademliaProtocol()
+                .getNode(); // new KademliaNode(nextNode);
         // set message type depending on find mode
         if (KademliaCommonConfig.FINDMODE == 0) m.type = Message.MSG_FIND;
         else {
@@ -330,8 +297,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     assert m.src != null;
     assert m.dest != null;
 
-    Node src = nodeIdtoNode(this.getNode().getId());
-    Node dest = nodeIdtoNode(destId);
+    Node src = Util.nodeIdtoNode(this.getNode().getId(), myPid);
+    Node dest = Util.nodeIdtoNode(destId, myPid);
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
@@ -429,6 +396,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param tmp BigInteger
    */
   public void setNode(KademliaNode node) {
+
     this.node = node;
     this.routingTable.setNodeId(node.getId());
 
@@ -437,7 +405,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     ConsoleHandler handler = new ConsoleHandler();
     logger.setLevel(Level.WARNING);
     // logger.setLevel(Level.ALL);
-
     handler.setFormatter(
         new SimpleFormatter() {
           private static final String format = "[%d][%s] %3$s %n";
@@ -448,5 +415,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           }
         });
     logger.addHandler(handler);
+  }
+
+  public Logger getLogger() {
+    return this.logger;
   }
 }

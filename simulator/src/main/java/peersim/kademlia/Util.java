@@ -1,6 +1,8 @@
 package peersim.kademlia;
 
 import java.math.BigInteger;
+import peersim.core.Network;
+import peersim.core.Node;
 
 /**
  * Some utility and mathematical function to work with BigInteger numbers and strings.
@@ -61,5 +63,40 @@ public class Util {
     BigInteger x = a.xor(b);
 
     return x.bitLength();
+  }
+
+  /**
+   * Search through the network the Node having a specific node Id, by performing binary serach (we
+   * concern about the ordering of the network).
+   *
+   * @param searchNodeId BigInteger
+   * @return Node
+   */
+  public static Node nodeIdtoNode(BigInteger searchNodeId, int pid) {
+    if (searchNodeId == null) return null;
+
+    int inf = 0;
+    int sup = Network.size() - 1;
+    int m;
+
+    while (inf <= sup) {
+      m = (inf + sup) / 2;
+
+      BigInteger mId = ((KademliaProtocol) Network.get(m).getProtocol(pid)).getNode().getId();
+
+      if (mId.equals(searchNodeId)) return Network.get(m);
+
+      if (mId.compareTo(searchNodeId) < 0) inf = m + 1;
+      else sup = m - 1;
+    }
+
+    // perform a traditional search for more reliability (maybe the network is not ordered)
+    BigInteger mId;
+    for (int i = Network.size() - 1; i >= 0; i--) {
+      mId = ((KademliaProtocol) Network.get(i).getProtocol(pid)).getNode().getId();
+      if (mId.equals(searchNodeId)) return Network.get(i);
+    }
+
+    return null;
   }
 }

@@ -1,5 +1,7 @@
 package peersim.kademlia;
 
+import peersim.kademlia.discv5.Topic;
+
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
  * messages (messages from application level sender destinated to another application level).<br>
@@ -141,7 +143,16 @@ public class Message extends SimpleEvent {
   public static final Message makeInitFindNode(Object body) {
     return new Message(MSG_INIT_FIND, body);
   }
-
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a find node request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeRegister(Topic topic) {
+    return new Message(MSG_INIT_REGISTER, topic);
+  }
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request

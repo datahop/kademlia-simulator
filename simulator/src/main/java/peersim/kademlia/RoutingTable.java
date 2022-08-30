@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import peersim.core.CommonState;
 
 /**
  * Gives an implementation for the rounting table component of a kademlia node
@@ -185,6 +186,16 @@ public class RoutingTable implements Cloneable {
 
   public BigInteger getNodeId() {
     return this.nodeId;
+  }
+
+  /** Check nodes and replace buckets with valid nodes from replacement list */
+  public void refreshBuckets() {
+
+    KBucket b = k_buckets.get(CommonState.r.nextInt(nBuckets));
+    if (b.neighbours.size() > 0) {
+      b.checkAndReplaceLast();
+      return;
+    }
   }
 
   // ______________________________________________________________________________________________

@@ -1,10 +1,14 @@
-package peersim.kademlia;
+package peersim.kademlia.discv5;
 
 import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
+import peersim.kademlia.KademliaCommonConfig;
+import peersim.kademlia.KademliaNode;
+import peersim.kademlia.KademliaProtocol;
+import peersim.kademlia.UniformRandomGenerator;
 
 /**
  * This control initializes the whole network (that was already created by peersim) assigning a
@@ -13,15 +17,19 @@ import peersim.core.Node;
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
  */
-public class CustomDistribution implements peersim.core.Control {
+public class CustomDistributionDiscv5 implements peersim.core.Control {
 
-  private static final String PAR_PROT = "protocol";
+  private static final String PAR_PROT = "protocolkad";
+  private static final String PAR_PROT_DISCV5 = "protocoldiscv5";
 
   private int protocolID;
+  private int protocolDiscv5ID;
+
   private UniformRandomGenerator urg;
 
-  public CustomDistribution(String prefix) {
+  public CustomDistributionDiscv5(String prefix) {
     protocolID = Configuration.getPid(prefix + "." + PAR_PROT);
+    protocolDiscv5ID = Configuration.getPid(prefix + "." + PAR_PROT_DISCV5);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
   }
 
@@ -44,9 +52,13 @@ public class CustomDistribution implements peersim.core.Control {
       node = new KademliaNode(id, "0.0.0.0", 0);
 
       KademliaProtocol kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolID)));
+      System.out.println("Custom distribution " + kadProt + " " + node.getId());
       generalNode.setKademliaProtocol(kadProt);
       kadProt.setNode(node);
       kadProt.setProtocolID(protocolID);
+
+      Discv5Protocol discv5Prot = ((Discv5Protocol) (Network.get(i).getProtocol(protocolDiscv5ID)));
+      discv5Prot.setKademliaProtocol(kadProt);
     }
 
     return false;

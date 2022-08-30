@@ -36,6 +36,38 @@ public class KBucket implements Cloneable {
     neighbours.remove(node);
   }
 
+  public void checkAndReplaceLast() {
+    if (neighbours.size() == 0 || CommonState.getTime() == 0)
+      // Entry has moved, don't replace it.
+      return;
+
+    // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
+    // "+CommonState.getTime());
+    /*
+    Node node = Util.nodeIdtoNode(neighbours.get(neighbours.size() - 1));
+    // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
+    // "+CommonState.getTime());
+    KademliaProtocol remote = node.getKademliaProtocol();
+
+    if (remote.routingTable != null) remote.routingTable.sendToFront(rTable.nodeId);
+
+    // System.out.println("checkAndReplaceLast "+remote.getNode().getId()+" at
+    // "+CommonState.getTime()+" at "+rTable.nodeId);
+
+    if (node.getFailState() != Node.OK) {
+      // Still the last entry.
+      neighbours.remove(neighbours.size() - 1);
+      if (replacements.size() > 0) {
+        // Random rand = new Random();
+        // BigInteger n = replacements.get(rand.nextInt(replacements.size()));
+        BigInteger n = replacements.get(CommonState.r.nextInt(replacements.size()));
+        neighbours.add(n);
+        replacements.remove(n);
+      }
+    }
+    */
+  }
+
   public Object clone() {
     KBucket dolly = new KBucket();
     for (BigInteger node : neighbours.keySet()) {
