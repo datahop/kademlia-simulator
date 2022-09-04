@@ -1,5 +1,8 @@
 package peersim.kademlia;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
  * messages (messages from application level sender destinated to another application level).<br>
@@ -81,7 +84,7 @@ public class Message extends SimpleEvent {
   public long operationId;
 
   /** Recipient node of the message */
-  public KademliaNode dest;
+  public KademliaNode dst;
 
   /** Source node of the message: has to be filled at application level */
   public KademliaNode src;
@@ -155,8 +158,8 @@ public class Message extends SimpleEvent {
 
   // ______________________________________________________________________________________________
   public String toString() {
-    String s = "[ID=" + id + "][DEST=" + dest + "]";
-    return s + "[Type=" + messageTypetoString() + "] BODY=(...)";
+    String s = "[ID=" + id + "][DEST=" + dst + "]";
+    return s + "[Type=" + typeToString() + "] BODY=(...)";
   }
 
   // ______________________________________________________________________________________________
@@ -164,7 +167,7 @@ public class Message extends SimpleEvent {
     Message dolly = new Message();
     dolly.type = this.type;
     dolly.src = this.src;
-    dolly.dest = this.dest;
+    dolly.dst = this.dst;
     dolly.operationId = this.operationId;
     dolly.body = this.body; // deep cloning?
 
@@ -172,7 +175,7 @@ public class Message extends SimpleEvent {
   }
 
   // ______________________________________________________________________________________________
-  public String messageTypetoString() {
+  public String typeToString() {
     switch (type) {
       case MSG_EMPTY:
         return "MSG_EMPTY";
@@ -203,5 +206,20 @@ public class Message extends SimpleEvent {
       default:
         return "UNKNOW:" + type;
     }
+  }
+
+  public Map<String, Object> toMap(boolean sent) {
+    Map<String, Object> result = new HashMap<String, Object>();
+    result.put("id", this.id);
+    result.put("type", this.typeToString());
+    result.put("src", this.src);
+    result.put("dst", this.dst);
+    if (sent) {
+      result.put("status", "sent");
+    } else {
+      result.put("status", "received");
+    }
+
+    return result;
   }
 }

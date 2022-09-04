@@ -200,7 +200,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           if (KademliaCommonConfig.FINDMODE == 1) request = new Message(Message.MSG_FIND_DIST);
           request.operationId = m.operationId;
           request.src = this.getNode();
-          request.dest = m.dest;
+          request.dst = m.dst;
           request.body = fop.destNode;
           if (KademliaCommonConfig.FINDMODE == 1)
             request.body = Util.distance(fop.destNode, (BigInteger) fop.body);
@@ -256,7 +256,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // create a response message containing the neighbours (with the same id of the request)
     Message response = new Message(Message.MSG_RESPONSE, neighbours);
     response.operationId = m.operationId;
-    response.dest = m.dest;
+    response.dst = m.dst;
     response.src = this.getNode();
     response.ackId = m.id; // set ACK number
 
@@ -298,7 +298,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
       BigInteger nextNode = fop.getNeighbour();
       if (nextNode != null) {
-        m.dest =
+        m.dst =
             nodeIdtoNode(nextNode).getKademliaProtocol().getNode(); // new KademliaNode(nextNode);
         // set message type depending on find mode
         if (KademliaCommonConfig.FINDMODE == 0) m.type = Message.MSG_FIND;
@@ -328,7 +328,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     this.routingTable.addNeighbour(destId);
     // int destpid;
     assert m.src != null;
-    assert m.dest != null;
+    assert m.dst != null;
 
     Node src = nodeIdtoNode(this.getNode().getId());
     Node dest = nodeIdtoNode(destId);
