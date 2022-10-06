@@ -361,6 +361,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     this.kademliaid = myPid;
 
     Message m;
+    if (event instanceof Message) {
+      m = (Message) event;
+      KademliaObserver.reportMsg(m, false);
+    }
 
     switch (((SimpleEvent) event).getType()) {
       case Message.MSG_RESPONSE:
