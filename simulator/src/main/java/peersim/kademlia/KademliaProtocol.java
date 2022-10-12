@@ -23,6 +23,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
+import peersim.kademlia.operations.FindOperation;
 import peersim.transport.UnreliableTransport;
 
 // __________________________________________________________________________________________________
@@ -53,7 +54,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private LinkedHashMap<Long, FindOperation> findOp;
 
   /** Kademlia node instance */
-  private KademliaNode node;
+  public KademliaNode node;
 
   /** logging handler */
   protected Logger logger;
@@ -203,7 +204,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           request.dst = m.dst;
           request.body = fop.destNode;
           if (KademliaCommonConfig.FINDMODE == 1)
-            request.body = Util.distance(fop.destNode, (BigInteger) fop.body);
+            request.body = Util.logDistance(fop.destNode, (BigInteger) fop.body);
           // increment hop count
           fop.nrHops++;
 
@@ -278,7 +279,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // create find operation and add to operations array
     // FindOperation fop = new FindOperation(m.dest, m.timestamp);
-    FindOperation fop = new FindOperation((BigInteger) m.body, m.timestamp);
+    FindOperation fop = new FindOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
 
     fop.body = m.body;
     findOp.put(fop.operationId, fop);
@@ -304,7 +305,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         if (KademliaCommonConfig.FINDMODE == 0) m.type = Message.MSG_FIND;
         else {
           m.type = Message.MSG_FIND_DIST;
-          m.body = Util.distance(nextNode, (BigInteger) fop.body);
+          m.body = Util.logDistance(nextNode, (BigInteger) fop.body);
         }
 
         logger.info("sendMessage to " + nextNode);

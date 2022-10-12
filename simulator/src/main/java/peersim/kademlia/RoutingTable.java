@@ -55,14 +55,14 @@ public class RoutingTable implements Cloneable {
   // add a neighbour to the correct k-bucket
   public boolean addNeighbour(BigInteger node) {
     // add the node to the k-bucket
-    return bucketAtDistance(Util.distance(nodeId, node)).addNeighbour(node);
+    return bucketAtDistance(Util.logDistance(nodeId, node)).addNeighbour(node);
   }
 
   // remove a neighbour from the correct k-bucket
   public void removeNeighbour(BigInteger node) {
 
     // remove the node from the k-bucket
-    bucketAtDistance(Util.distance(nodeId, node)).removeNeighbour(node);
+    bucketAtDistance(Util.logDistance(nodeId, node)).removeNeighbour(node);
   }
 
   // return the neighbours with a specific common prefix len
@@ -91,7 +91,7 @@ public class RoutingTable implements Cloneable {
     ArrayList<BigInteger> neighbour_candidates = new ArrayList<BigInteger>();
 
     // get the lenght of the longest common prefix
-    int prefix_len = Util.distance(nodeId, key);
+    int prefix_len = Util.logDistance(nodeId, key);
 
     if (prefix_len < 0) return new BigInteger[] {nodeId};
     // return the k-bucket if is full
@@ -112,13 +112,13 @@ public class RoutingTable implements Cloneable {
     TreeMap<Integer, List<BigInteger>> distance_map = new TreeMap<Integer, List<BigInteger>>();
 
     for (BigInteger node : neighbour_candidates) {
-      if (distance_map.get(Util.distance(node, key)) == null) {
+      if (distance_map.get(Util.logDistance(node, key)) == null) {
         List<BigInteger> l = new ArrayList<BigInteger>();
         l.add(node);
-        distance_map.put(Util.distance(node, key), l);
+        distance_map.put(Util.logDistance(node, key), l);
 
       } else {
-        distance_map.get(Util.distance(node, key)).add(node);
+        distance_map.get(Util.logDistance(node, key)).add(node);
       }
     }
 
@@ -155,11 +155,11 @@ public class RoutingTable implements Cloneable {
   }
 
   public KBucket getBucket(BigInteger node) {
-    return bucketAtDistance(Util.distance(nodeId, node));
+    return bucketAtDistance(Util.logDistance(nodeId, node));
   }
 
   public int getBucketNum(BigInteger node) {
-    int dist = Util.distance(nodeId, node);
+    int dist = Util.logDistance(nodeId, node);
     if (dist <= bucketMinDistance) {
       return 0;
     }
