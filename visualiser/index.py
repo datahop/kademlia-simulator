@@ -1,10 +1,6 @@
-from matplotlib.pyplot import fill
 import pandas as pd
 import networkx as nx
 
-from pprint import pprint
-from rich.markdown import Markdown
-from rich import print
 from rich.console import Console
 from pyvis.network import Network
 
