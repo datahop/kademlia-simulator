@@ -56,6 +56,22 @@ public final class UniformRandomGenerator {
     this(aBits, new Random(aSeed));
   }
 
+  public BigInteger getMaxID() {
+    BigInteger max = this.generate();
+    for (int i = 0; i < bits; i++) {
+      max = max.setBit(i);
+    }
+    return max;
+  }
+
+  public BigInteger getMinID() {
+    BigInteger min = this.generate();
+    for (int i = 0; i < bits; i++) {
+      min = min.clearBit(i);
+    }
+    return min;
+  }
+
   // ______________________________________________________________________________________________
   /**
    * Returns a unique 128-bit random number. The number is also put into an internal store to check
