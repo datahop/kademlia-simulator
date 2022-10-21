@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import networkx as nx
 
 from rich.console import Console
-from rich.markdown import Markdown
-from pyvis.network import Network
 
 console = Console(record = True)
 # ---------------------------------------------------------------------------- #
@@ -22,8 +19,6 @@ physics = False
 image_width = 750
 image_height = 750
 
-nt = Network(str(image_width) + 'px', str(image_width) + 'px', notebook=True, directed=True)
-
 message_ids = set(msg_df["id"])
 
 for index, row in op_df.iterrows():
@@ -37,6 +32,7 @@ for index, row in op_df.iterrows():
 # ? operated_msg_df stores all messages involved in that operation.
     
 fig, axs = plt.subplots(len(op_df), figsize=(30, 30))
+
 
 biggest_node_id = operated_msg_df["dst"].max() if operated_msg_df["dst"].max() > operated_msg_df["src"].max() else operated_msg_df["src"].max()
 smallest_node_id = operated_msg_df["dst"].min() if operated_msg_df["dst"].min() < operated_msg_df["src"].min() else operated_msg_df["src"].min()
