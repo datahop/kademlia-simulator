@@ -1,4 +1,4 @@
-from email import message
+import matplotlib.pyplot as plt
 import pandas as pd
 import networkx as nx
 
@@ -26,43 +26,52 @@ nt = Network(str(image_width) + 'px', str(image_width) + 'px', notebook=True, di
 
 message_ids = set(msg_df["id"])
 
-for item in op_df["src"]:
-    # ? Add the operation node to the graph  
-    nt.add_node(item, label=str(item)[:5], physics=physics, color="green")
-    
-
 for index, row in op_df.iterrows():
-    op_src = row["src"]
-    console.print(Markdown("# " + str(op_src)), style="bold white")
-    
     # ? Get the messages from the operation
     messages = [int(x) for x in row["messages"].split("|")]
     
     # ? Get all messages used in the operation
     operated_msg_df = (msg_df.loc[ msg_df["id"].isin(messages) ])
+
+# ? op_df stores all operation sources.
+# ? operated_msg_df stores all messages involved in that operation.
     
-    for msg_index, msg_row in operated_msg_df.iterrows():
-        msg_src = msg_row["src"]
-        msg_dst = msg_row["dst"]
-        
-        # ? Add the src and dst nodes of the message
-        if len(nt.get_node(msg_src)) == 0:  # ? Check if nodes have already been drawn.
-            nt.add_node(msg_src, str(msg_src)[:5], physics=physics)
-        nt.add_node(msg_dst, str(msg_dst)[:5], physics=physics)
-        
-        # ? Connect the src and dst nodes of the message
-        nt.add_edge(msg_src, msg_dst, title=msg_index, physics=physics)
+fig, axs = plt.subplots(len(op_df), figsize=(30, 30))
 
-    # console.print(Markdown("# op_df"), style="bold white")
-    # print(op_df)
-    # console.print(Markdown("---"), style="bold white")
+biggest_node_id = operated_msg_df["dst"].max() if operated_msg_df["dst"].max() > operated_msg_df["src"].max() else operated_msg_df["src"].max()
+smallest_node_id = operated_msg_df["dst"].min() if operated_msg_df["dst"].min() < operated_msg_df["src"].min() else operated_msg_df["src"].min()
 
-    # console.print(Markdown("# msg_df"), style="bold white")
-    # print(msg_df)
-    # console.print(Markdown("---"), style="bold white")
+node_color = "#c1e7ff"
+node_label_color = "#004c6d"
+dot_size = 2000
+min = 0
+max = biggest_node_id * 1.2
 
-    # console.print(Markdown("# operated_msg_df"), style="bold white")
-    # print(operated_msg_df)
-    # console.print(Markdown("---"), style="bold white")
+for index, row in op_df.iterrows():
+    if len(op_df) == 1:
+        ax = axs
+    else:
+        ax = axs[index]
+
+    # ax.axhline(y=index, color=node_label_color)
+    ax.hlines(y=index, xmin=smallest_node_id, xmax=biggest_node_id, linewidth=5, color=node_color)
+    
+    ax.set_xlim(xmin=0, xmax=max)
+    ax.set_ylim(ymin=-5, ymax=5)
+    
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.set_yticks([])
+    ax.set_xticks([])
         
-nt.show("nx.html")
+    ax.scatter([int(x) for x in operated_msg_df["src"]], [index] * len(operated_msg_df), s=dot_size, color=node_color)
+    ax.scatter([int(x) for x in operated_msg_df["dst"]], [index] * len(operated_msg_df), s=dot_size, color=node_color)
+    
+    for src in op_df["src"]:
+        ax.annotate(str(src)[:5], (src, index), color=node_label_color, fontweight="bold", fontsize=30)
+    for src in operated_msg_df["src"]:
+        ax.annotate(str(src)[:5], (src, index), color=node_label_color, fontweight="bold", fontsize=30)
+    for dst in operated_msg_df["dst"]:
+        ax.annotate(str(dst)[:5], (dst, index), color=node_label_color, fontweight="bold", fontsize=30)
+            
+plt.savefig("output.png")
