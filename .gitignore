@@ -1,1 +1,3 @@
 visualiser/lib
+visualiser/*.png
+visualiser/output.png
