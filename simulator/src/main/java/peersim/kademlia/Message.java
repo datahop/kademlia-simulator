@@ -48,27 +48,35 @@ public class Message extends SimpleEvent {
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
   public static final int MSG_RESPONSE = 5;
 
+  /** Message Type: FINDVALUE (message regarding value find) finding by distance */
+  public static final int MSG_PUT = 6;
+
+  /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
+  public static final int MSG_GET = 7;
+
+  //DISv5 specific messages
   /** Message Type: REGISTER (register the node under a topic) */
-  public static final int MSG_REGISTER = 6;
+  public static final int MSG_REGISTER = 8;
 
   /** Message Type: INIT_REGISTER (start registering under a topic) */
-  public static final int MSG_INIT_REGISTER = 7;
+  public static final int MSG_INIT_REGISTER = 9;
+  
   /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
-  public static final int MSG_TICKET_REQUEST = 8;
+  public static final int MSG_TICKET_REQUEST = 10;
 
   /** Message Type: TICKET_RESPONSE (return a ticket back to the origin) */
-  public static final int MSG_TICKET_RESPONSE = 9;
+  public static final int MSG_TICKET_RESPONSE = 11;
 
   /** Message Type: TOPIC_QUERY (send a query for topics) */
-  public static final int MSG_TOPIC_QUERY = 10;
+  public static final int MSG_TOPIC_QUERY = 12;
 
   /** Message Type: REGISTER_RESPONSE (response to register request) */
-  public static final int MSG_REGISTER_RESPONSE = 11;
+  public static final int MSG_REGISTER_RESPONSE = 13;
 
   /** Message Type: TOPIC_QUERY_REPLY (respond to topic queries) */
-  public static final int MSG_TOPIC_QUERY_REPLY = 12;
+  public static final int MSG_TOPIC_QUERY_REPLY = 14;
 
-  public static final int MSG_INIT_TOPIC_LOOKUP = 13;
+  public static final int MSG_INIT_TOPIC_LOOKUP = 15;
 
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
