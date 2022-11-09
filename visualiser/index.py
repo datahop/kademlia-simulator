@@ -47,7 +47,7 @@ def visualise_op(op_id, op_df, msg_df):
     for dst in msg_dsts:
         ax.annotate(str(dst)[:5], (dst, op_id), color=node_label_color, fontweight="bold", fontsize=40)
     
-    ax.set_xscale("log")
+    ax.set_xscale("log", base=2)
     ax.axis("off")
     
     plt.savefig("op_" +str(op_id)+ ".png")
