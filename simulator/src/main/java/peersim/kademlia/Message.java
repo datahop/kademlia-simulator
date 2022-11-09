@@ -54,13 +54,13 @@ public class Message extends SimpleEvent {
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
   public static final int MSG_GET = 7;
 
-  //DISv5 specific messages
+  // DISv5 specific messages
   /** Message Type: REGISTER (register the node under a topic) */
   public static final int MSG_REGISTER = 8;
 
   /** Message Type: INIT_REGISTER (start registering under a topic) */
   public static final int MSG_INIT_REGISTER = 9;
-  
+
   /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
   public static final int MSG_TICKET_REQUEST = 10;
 
