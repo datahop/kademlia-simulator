@@ -13,7 +13,6 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaProtocol;
-import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
 import peersim.kademlia.Util;
 
@@ -43,7 +42,7 @@ public class FindOperation extends Operation {
    * @param timestamp Id of the node to find
    */
   public FindOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
-    super(srcNode, destNode, Message.MSG_FIND, timestamp);
+    super(srcNode, destNode, timestamp);
 
     // initialize closestSet
     closestSet = new HashMap<BigInteger, Boolean>();

@@ -1,7 +1,6 @@
 package peersim.kademlia.operations;
 
 import java.math.BigInteger;
-import peersim.kademlia.Message;
 
 /**
  * This class represents a find operation and offer the methods needed to maintain and update the
@@ -19,6 +18,6 @@ public class PutOperation extends Operation {
    * @param destNode Id of the node to find
    */
   public PutOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
-    super(srcNode, destNode, Message.MSG_PUT, timestamp);
+    super(srcNode, destNode, timestamp);
   }
 }

@@ -20,9 +20,6 @@ public abstract class Operation {
   /** represent univocally the find operation */
   protected long operationId;
 
-  /** Type of the initial message */
-  protected int type;
-
   /** ID of the node to find */
   protected BigInteger destNode;
 
@@ -45,10 +42,9 @@ public abstract class Operation {
    *
    * @param destNode Id of the node to find
    */
-  public Operation(BigInteger srcNode, BigInteger dstNode, int type, long timestamp) {
+  public Operation(BigInteger srcNode, BigInteger dstNode, long timestamp) {
     this.timestamp = timestamp;
     this.destNode = dstNode;
-    this.type = type;
     this.srcNode = srcNode;
 
     // set a new find id
