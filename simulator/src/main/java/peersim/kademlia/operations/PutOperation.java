@@ -10,14 +10,14 @@ import java.math.BigInteger;
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
  */
-public class PutOperation extends Operation {
+public class PutOperation extends GetOperation {
 
   /**
    * defaul constructor
    *
    * @param destNode Id of the node to find
    */
-  public PutOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
-    super(srcNode, destNode, timestamp);
+  public PutOperation(BigInteger srcNode, BigInteger value, long timestamp) {
+    super(srcNode, value, timestamp);
   }
 }

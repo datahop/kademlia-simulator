@@ -39,48 +39,58 @@ public class Message extends SimpleEvent {
   /** Message Type: INIT_FIND (command to a node to start looking for a node) */
   public static final int MSG_INIT_FIND = 2;
 
+  /** Message Type: INIT_GET (command to a node to start looking for a value) */
+  public static final int MSG_INIT_GET = 3;
+
+  /** Message Type: INIT_PUT (command to a node to storing a value) */
+  public static final int MSG_INIT_PUT = 4;
+
   /** Message Type: FINDVALUE (message regarding value find) */
-  public static final int MSG_FIND = 3;
+  public static final int MSG_FIND = 5;
 
   /** Message Type: FINDVALUE (message regarding value find) finding by distance */
-  public static final int MSG_FIND_DIST = 4;
+  public static final int MSG_FIND_DIST = 6;
 
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
-  public static final int MSG_RESPONSE = 5;
+  public static final int MSG_RESPONSE = 7;
 
   /** Message Type: FINDVALUE (message regarding value find) finding by distance */
-  public static final int MSG_PUT = 6;
+  public static final int MSG_PUT = 8;
 
   /** Message Type: RESPONSE (respons message to a findvalue or findnode) */
-  public static final int MSG_GET = 7;
+  public static final int MSG_GET = 9;
 
   // DISv5 specific messages
   /** Message Type: REGISTER (register the node under a topic) */
-  public static final int MSG_REGISTER = 8;
+  public static final int MSG_REGISTER = 10;
 
   /** Message Type: INIT_REGISTER (start registering under a topic) */
-  public static final int MSG_INIT_REGISTER = 9;
+  public static final int MSG_INIT_REGISTER = 11;
 
   /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
-  public static final int MSG_TICKET_REQUEST = 10;
+  public static final int MSG_TICKET_REQUEST = 12;
 
   /** Message Type: TICKET_RESPONSE (return a ticket back to the origin) */
-  public static final int MSG_TICKET_RESPONSE = 11;
+  public static final int MSG_TICKET_RESPONSE = 13;
 
   /** Message Type: TOPIC_QUERY (send a query for topics) */
-  public static final int MSG_TOPIC_QUERY = 12;
+  public static final int MSG_TOPIC_QUERY = 14;
 
   /** Message Type: REGISTER_RESPONSE (response to register request) */
-  public static final int MSG_REGISTER_RESPONSE = 13;
+  public static final int MSG_REGISTER_RESPONSE = 15;
 
   /** Message Type: TOPIC_QUERY_REPLY (respond to topic queries) */
-  public static final int MSG_TOPIC_QUERY_REPLY = 14;
+  public static final int MSG_TOPIC_QUERY_REPLY = 16;
 
-  public static final int MSG_INIT_TOPIC_LOOKUP = 15;
+  public static final int MSG_INIT_TOPIC_LOOKUP = 17;
 
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
   public Object body = null;
+
+  // ______________________________________________________________________________________________
+  /** This Object contains the body of the message, no matter what it contains */
+  public Object value = null;
 
   /** ID of the message. this is automatically generated univocally, and should not change */
   public long id;
@@ -133,6 +143,19 @@ public class Message extends SimpleEvent {
 
   // ______________________________________________________________________________________________
   /**
+   * Creates a message with specific type and body
+   *
+   * @param messageType int type of the message
+   * @param body Object body to assign (shallow copy)
+   */
+  public Message(int messageType, Object body, Object value) {
+    super(messageType);
+    this.id = (ID_GENERATOR++);
+    this.body = body;
+    this.value = value;
+  }
+  // ______________________________________________________________________________________________
+  /**
    * Encapsulates the creation of a find value request
    *
    * @param body Object
@@ -153,6 +176,27 @@ public class Message extends SimpleEvent {
     return new Message(MSG_INIT_FIND, body);
   }
 
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a GET request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitGetValue(Object body) {
+    return new Message(MSG_INIT_GET, body);
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a PUT request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitPutValue(Object body, Object value) {
+    return new Message(MSG_INIT_PUT, body, value);
+  }
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request
