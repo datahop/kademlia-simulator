@@ -1,19 +1,15 @@
 # Visualiser
 
-This visualiser works by showing the nodes being communicated with during an operation. It shows the nodes involved in the lookup relative to the hash space.
+This visualiser works by showing the nodes being communicated with during an operation. It shows the nodes involved in the lookup relative to the hash space. You can either use the command line version (`index.py`) or the Dash web application (`app.py`).
 
 ## Dependencies
-The code uses the following Python libraries which can be installed using `pip install <library_name>`:
-
-- `matplotlib`
-- `pandas`
-
 Make sure that the directory follows this structure:
 ```
 - 📂 log_folder
     - 📃 msg.csv
     - 📃 operations.csv
 - 📃 index.py
+- 📃 app.py
 ```
 
 ## Usage
@@ -22,8 +18,12 @@ To run it just run:
 ```
 python index.py
 ```
+or
+```
+python app.py
+```
 
-To visualise a specific operation just pass in the operation ID:
+To visualise a specific operation (using the command line tool - `index.py`) just pass in the operation ID:
 ```
 python index.py <operation_id>
 ```
