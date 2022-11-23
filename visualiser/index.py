@@ -94,7 +94,6 @@ with console.status("Visualising..."):
     # ? Read contents of msg
     msg_df = pd.read_csv('log_folder/msg.csv')
     # dst | src | id | type | status
-
     try:
         op_id
         visualise_op(op_id, op_df, msg_df)
