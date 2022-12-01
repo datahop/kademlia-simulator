@@ -1,6 +1,9 @@
 package peersim.kademlia;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -16,7 +19,7 @@ import peersim.edsim.EDSimulator;
  */
 
 // ______________________________________________________________________________________________
-public class TrafficGenerator implements Control {
+public class TrafficGeneratorPutGet implements Control {
 
   // ______________________________________________________________________________________________
   /** MSPastry Protocol to act */
@@ -27,28 +30,60 @@ public class TrafficGenerator implements Control {
 
   private boolean first = true;
   // ______________________________________________________________________________________________
-  public TrafficGenerator(String prefix) {
+  public TrafficGeneratorPutGet(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
   }
 
   // ______________________________________________________________________________________________
   /**
-   * generates a random find node message, by selecting randomly the destination.
+   * generates a PUT message for t1 key and string message
    *
    * @return Message
    */
-  private Message generateFindNodeMessage() {
+  private Message generatePutMessage() {
+
     // existing active destination node
-    Node n = Network.get(CommonState.r.nextInt(Network.size()));
-    while (!n.isUp()) {
-      n = Network.get(CommonState.r.nextInt(Network.size()));
+    MessageDigest digest;
+    BigInteger id;
+    String value = "hello";
+    try {
+      String topic = "t1";
+      digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(topic.getBytes(StandardCharsets.UTF_8));
+      id = new BigInteger(1, hash);
+      Message m = Message.makeInitPutValue(id, value);
+      m.timestamp = CommonState.getTime();
+      System.out.println("Put message " + m.body + " " + m.value);
+      return m;
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+      return null;
     }
-    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getNode().getId();
+  }
 
-    Message m = Message.makeInitFindNode(dst);
-    m.timestamp = CommonState.getTime();
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  private Message generateGetMessage() {
 
-    return m;
+    MessageDigest digest;
+    BigInteger id;
+    try {
+      String topic = "t1";
+      digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(topic.getBytes(StandardCharsets.UTF_8));
+      id = new BigInteger(1, hash);
+      Message m = Message.makeInitGetValue(id);
+      m.timestamp = CommonState.getTime();
+
+      return m;
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   // ______________________________________________________________________________________________
@@ -64,9 +99,12 @@ public class TrafficGenerator implements Control {
       start = Network.get(CommonState.r.nextInt(Network.size()));
     } while ((start == null) || (!start.isUp()));
 
-    // send message
-    EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-
+    if (first) {
+      EDSimulator.add(0, generatePutMessage(), start, pid);
+      first = false;
+    } else {
+      EDSimulator.add(0, generateGetMessage(), start, pid);
+    }
     return false;
   }
 
