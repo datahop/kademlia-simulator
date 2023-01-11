@@ -10,43 +10,92 @@ op_df = pd.read_csv("log_folder/operations.csv")
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div([
-    html.H1(
-        "Kademlia Visualiser",
-        className="display-1", 
-        style={
-            "textAlign": "center",
-            "marginTop": "3vh"
-        }
-    ),
-    dbc.Container(
-        dbc.Row([
-            html.P(
-                "Click on an operation in the table on the left to view it on the graph on the right.",
-                className="lead",
-                style={"textAlign": "center"}
-            ),
-            dbc.Col([
-                dash_table.DataTable(
-                    op_df.to_dict("records"), 
-                    [{"name": i, "id": i} for i in op_df.columns],
-                    id="table",
-                    style_cell={"textAlign": "center"}
-                ),
-            ], style={"textAlign": "center"}),
-            dbc.Col(
-                dcc.Graph(
-                    id="graph", 
+app.layout = html.Div(
+    [
+        dbc.Row(
+            [
+                html.H1(
+                    "Kademlia Visualiser",
                     style={
-                        "height": "70vh"
+                        "width": "25%"
                     }
                 ),
-            )
-        ]),
-    style={"padding": "5vh 3vw 0 3vw"},
-    fluid=True
-    )
-])
+                # html.Div(
+                #     dcc.Input(
+                #         id="path-input",
+                #         type="text",
+                #         placeholder="Enter the path to the logs here",
+                #         # TODO: Delete the next line.
+                #         value="./log_folder",
+                #         style={
+                #             "width": "100%",
+                #             "padding": "0.5vh 0.5vw"
+                #         }
+                #     ),
+                #     style={
+                #         "width": "20%"
+                #     }
+                # )
+            ],
+            style={
+                # "outline": "1px solid black",
+                "display": "flex",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+                "padding": "0vh 1vw",
+                "maxWidth": "100vw",
+                "borderBottom": "2px solid #aaa",
+                "overflowX": "hidden"
+            }
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.P(
+                            "Click on an operation to plot it.",
+                            style={"textAlign": "center"}
+                        ),
+                        html.Div(
+                            dash_table.DataTable(
+                                op_df.to_dict("records"), 
+                                [{"name": i, "id": i} for i in op_df.columns],
+                                id="table",
+                                style_cell={"textAlign": "center"}
+                            ),
+                            style={
+                                "maxHeight": "90vh",
+                                "overflowY": "scroll"
+                            }
+                        )
+                    ],
+                    width=3
+                ),
+                dbc.Col(
+                    [
+                        dcc.Graph(
+                            id="graph", 
+                            style={
+                                "height": "95vh"
+                            }
+                        ),
+                    ],
+                    width=9
+                )
+            ],
+            style={
+                "padding": "1vh 1vw",
+                "maxWidth": "100vw"
+            }
+        )
+    ],
+    style={
+        "maxWidth": "100vw",
+        "maxHeight": "100vh",
+        "overflow": "hidden"
+    }
+)
+
 
 @callback(Output("graph", "figure"), Input("table", "active_cell"))
 def update_graphs(active_cell):
