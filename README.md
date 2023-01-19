@@ -12,6 +12,14 @@ To run the simulator it is necessary to have Java and Maven installed. For Ubunt
 $ sudo apt install maven default-jdk
 ```
 
+## Installation
+
+To compile everything use the Maven packager:
+
+```shell
+$ maven package
+```
+
 ## How to run it
 
 To execut a simulation it is necessary to call the run.sh, with a configuration file as a parameter. For example:
