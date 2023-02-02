@@ -30,7 +30,7 @@ public class Util {
    * @param a BigInteger
    * @param b BigInteger
    * @return BigInteger
-   *     <p>public static final BigInteger distance(BigInteger a, BigInteger b) { return a.xor(b); }
+   *     <p>public static BigInteger xorDistance(BigInteger a, BigInteger b) { return a.xor(b); }
    */
 
   /**
@@ -56,10 +56,21 @@ public class Util {
    * @param BigInteger b
    * @return int result
    */
-  public static int distance(BigInteger a, BigInteger b) {
+  public static int logDistance(BigInteger a, BigInteger b) {
 
     BigInteger x = a.xor(b);
 
     return x.bitLength();
+  }
+
+  /**
+   * return the distance between two number wich is defined as (a XOR b)
+   *
+   * @param a BigInteger
+   * @param b BigInteger
+   * @return BigInteger
+   */
+  public static BigInteger xorDistance(BigInteger a, BigInteger b) {
+    return a.xor(b);
   }
 }
