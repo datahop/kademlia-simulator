@@ -21,4 +21,16 @@ public class Block {
       }
     }
   }
+
+  public long getBlockId(){
+    return this.blockId;
+  }
+
+  public Sample[][] getSamples(){
+    return this.blockSamples;
+  }
+
+  public Sample getSample(int row, int column){
+    return this.blockSamples[row][column];
+  }
 }
