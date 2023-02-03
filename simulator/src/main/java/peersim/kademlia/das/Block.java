@@ -70,8 +70,15 @@ public class Block implements Iterator<Sample> {
     if (column == SIZE - 1 && row == SIZE - 1) return null;
 
     column++;
-    if (column == SIZE - 1) row++;
+    if (column == SIZE - 1) {
+      row++;
+      column = 0;
+    }
 
     return blockSamples[row][column];
+  }
+
+  public void initIterator() {
+    column = row = 0;
   }
 }
