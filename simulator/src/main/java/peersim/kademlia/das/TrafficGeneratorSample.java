@@ -25,7 +25,8 @@ public class TrafficGeneratorSample implements Control {
   /** MSPastry Protocol ID to act */
   private final int pid;
 
-  private boolean first = true;
+  Block b;
+  private boolean first = true, second = true;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
@@ -47,6 +48,21 @@ public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  private Message generateGetSampleMessage(Sample s) {
+
+    Message m = Message.makeInitGetValue(s.getId());
+    m.timestamp = CommonState.getTime();
+    System.out.println("Get message " + m.body + " " + m.value);
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
    * every call of this control generates and send a random find node message
    *
    * @return boolean
@@ -59,11 +75,16 @@ public class TrafficGeneratorSample implements Control {
     } while ((start == null) || (!start.isUp()));
 
     if (first) {
-      Block b = new Block(10);
+      b = new Block(10);
 
       while (b.hasNext()) EDSimulator.add(0, generatePutSampleMessage(b.next()), start, pid);
-
+      b.initIterator();
       first = false;
+    } else if (second) {
+
+      while (b.hasNext()) EDSimulator.add(0, generateGetSampleMessage(b.next()), start, pid);
+
+      second = false;
     }
     return false;
   }
