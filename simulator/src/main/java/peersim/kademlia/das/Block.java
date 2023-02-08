@@ -59,23 +59,25 @@ public class Block implements Iterator<Sample> {
   @Override
   public boolean hasNext() {
 
-    if (row == SIZE - 1 && column < SIZE - 1) return false;
+    // System.out.println("Column " + column + " row " + row);
+    if (row < SIZE) return true;
 
-    return true;
+    return false;
   }
 
   @Override
   public Sample next() {
 
-    if (column == SIZE - 1 && row == SIZE - 1) return null;
+    Sample s = blockSamples[row][column];
 
     column++;
-    if (column == SIZE - 1) {
+    if (column == SIZE) {
       row++;
       column = 0;
     }
 
-    return blockSamples[row][column];
+    if (column > SIZE - 1) return null;
+    return s;
   }
 
   public void initIterator() {
