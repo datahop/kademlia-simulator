@@ -10,13 +10,11 @@ public class Sample {
   private int sampleId;
   private long blockId;
   private BigInteger id;
-  private int size;
 
   public Sample(long blockId, int sampleId) {
 
     try {
 
-      size = 512;
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
       String idName = String.valueOf(blockId) + "_" + String.valueOf(sampleId);
@@ -33,10 +31,6 @@ public class Sample {
 
   public long getBlockId() {
     return blockId;
-  }
-
-  public int getSize() {
-    return size;
   }
 
   public BigInteger getId() {
