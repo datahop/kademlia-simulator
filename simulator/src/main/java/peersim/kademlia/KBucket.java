@@ -1,6 +1,8 @@
 package peersim.kademlia;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 import peersim.core.CommonState;
 
@@ -12,6 +14,7 @@ import peersim.core.CommonState;
  * @version 1.0
  */
 public class KBucket implements Cloneable {
+  protected List<BigInteger> replacements;
 
   // k-bucket array
   protected TreeMap<BigInteger, Long> neighbours = null;
@@ -19,6 +22,7 @@ public class KBucket implements Cloneable {
   // empty costructor
   public KBucket() {
     neighbours = new TreeMap<BigInteger, Long>();
+    replacements = new ArrayList<BigInteger>();
   }
 
   // add a neighbour to this k-bucket
@@ -26,14 +30,25 @@ public class KBucket implements Cloneable {
     long time = CommonState.getTime();
     if (neighbours.size() < KademliaCommonConfig.K) { // k-bucket isn't full
       neighbours.put(node, time); // add neighbour to the tail of the list
+      removeReplacement(node);
       return true;
+    } else {
+      addReplacement(node);
+      return false;
     }
-    return false;
   }
 
   // remove a neighbour from this k-bucket
   public void removeNeighbour(BigInteger node) {
     neighbours.remove(node);
+  }
+
+  public void addReplacement(BigInteger node) {
+    replacements.add(0, node);
+  }
+
+  public void removeReplacement(BigInteger node) {
+    replacements.remove(node);
   }
 
   public Object clone() {
