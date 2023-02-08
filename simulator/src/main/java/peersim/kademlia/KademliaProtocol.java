@@ -499,6 +499,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     return this.routingTable;
   }
 
+  public void refreshBuckets() {
+    routingTable.refreshBuckets();
+  }
+
   /** Set the protocol ID for this node. */
   public void setProtocolID(int protocolID) {
     this.kademliaid = protocolID;

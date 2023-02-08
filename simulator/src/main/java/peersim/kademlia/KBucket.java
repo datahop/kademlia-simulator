@@ -71,7 +71,7 @@ public class KBucket implements Cloneable {
   }
 
   public void removeReplacement(BigInteger node) {
-    if(replacements.size() > 0){
+    if (replacements.size() > 0) {
       replacements.remove(node);
     }
   }
