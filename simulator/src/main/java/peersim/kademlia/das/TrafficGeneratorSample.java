@@ -1,5 +1,6 @@
 package peersim.kademlia.das;
 
+import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -52,9 +53,9 @@ public class TrafficGeneratorSample implements Control {
    *
    * @return Message
    */
-  private Message generateGetSampleMessage(Sample s) {
+  private Message generateGetSampleMessage(BigInteger sampleId) {
 
-    Message m = Message.makeInitGetValue(s.getId());
+    Message m = Message.makeInitGetValue(sampleId);
     m.timestamp = CommonState.getTime();
     System.out.println("Get message " + m.body + " " + m.value);
 
@@ -82,7 +83,15 @@ public class TrafficGeneratorSample implements Control {
     } else if (second) {
       b.initIterator();
 
-      while (b.hasNext()) EDSimulator.add(0, generateGetSampleMessage(b.next()), start, pid);
+      for (int i = 0; i < Network.size(); i++) {
+        start = Network.get(i);
+        if (start.isUp()) {
+          BigInteger[] samples = b.getNRandomSamplesIds(10);
+          for (int j = 0; j < samples.length; j++) {
+            EDSimulator.add(0, generateGetSampleMessage(samples[j]), start, pid);
+          }
+        }
+      }
 
       second = false;
     }
