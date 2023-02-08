@@ -193,7 +193,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         fop.setFinished(true);
       }
 
-      if (fop instanceof GetOperation && m.value != null) {
+      if (fop instanceof GetOperation && m.value != null && !fop.isFinished()) {
         fop.setFinished(true);
         ((GetOperation) fop).setValue(m.value);
         logger.warning(
