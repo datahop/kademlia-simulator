@@ -20,8 +20,8 @@ public class KBucket implements Cloneable {
   // k-bucket array
   protected TreeMap<BigInteger, Long> neighbours = null;
 
-  // k-bucket size
-  protected int k;
+  // k-bucket size, max replacement bucket size
+  protected int k, maxReplacements;
 
   // empty constructor
   public KBucket() {
@@ -29,21 +29,27 @@ public class KBucket implements Cloneable {
     replacements = new ArrayList<BigInteger>();
   }
 
-  public KBucket(int k) {
+  public KBucket(int k, int maxReplacements) {
     neighbours = new TreeMap<BigInteger, Long>();
     replacements = new ArrayList<BigInteger>();
     this.k = k;
+    this.maxReplacements = maxReplacements;
   }
 
   // add a neighbour to this k-bucket
   public boolean addNeighbour(BigInteger node) {
     long time = CommonState.getTime();
-    if (neighbours.size() < KademliaCommonConfig.K) { // k-bucket isn't full
+    if (neighbours.size() < k) { // k-bucket isn't full
+
       neighbours.put(node, time); // add neighbour to the tail of the list
       removeReplacement(node);
+
       return true;
+
     } else {
+
       addReplacement(node);
+
       return false;
     }
   }
@@ -54,7 +60,14 @@ public class KBucket implements Cloneable {
   }
 
   public void addReplacement(BigInteger node) {
-    replacements.add(0, node);
+    if (!replacements.contains(node)) {
+      replacements.add(0, node);
+
+      if (replacements.size() > maxReplacements) {
+        // Replacements is full - remove the last item
+        replacements.remove(replacements.size() - 1);
+      }
+    }
   }
 
   public void removeReplacement(BigInteger node) {
