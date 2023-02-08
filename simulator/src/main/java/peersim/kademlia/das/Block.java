@@ -1,6 +1,9 @@
 package peersim.kademlia.das;
 
+import java.math.BigInteger;
 import java.util.Iterator;
+
+import peersim.core.CommonState;
 
 public class Block implements Iterator<Sample> {
 
@@ -52,6 +55,16 @@ public class Block implements Iterator<Sample> {
     return this.blockSamples;
   }
 
+  public BigInteger[] getNRandomSamplesIds(int n){
+
+    BigInteger[] samples = new BigInteger[n];
+    for(int i=0;i<samples.length;i++){
+      int r = CommonState.r.nextInt(SIZE);
+      int c = CommonState.r.nextInt(SIZE);
+      samples[i] = this.blockSamples[r][c].getId();
+    }
+    return samples;    
+  }
   public Sample getSample(int row, int column) {
     return this.blockSamples[row][column];
   }
