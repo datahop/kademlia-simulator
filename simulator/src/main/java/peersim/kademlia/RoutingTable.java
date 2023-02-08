@@ -37,7 +37,7 @@ public class RoutingTable implements Cloneable {
   public RoutingTable(int nBuckets, int k, int maxReplacements) {
 
     k_buckets = new TreeMap<Integer, KBucket>();
-    // initialize k-bukets
+    // initialize k-buckets
 
     this.nBuckets = nBuckets;
 
@@ -48,7 +48,7 @@ public class RoutingTable implements Cloneable {
     bucketMinDistance = KademliaCommonConfig.BITS - nBuckets;
 
     for (int i = 0; i <= nBuckets; i++) {
-      k_buckets.put(i, new KBucket());
+      k_buckets.put(i, new KBucket(k));
     }
   }
 
@@ -139,7 +139,7 @@ public class RoutingTable implements Cloneable {
   public Object clone() {
     RoutingTable dolly = new RoutingTable(nBuckets, k, maxReplacements);
     for (int i = 0; i < k_buckets.size(); i++) {
-      k_buckets.put(i, new KBucket()); // (KBucket) k_buckets.get(i).clone());
+      k_buckets.put(i, new KBucket(k)); // (KBucket) k_buckets.get(i).clone());
     }
     return dolly;
   }
