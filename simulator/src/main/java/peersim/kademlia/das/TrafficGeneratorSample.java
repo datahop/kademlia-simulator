@@ -78,9 +78,9 @@ public class TrafficGeneratorSample implements Control {
       b = new Block(10);
 
       while (b.hasNext()) EDSimulator.add(0, generatePutSampleMessage(b.next()), start, pid);
-      b.initIterator();
       first = false;
     } else if (second) {
+      b.initIterator();
 
       while (b.hasNext()) EDSimulator.add(0, generateGetSampleMessage(b.next()), start, pid);
 
