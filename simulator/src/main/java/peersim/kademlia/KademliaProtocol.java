@@ -500,6 +500,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   }
 
   public void refreshBuckets() {
+    // logger.warning("Calling refreshbuckets");
     routingTable.refreshBuckets();
   }
 
