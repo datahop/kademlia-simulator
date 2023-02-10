@@ -17,7 +17,7 @@ import peersim.kademlia.Message;
  */
 
 // ______________________________________________________________________________________________
-public class TrafficGeneratorSample implements Control {
+public class TrafficGeneratorSamplePut implements Control {
 
   // ______________________________________________________________________________________________
   /** MSPastry Protocol to act */
@@ -29,7 +29,7 @@ public class TrafficGeneratorSample implements Control {
   Block b;
   private boolean first = true, second = true;
   // ______________________________________________________________________________________________
-  public TrafficGeneratorSample(String prefix) {
+  public TrafficGeneratorSamplePut(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
   }
 
