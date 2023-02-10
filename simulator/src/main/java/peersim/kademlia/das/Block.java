@@ -26,7 +26,7 @@ public class Block implements Iterator<Sample> {
 
       for (int j = 0; j < blockSamples[0].length; j++) {
 
-        blockSamples[i][j] = new Sample(blockId, i * j);
+        blockSamples[i][j] = new Sample(blockId, i, j);
       }
     }
   }
@@ -41,7 +41,7 @@ public class Block implements Iterator<Sample> {
 
       for (int j = 0; j < blockSamples[0].length; j++) {
 
-        blockSamples[i][j] = new Sample(blockId, i * j);
+        blockSamples[i][j] = new Sample(blockId, i, j);
       }
     }
   }
