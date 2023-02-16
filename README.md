@@ -24,6 +24,13 @@ $ ./run.sh config/kademlia.cfg
 
 Follow PeerSim [documentation](http://peersim.sourceforge.net/tutorialed/)
 
+## Contribution
+If you want to contribute:
+* Fork the repo to your repo
+* Write your contribution
+* Rebase your code (here's a [tutorial](https://www.howtogeek.com/849210/git-rebase/)) to make sure the changes introduced into the main repo are take into account in your contribution
+* Create a pull request
+
 ## Code Documentation
 
 TBC 
