@@ -530,4 +530,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         });
     logger.addHandler(handler);
   }
+
+  public Logger getLogger() {
+    return this.logger;
+  }
 }
