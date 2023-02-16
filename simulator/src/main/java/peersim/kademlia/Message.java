@@ -62,27 +62,7 @@ public class Message extends SimpleEvent {
 
   // DISv5 specific messages
   /** Message Type: REGISTER (register the node under a topic) */
-  public static final int MSG_REGISTER = 10;
-
-  /** Message Type: INIT_REGISTER (start registering under a topic) */
-  public static final int MSG_INIT_REGISTER = 11;
-
-  /** Message Type: TICKET_REQUEST (obtain a ticket to later register a topic) */
-  public static final int MSG_TICKET_REQUEST = 12;
-
-  /** Message Type: TICKET_RESPONSE (return a ticket back to the origin) */
-  public static final int MSG_TICKET_RESPONSE = 13;
-
-  /** Message Type: TOPIC_QUERY (send a query for topics) */
-  public static final int MSG_TOPIC_QUERY = 14;
-
-  /** Message Type: REGISTER_RESPONSE (response to register request) */
-  public static final int MSG_REGISTER_RESPONSE = 15;
-
-  /** Message Type: TOPIC_QUERY_REPLY (respond to topic queries) */
-  public static final int MSG_TOPIC_QUERY_REPLY = 16;
-
-  public static final int MSG_INIT_TOPIC_LOOKUP = 17;
+  public static final int MSG_INIT_NEW_BLOCK = 10;
 
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
@@ -239,22 +219,8 @@ public class Message extends SimpleEvent {
         return "MSG_FIND";
       case MSG_RESPONSE:
         return "MSG_RESPONSE";
-      case MSG_REGISTER:
-        return "MSG_REGISTER";
-      case MSG_INIT_REGISTER:
-        return "MSG_INIT_REGISTER";
-      case MSG_TICKET_REQUEST:
-        return "MSG_TICKET_REQUEST";
-      case MSG_TICKET_RESPONSE:
-        return "MSG_TICKET_RESPONSE";
-      case MSG_TOPIC_QUERY:
-        return "MSG_TOPIC_QUERY";
-      case MSG_TOPIC_QUERY_REPLY:
-        return "MSG_TOPIC_QUERY_REPLY";
-      case MSG_REGISTER_RESPONSE:
-        return "MSG_REGISTER_RESPONSE";
-      case MSG_INIT_TOPIC_LOOKUP:
-        return "MSG_INIT_TOPIC_LOOKUP";
+      case MSG_INIT_NEW_BLOCK:
+        return "MSG_INIT_NEW_BLOCK";
       default:
         return "UNKNOW:" + type;
     }
