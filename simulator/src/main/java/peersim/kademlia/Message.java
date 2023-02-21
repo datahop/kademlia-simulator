@@ -185,8 +185,8 @@ public class Message extends SimpleEvent {
    * @param body Object
    * @return Message
    */
-  public static final Message makeInitNewBlock() {
-    return new Message(MSG_INIT_NEW_BLOCK);
+  public static final Message makeInitNewBlock(Object body) {
+    return new Message(MSG_INIT_NEW_BLOCK, body);
   }
 
   // ______________________________________________________________________________________________

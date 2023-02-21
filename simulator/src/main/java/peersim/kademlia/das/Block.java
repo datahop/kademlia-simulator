@@ -77,10 +77,10 @@ public class Block implements Iterator<Sample> {
     if (totalSamples < 1.0) totalSamples = 1.0;
     totalSamples = totalSamples / 2.0;
 
-    System.out.println("INTER_SAMPLE_GAP: " + INTER_SAMPLE_GAP.toString(2));
+    // System.out.println("INTER_SAMPLE_GAP: " + INTER_SAMPLE_GAP.toString(2));
 
     BigInteger reg_size = INTER_SAMPLE_GAP.multiply(BigInteger.valueOf(((long) totalSamples)));
-    System.out.println("Radius: " + reg_size.toString(2));
+    // System.out.println("Radius: " + reg_size.toString(2));
 
     return reg_size;
   }

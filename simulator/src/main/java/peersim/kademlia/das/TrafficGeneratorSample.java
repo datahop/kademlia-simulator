@@ -54,9 +54,9 @@ public class TrafficGeneratorSample implements Control {
    *
    * @return Message
    */
-  private Message generateNewBlockMessage() {
+  private Message generateNewBlockMessage(Block b) {
 
-    Message m = Message.makeInitNewBlock();
+    Message m = Message.makeInitNewBlock(b);
     m.timestamp = CommonState.getTime();
 
     return m;
@@ -69,16 +69,15 @@ public class TrafficGeneratorSample implements Control {
    * @return boolean
    */
   public boolean execute() {
-    if (first) {
-      for (int i = 0; i < Network.size(); i++) {
-        Node start = Network.get(i);
-        if (start.isUp()) {
-          EDSimulator.add(0, generateNewBlockMessage(), start, pid);
-        }
-      }
 
-      first = false;
+    Block b = new Block();
+    for (int i = 0; i < Network.size(); i++) {
+      Node start = Network.get(i);
+      if (start.isUp()) {
+        EDSimulator.add(0, generateNewBlockMessage(b), start, pid);
+      }
     }
+
     return false;
   }
 
