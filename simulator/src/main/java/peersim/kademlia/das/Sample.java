@@ -69,9 +69,11 @@ public class Sample {
   public boolean isInRegion(BigInteger peerID, BigInteger radius) {
     /** (peerID - radius) < this.id < (peerID + radius) */
     if ((this.id.compareTo(peerID.subtract(radius)) == 1)
-        && (this.id.compareTo(peerID.add(radius)) == -1)) return true;
-
-    return false;
+        && (this.id.compareTo(peerID.add(radius)) == -1)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public int getRow() {

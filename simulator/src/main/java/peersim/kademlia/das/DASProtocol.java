@@ -11,9 +11,13 @@ import java.math.BigInteger;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
+import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaProtocol;
+import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.RoutingTable;
 import peersim.kademlia.SimpleEvent;
@@ -42,6 +46,9 @@ public class DASProtocol implements Cloneable, EDProtocol {
   private BigInteger builderAddress;
 
   private boolean isBuilder;
+
+  private KeyValueStore kv;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -68,6 +75,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
     // System.out.println("New DASProtocol");
 
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
+    kv = new KeyValueStore();
   }
 
   /**
@@ -95,6 +103,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
     // this.protocolId = myPid;
 
     Message m;
+    logger.warning("Message received");
 
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
@@ -106,6 +115,10 @@ public class DASProtocol implements Cloneable, EDProtocol {
       case Message.MSG_INIT_NEW_BLOCK:
         m = (Message) event;
         handleInitNewBlock(m, myPid);
+        break;
+      case Message.MSG_GET:
+        m = (Message) event;
+        logger.warning("Get Sample " + m.body);
         break;
     }
   }
@@ -146,9 +159,79 @@ public class DASProtocol implements Cloneable, EDProtocol {
    */
   private void handleInitNewBlock(Message m, int myPid) {
     // logger.warning(" handleInitNewBlock");
+    Block b = (Block) m.body;
 
+    if (isBuilder()) {
+      logger.warning("Building block");
+
+      while (b.hasNext()) {
+        // create a put request
+        Sample s = b.next();
+
+        // logger.warning("New sample:" + s.getId());
+        kv.add(s.getId(), s);
+      }
+    } else {
+      BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
+      while (b.hasNext()) {
+        Sample s = b.next();
+
+        if (s.isInRegion(getKademliaId(), radius)) {
+          logger.warning("Sending get message");
+          Message msg = generateGetMessage(s);
+          msg.src = this.getKademliaProtocol().getKademliaNode();
+          msg.dst =
+              this.getKademliaProtocol()
+                  .nodeIdtoNode(builderAddress)
+                  .getKademliaProtocol()
+                  .getKademliaNode();
+          sendMessage(msg, builderAddress, myPid);
+        }
+      }
+    }
   }
 
   // public void refreshBucket(TicketTable rou, BigInteger node, int distance) {
   public void refreshBucket(RoutingTable rou, int distance) {}
+
+  /**
+   * send a message with current transport layer and starting the timeout timer (wich is an event)
+   * if the message is a request
+   *
+   * @param m the message to send
+   * @param destId the Id of the destination node
+   * @param myPid the sender Pid
+   */
+  private void sendMessage(Message m, BigInteger destId, int myPid) {
+
+    // int destpid;
+    assert m.src != null;
+    assert m.dst != null;
+
+    Node src = this.kadProtocol.getNode();
+    Node dest = this.kadProtocol.nodeIdtoNode(destId);
+
+    // destpid = dest.getKademliaProtocol().getProtocolID();
+
+    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+    transport.send(src, dest, m, myPid);
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  private Message generateGetMessage(Sample s) {
+
+    Message m = new Message(Message.MSG_GET, s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  public BigInteger getKademliaId() {
+    return this.getKademliaProtocol().getKademliaNode().getId();
+  }
 }
