@@ -9,7 +9,6 @@ package peersim.kademlia;
  */
 import java.math.BigInteger;
 import java.util.Arrays;
-// logging
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
@@ -99,6 +98,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();
+
+    // System.out.println("New kademliaprotocol");
   }
 
   /**

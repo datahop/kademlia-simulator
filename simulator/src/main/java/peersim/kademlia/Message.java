@@ -177,6 +177,18 @@ public class Message extends SimpleEvent {
   public static final Message makeInitPutValue(Object body, Object value) {
     return new Message(MSG_INIT_PUT, body, value);
   }
+
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a PUT request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitNewBlock() {
+    return new Message(MSG_INIT_NEW_BLOCK);
+  }
+
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request
