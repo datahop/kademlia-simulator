@@ -43,7 +43,7 @@ public class TrafficGenerator implements Control {
     while (!n.isUp()) {
       n = Network.get(CommonState.r.nextInt(Network.size()));
     }
-    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getNode().getId();
+    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getKademliaNode().getId();
 
     Message m = Message.makeInitFindNode(dst);
     m.timestamp = CommonState.getTime();

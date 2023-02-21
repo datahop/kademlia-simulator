@@ -114,7 +114,7 @@ public class TrafficGeneratorSamplePut implements Control {
         for (int i = 0; i < Network.size(); i++) {
           Node n = Network.get(i);
           KademliaProtocol kadProt = ((KademliaProtocol) (n.getProtocol(pid)));
-          KademliaNode kadNode = kadProt.getNode();
+          KademliaNode kadNode = kadProt.getKademliaNode();
           if (n.isUp() && s.isInRegion(kadNode.getId(), radius)) {
 
             EDSimulator.add(0, generatePutSampleMessage(s), n, pid);
