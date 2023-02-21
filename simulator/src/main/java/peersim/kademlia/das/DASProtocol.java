@@ -7,6 +7,7 @@ package peersim.kademlia.das;
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
  */
+import java.math.BigInteger;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
@@ -37,6 +38,9 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
   private Logger logger;
 
+  private BigInteger builderAddress;
+
+  private boolean isBuilder;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -60,6 +64,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
     _init();
     sentMsg = new TreeMap<Long, Long>();
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
+    // System.out.println("New DASProtocol");
 
     // kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
   }
@@ -116,13 +121,31 @@ public class DASProtocol implements Cloneable, EDProtocol {
     return kadProtocol;
   }
 
+  public boolean isBuilder() {
+    return this.isBuilder;
+  }
+
+  public void setBuilder(boolean isBuilder) {
+    this.isBuilder = isBuilder;
+  }
+
+  public void setBuilderAddress(BigInteger address) {
+    this.builderAddress = address;
+  }
+
+  public BigInteger getBuilderAddress() {
+    return this.builderAddress;
+  }
+
   /**
    * Start a topic query opearation.<br>
    *
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInitNewBlock(Message m, int myPid) {}
+  private void handleInitNewBlock(Message m, int myPid) {
+    // System.out.println(" handleInitNewBlock");
+  }
 
   // public void refreshBucket(TicketTable rou, BigInteger node, int distance) {
   public void refreshBucket(RoutingTable rou, int distance) {}
