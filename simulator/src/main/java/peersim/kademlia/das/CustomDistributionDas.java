@@ -25,6 +25,7 @@ public class CustomDistributionDas implements peersim.core.Control {
   private int protocolID;
   private int protocolDasID;
 
+  private BigInteger builderAddress;
   private UniformRandomGenerator urg;
 
   public CustomDistributionDas(String prefix) {
@@ -52,13 +53,17 @@ public class CustomDistributionDas implements peersim.core.Control {
       node = new KademliaNode(id, "0.0.0.0", 0);
 
       KademliaProtocol kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolID)));
-      System.out.println("Custom distribution DAS " + kadProt + " " + node.getId());
       generalNode.setKademliaProtocol(kadProt);
       kadProt.setNode(node);
       kadProt.setProtocolID(protocolID);
 
       DASProtocol dasProtocol = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
       dasProtocol.setKademliaProtocol(kadProt);
+
+      if (i == 0) {
+        dasProtocol.setBuilder(true);
+        builderAddress = dasProtocol.getKademliaProtocol().getKademliaNode().getId();
+      } else dasProtocol.setBuilderAddress(builderAddress);
     }
 
     return false;

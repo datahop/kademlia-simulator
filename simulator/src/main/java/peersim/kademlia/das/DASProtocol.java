@@ -23,11 +23,12 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
   private static final String PAR_TRANSPORT = "transport";
   private static final String PAR_DASPROTOCOL = "dasprotocol";
+  private static final String PAR_KADEMLIA = "kademlia";
 
   private static String prefix = null;
   private UnreliableTransport transport;
   private int tid;
-  private int protocolId;
+  private int kademliaId;
   // private int kademliaId;
   /** trace message sent for timeout purpose */
   private TreeMap<Long, Long> sentMsg;
@@ -66,7 +67,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
     // System.out.println("New DASProtocol");
 
-    // kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
+    kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
   }
 
   /**
@@ -91,14 +92,14 @@ public class DASProtocol implements Cloneable, EDProtocol {
   public void processEvent(Node myNode, int myPid, Object event) {
 
     // Parse message content Activate the correct event manager fot the particular event
-    this.protocolId = myPid;
+    // this.protocolId = myPid;
 
     Message m;
 
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
       m = (Message) event;
-      m.dst = this.getKademliaProtocol().getNode();
+      m.dst = this.getKademliaProtocol().getKademliaNode();
     }
 
     switch (((SimpleEvent) event).getType()) {
@@ -144,7 +145,8 @@ public class DASProtocol implements Cloneable, EDProtocol {
    * @param myPid the sender Pid
    */
   private void handleInitNewBlock(Message m, int myPid) {
-    // System.out.println(" handleInitNewBlock");
+    // logger.warning(" handleInitNewBlock");
+
   }
 
   // public void refreshBucket(TicketTable rou, BigInteger node, int distance) {
