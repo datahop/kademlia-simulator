@@ -64,6 +64,8 @@ public class Message extends SimpleEvent {
   /** Message Type: REGISTER (register the node under a topic) */
   public static final int MSG_INIT_NEW_BLOCK = 10;
 
+  public static final int MSG_INIT_GET_SAMPLE = 11;
+
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
   public Object body = null;
@@ -189,6 +191,16 @@ public class Message extends SimpleEvent {
     return new Message(MSG_INIT_NEW_BLOCK, body);
   }
 
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a PUT request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitGetSample(Object body) {
+    return new Message(MSG_INIT_GET_SAMPLE, body);
+  }
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request

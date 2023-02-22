@@ -108,4 +108,9 @@ public class KeyValueStore {
   public void erase() {
     mem = new HashMap<BigInteger, Object>();
   }
+
+  /** Get occupancy */
+  public int occupancy() {
+    return mem.size();
+  }
 }
