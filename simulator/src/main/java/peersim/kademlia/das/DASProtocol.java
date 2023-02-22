@@ -226,9 +226,9 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
     if (pendingSamples < 0) {
       System.err.println("There has been some error in the protocol");
-      System.exit(-1);
+      System.exit(1);
     } else if (pendingSamples == 0) {
-      logger.warning("Received samples " + kv.occupancy());
+      logger.info("Received samples " + kv.occupancy());
     }
   }
 

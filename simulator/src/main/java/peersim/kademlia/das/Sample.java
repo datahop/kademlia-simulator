@@ -58,7 +58,6 @@ public class Sample {
     } else if (KademliaCommonConfig.MAPPING_FN
         == KademliaCommonConfig.SAMPLE_MAPPING_REGION_BASED) {
       this.id = Block.INTER_SAMPLE_GAP.multiply(BigInteger.valueOf(this.sampleNumberByRow()));
-
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
       System.exit(1);

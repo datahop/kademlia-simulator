@@ -73,14 +73,17 @@ public class Block implements Iterator<Sample> {
   /** Compute the radius of the region containing the desired number of copies of each sample */
   public BigInteger computeRegionRadius(int numberOfCopiesPerSample) {
 
-    double totalSamples = ((1.0 * this.numSamples) / Network.size()) * numberOfCopiesPerSample;
-    if (totalSamples < 1.0) totalSamples = 1.0;
-    totalSamples = totalSamples / 2.0;
-
-    BigInteger region =
-        INTER_SAMPLE_GAP.multiply(BigInteger.valueOf((long) numberOfCopiesPerSample));
-    region = region.shiftRight(1);
-    return region;
+    /**
+     * Calculate the radius by dividing Id space by number of nodes in the network, and multiplying
+     * by number of copies per sample The result is divided by 2 to calculate the radius (instead of
+     * diameter)
+     */
+    BigInteger radius =
+        MAX_KEY
+            .divide(BigInteger.valueOf(Network.size()))
+            .multiply(BigInteger.valueOf(numberOfCopiesPerSample));
+    radius = radius.shiftRight(1);
+    return radius;
   }
 
   public long getBlockId() {
@@ -109,7 +112,6 @@ public class Block implements Iterator<Sample> {
   @Override
   public boolean hasNext() {
 
-    // System.out.println("Column " + column + " row " + row);
     if (row < SIZE) return true;
 
     return false;
