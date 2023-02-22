@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import peersim.core.CommonState;
 
 /**
  * Gives an implementation for the rounting table component of a kademlia node
@@ -20,7 +21,7 @@ public class RoutingTable implements Cloneable {
   protected TreeMap<Integer, KBucket> k_buckets = null;
 
   // number of k-buckets
-  protected int nBuckets;
+  protected int kBuckets;
 
   // bucket size
   protected int k;
@@ -34,20 +35,20 @@ public class RoutingTable implements Cloneable {
   // ______________________________________________________________________________________________
   /** instanciates a new empty routing table with the specified size */
   // public RoutingTable() {
-  public RoutingTable(int nBuckets, int k, int maxReplacements) {
+  public RoutingTable(int kBuckets, int k, int maxReplacements) {
 
     k_buckets = new TreeMap<Integer, KBucket>();
     // initialize k-buckets
 
-    this.nBuckets = nBuckets;
+    this.kBuckets = kBuckets;
 
     this.k = k;
 
     this.maxReplacements = maxReplacements;
 
-    bucketMinDistance = KademliaCommonConfig.BITS - nBuckets;
+    bucketMinDistance = KademliaCommonConfig.BITS - kBuckets;
 
-    for (int i = 0; i <= nBuckets; i++) {
+    for (int i = 0; i <= kBuckets; i++) {
       k_buckets.put(i, new KBucket(k, maxReplacements));
     }
   }
@@ -137,7 +138,7 @@ public class RoutingTable implements Cloneable {
 
   // ______________________________________________________________________________________________
   public Object clone() {
-    RoutingTable dolly = new RoutingTable(nBuckets, k, maxReplacements);
+    RoutingTable dolly = new RoutingTable(kBuckets, k, maxReplacements);
     for (int i = 0; i < k_buckets.size(); i++) {
       k_buckets.put(i, new KBucket(k, maxReplacements)); // (KBucket) k_buckets.get(i).clone());
     }
@@ -145,7 +146,13 @@ public class RoutingTable implements Cloneable {
   }
 
   public void refreshBuckets() {
-    // TODO
+    KBucket b = k_buckets.get(CommonState.r.nextInt(kBuckets));
+
+    // Replace the last item in kbucket if its full
+    if (b != null && b.neighbours.size() > 0) {
+      b.checkAndReplaceLast();
+      return;
+    }
   }
 
   // ______________________________________________________________________________________________
