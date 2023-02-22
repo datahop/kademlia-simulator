@@ -108,6 +108,7 @@ public class TrafficGeneratorSamplePut implements Control {
       System.out.println("Number of samples in the block: " + b.getNumSamples());
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
+      int totalSamples = 0;
       while (b.hasNext()) {
         Sample s = b.next();
         boolean inRegion = false;
@@ -118,6 +119,7 @@ public class TrafficGeneratorSamplePut implements Control {
           if (n.isUp() && s.isInRegion(kadNode.getId(), radius)) {
 
             EDSimulator.add(0, generatePutSampleMessage(s), n, pid);
+            totalSamples++;
             if (inRegion == false) {
               samplesWithinRegion++;
               inRegion = true;
@@ -129,6 +131,7 @@ public class TrafficGeneratorSamplePut implements Control {
           }
         }
       }
+      System.out.println("Total samples " + totalSamples);
       System.out.println(
           ""
               + samplesWithinRegion
