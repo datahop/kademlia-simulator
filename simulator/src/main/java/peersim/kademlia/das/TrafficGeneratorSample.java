@@ -70,7 +70,8 @@ public class TrafficGeneratorSample implements Control {
    */
   public boolean execute() {
 
-    Block b = new Block();
+    Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
+
     for (int i = 0; i < Network.size(); i++) {
       Node start = Network.get(i);
       if (start.isUp()) {

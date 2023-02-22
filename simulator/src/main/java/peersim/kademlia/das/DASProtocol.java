@@ -19,7 +19,6 @@ import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
-import peersim.kademlia.RoutingTable;
 import peersim.kademlia.SimpleEvent;
 import peersim.transport.UnreliableTransport;
 
@@ -103,7 +102,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
     // this.protocolId = myPid;
 
     Message m;
-    logger.warning("Message received");
+    // logger.warning("Message received");
 
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
@@ -118,7 +117,11 @@ public class DASProtocol implements Cloneable, EDProtocol {
         break;
       case Message.MSG_GET:
         m = (Message) event;
-        logger.warning("Get Sample " + m.body);
+        handleGetSample(m, myPid);
+        break;
+      case Message.MSG_RESPONSE:
+        m = (Message) event;
+        handleGetResponse(m, myPid);
         break;
     }
   }
@@ -162,20 +165,21 @@ public class DASProtocol implements Cloneable, EDProtocol {
     Block b = (Block) m.body;
 
     if (isBuilder()) {
-      logger.warning("Building block");
+      logger.warning("Building block " + b.getBlockId());
 
       while (b.hasNext()) {
         // create a put request
         Sample s = b.next();
-
-        // logger.warning("New sample:" + s.getId());
+        logger.warning("Builder new sample:" + s.getId());
         kv.add(s.getId(), s);
       }
     } else {
+      logger.warning("Non building block " + b.getBlockId());
+
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
       while (b.hasNext()) {
         Sample s = b.next();
-
+        // logger.warning("New sample:" + s.getId());
         if (s.isInRegion(getKademliaId(), radius)) {
           logger.warning("Sending get message");
           Message msg = generateGetMessage(s);
@@ -189,10 +193,34 @@ public class DASProtocol implements Cloneable, EDProtocol {
         }
       }
     }
+    b.initIterator();
   }
 
-  // public void refreshBucket(TicketTable rou, BigInteger node, int distance) {
-  public void refreshBucket(RoutingTable rou, int distance) {}
+  private void handleGetSample(Message m, int myPid) {
+    // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
+    // create a response message containing the neighbours (with the same id of the request)
+    logger.warning("Get sample " + m.body);
+    Sample s = (Sample) kv.get((BigInteger) m.body);
+
+    if (s == null) {
+      logger.warning("Sample not found");
+      return;
+    }
+
+    Message response = new Message(Message.MSG_RESPONSE, s);
+    response.operationId = m.operationId;
+    response.dst = m.dst;
+    response.src = this.kadProtocol.getKademliaNode();
+    response.ackId = m.id; // set ACK number
+    sendMessage(response, m.src.getId(), myPid);
+  }
+
+  private void handleGetResponse(Message m, int myPid) {
+
+    Sample s = (Sample) m.body;
+    logger.warning("Received sample:" + s.getId());
+    kv.add((BigInteger) s.getId(), s);
+  }
 
   /**
    * send a message with current transport layer and starting the timeout timer (wich is an event)
@@ -225,7 +253,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
    */
   private Message generateGetMessage(Sample s) {
 
-    Message m = new Message(Message.MSG_GET, s);
+    Message m = new Message(Message.MSG_GET, s.getId());
     m.timestamp = CommonState.getTime();
 
     return m;
