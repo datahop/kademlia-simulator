@@ -15,7 +15,6 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
@@ -48,6 +47,8 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
   private KeyValueStore kv;
 
+  private int pendingSamples;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -75,6 +76,7 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
     kv = new KeyValueStore();
+    pendingSamples = 0;
   }
 
   /**
@@ -114,6 +116,10 @@ public class DASProtocol implements Cloneable, EDProtocol {
       case Message.MSG_INIT_NEW_BLOCK:
         m = (Message) event;
         handleInitNewBlock(m, myPid);
+        break;
+      case Message.MSG_INIT_GET_SAMPLE:
+        m = (Message) event;
+        handleInitGetSample(m, myPid);
         break;
       case Message.MSG_GET:
         m = (Message) event;
@@ -161,45 +167,41 @@ public class DASProtocol implements Cloneable, EDProtocol {
    * @param myPid the sender Pid
    */
   private void handleInitNewBlock(Message m, int myPid) {
-    // logger.warning(" handleInitNewBlock");
-    Block b = (Block) m.body;
+    Sample s = (Sample) m.body;
 
     if (isBuilder()) {
-      logger.warning("Building block " + b.getBlockId());
-
-      while (b.hasNext()) {
-        // create a put request
-        Sample s = b.next();
-        logger.warning("Builder new sample:" + s.getId());
-        kv.add(s.getId(), s);
-      }
-    } else {
-      logger.warning("Non building block " + b.getBlockId());
-
-      BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
-      while (b.hasNext()) {
-        Sample s = b.next();
-        // logger.warning("New sample:" + s.getId());
-        if (s.isInRegion(getKademliaId(), radius)) {
-          logger.warning("Sending get message");
-          Message msg = generateGetMessage(s);
-          msg.src = this.getKademliaProtocol().getKademliaNode();
-          msg.dst =
-              this.getKademliaProtocol()
-                  .nodeIdtoNode(builderAddress)
-                  .getKademliaProtocol()
-                  .getKademliaNode();
-          sendMessage(msg, builderAddress, myPid);
-        }
-      }
+      logger.info("Builder new sample:" + s.getId());
+      kv.add(s.getId(), s);
     }
-    b.initIterator();
+  }
+
+  /**
+   * Start a topic query opearation.<br>
+   *
+   * @param m Message received (contains the node to find)
+   * @param myPid the sender Pid
+   */
+  private void handleInitGetSample(Message m, int myPid) {
+    BigInteger sampleId = (BigInteger) m.body;
+
+    if (isBuilder()) return;
+
+    logger.info("Getting sample from builder " + sampleId);
+    Message msg = generateGetMessage(sampleId);
+    msg.src = this.getKademliaProtocol().getKademliaNode();
+    msg.dst =
+        this.getKademliaProtocol()
+            .nodeIdtoNode(builderAddress)
+            .getKademliaProtocol()
+            .getKademliaNode();
+    sendMessage(msg, builderAddress, myPid);
+    pendingSamples++;
   }
 
   private void handleGetSample(Message m, int myPid) {
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
-    logger.warning("Get sample " + m.body);
+    logger.info("Get sample " + m.body);
     Sample s = (Sample) kv.get((BigInteger) m.body);
 
     if (s == null) {
@@ -218,8 +220,16 @@ public class DASProtocol implements Cloneable, EDProtocol {
   private void handleGetResponse(Message m, int myPid) {
 
     Sample s = (Sample) m.body;
-    logger.warning("Received sample:" + s.getId());
+    logger.info("Received sample:" + s.getId());
     kv.add((BigInteger) s.getId(), s);
+    pendingSamples--;
+
+    if (pendingSamples < 0) {
+      System.err.println("There has been some error in the protocol");
+      System.exit(-1);
+    } else if (pendingSamples == 0) {
+      logger.warning("Received samples " + kv.occupancy());
+    }
   }
 
   /**
@@ -251,9 +261,9 @@ public class DASProtocol implements Cloneable, EDProtocol {
    *
    * @return Message
    */
-  private Message generateGetMessage(Sample s) {
+  private Message generateGetMessage(BigInteger sampleId) {
 
-    Message m = new Message(Message.MSG_GET, s.getId());
+    Message m = new Message(Message.MSG_GET, sampleId);
     m.timestamp = CommonState.getTime();
 
     return m;

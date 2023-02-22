@@ -1,5 +1,6 @@
 package peersim.kademlia.das;
 
+import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -54,14 +55,27 @@ public class TrafficGeneratorSample implements Control {
    *
    * @return Message
    */
-  private Message generateNewBlockMessage(Block b) {
+  private Message generateNewBlockMessage(Sample s) {
 
-    Message m = Message.makeInitNewBlock(b);
+    Message m = Message.makeInitNewBlock(s);
     m.timestamp = CommonState.getTime();
 
     return m;
   }
 
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  private Message generateNewSampleMessage(Sample s) {
+
+    Message m = Message.makeInitGetSample(s.getId());
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
   // ______________________________________________________________________________________________
   /**
    * every call of this control generates and send a random find node message
@@ -71,14 +85,50 @@ public class TrafficGeneratorSample implements Control {
   public boolean execute() {
 
     Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
+    BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
+    int samplesWithinRegion = 0; // samples that are within at least one node's region
+    int totalSamples = 0;
 
-    for (int i = 0; i < Network.size(); i++) {
-      Node start = Network.get(i);
-      if (start.isUp()) {
-        EDSimulator.add(0, generateNewBlockMessage(b), start, pid);
+    while (b.hasNext()) {
+      Sample s = b.next();
+      boolean inRegion = false;
+
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        DASProtocol dasProt = ((DASProtocol) (n.getProtocol(pid)));
+        // System.out.println("New sample " + s.getId() + " node:" + dasProt.getKademliaId());
+        if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, pid);
+        else if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
+          // System.out.println("New sample assigned");
+          totalSamples++;
+          EDSimulator.add(0, generateNewSampleMessage(s), n, pid);
+          if (inRegion == false) {
+            samplesWithinRegion++;
+            inRegion = true;
+            /*System.out.println(
+            s.getId()//.toString(2)
+                + " is within the radius of "
+                + dasProt.getKademliaId().toString(2));*/
+          }
+        }
       }
     }
 
+    System.out.println(
+        ""
+            + samplesWithinRegion
+            + " samples out of "
+            + b.getNumSamples()
+            + " samples are within a node's region");
+
+    System.out.println("" + totalSamples + " total samples distributed");
+    if (samplesWithinRegion != b.getNumSamples()) {
+      System.out.println(
+          "Error: there are "
+              + (b.getNumSamples() - samplesWithinRegion)
+              + " samples that are not within a region of a peer ");
+      System.exit(1);
+    }
     return false;
   }
 
