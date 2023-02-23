@@ -62,6 +62,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   private KeyValueStore kv;
 
+  private KademliaEvents callback;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -188,6 +189,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       // save received neighbour in the closest Set of fin operation
 
       BigInteger[] neighbours = (BigInteger[]) m.body;
+      if (callback != null) callback.nodesFound(neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
       if (!fop.isFinished() && Arrays.asList(neighbours).contains(fop.getDestNode())) {
@@ -540,5 +542,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   public Logger getLogger() {
     return this.logger;
+  }
+
+  public void setEventsCallback(KademliaEvents callback) {
+    this.callback = callback;
   }
 }
