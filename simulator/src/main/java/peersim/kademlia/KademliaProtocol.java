@@ -63,7 +63,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   private KeyValueStore kv;
 
-  public LinkedHashMap<Long, FindLogging> findLog;
+  public LinkedHashMap<Long, OpLogging> findLog;
 
   /**
    * Replicate this object by returning an identical copy.<br>
@@ -98,7 +98,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     findOp = new LinkedHashMap<Long, FindOperation>();
 
-    findLog = new LinkedHashMap<Long, FindLogging>();
+    findLog = new LinkedHashMap<Long, OpLogging>();
 
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
@@ -177,16 +177,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     if (m.src != null) {
       routingTable.addNeighbour(m.src.getId());
     }
-
-    // get corresponding find operation (using the message field operationId)
     FindOperation fop = this.findOp.get(m.operationId);
-    FindLogging fLog = this.findLog.get(fop.getId());
-    if (fop.isFinished() && !fLog.isFinished()) {
-      fLog.SetStop((CommonState.getTime()));
-      fLog.setFinished();
-      KademliaObserver.reportFindOp(fLog);
-    }
-
     if (fop != null) {
       fop.elaborateResponse((BigInteger[]) m.body);
 
@@ -235,10 +226,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             // send find request
             sendMessage(request, neighbour, myPid);
             if (request.getType() == Message.MSG_FIND
-                || request.getType() == Message.MSG_FIND_DIST) {
-              fLog.AddMessage(request.id);
-              findLog.put(fLog.getId(), fLog);
-            }
+                || request.getType() == Message.MSG_FIND_DIST) {}
           }
         } else if (fop.getAvailableRequests()
             == KademliaCommonConfig.ALPHA) { // no new neighbour and no outstanding requests
@@ -260,12 +248,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             logger.warning("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
           } else if (fop instanceof GetOperation) {
             findOp.remove(fop.getId());
-            findLog.remove(fLog.getId());
             logger.warning("Getprocess finished not found ");
 
           } else {
             findOp.remove(fop.getId());
-            findLog.remove(fLog.getId());
           }
 
           if (fop.getBody().equals("Automatically Generated Traffic")
@@ -350,7 +336,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // FindOperation fop = new FindOperation(m.dest, m.timestamp);
 
     FindOperation fop;
-    FindLogging fLog;
 
     switch (m.type) {
       case Message.MSG_INIT_FIND:
@@ -378,12 +363,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     fop.setAvailableRequests(KademliaCommonConfig.ALPHA);
     // set message operation id
     m.operationId = fop.getId();
-    fLog = new FindLogging(fop.getId(), this.node.getId(), CommonState.getTime());
-
-    if (m.getType() == Message.MSG_INIT_FIND) {
-      fLog.AddMessage(m.id);
-      findLog.put(fLog.getId(), fLog);
-    }
     m.src = this.getNode();
 
     // send ALPHA messages
@@ -454,7 +433,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // Parse message content Activate the correct event manager fot the particular event
     this.kademliaid = myPid;
-
     Message m;
     if (event instanceof Message) {
       m = (Message) event;
@@ -473,6 +451,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         handleInit(m, myPid);
         break;
       case Message.MSG_INIT_GET:
+        m = (Message) event;
+        break;
+
       case Message.MSG_INIT_PUT:
         m = (Message) event;
         handleInit(m, myPid);
@@ -521,6 +502,26 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           this.handleResponse(m1, myPid);
         }
         break;*/
+    }
+    if (event instanceof Message) {
+      OpLogging fLog;
+
+      m = (Message) event;
+      if (this.findLog.get(m.operationId) == null) {
+        fLog = new OpLogging(m.operationId, this.node.getId(), CommonState.getTime());
+        findLog.put(m.operationId, fLog);
+      } else {
+        fLog = this.findLog.get(m.operationId);
+      }
+      /*Operation Logging */
+      fLog.AddMessage(m.id);
+      findLog.put(m.operationId, fLog);
+      if (this.findOp.get(m.operationId) != null) {
+        if (this.findOp.get(m.operationId).isFinished() && !fLog.isFinished()) {
+          fLog.SetStop((CommonState.getTime()));
+          KademliaObserver.reportFindOp(fLog);
+        }
+      }
     }
   }
 

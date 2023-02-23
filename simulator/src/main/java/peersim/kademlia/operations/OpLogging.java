@@ -9,9 +9,11 @@ import java.util.Map;
  * Observer
  */
 // ______________________________________________________________________________________
-public class FindLogging extends SimpleEvent {
+public class OpLogging extends SimpleEvent {
 
   public static final int OP_FIND = 0;
+  public static final int OP_GET = 1;
+  public static final int OP_PUT = 2;
 
   /** ID of the actual find operation. */
   public long id;
@@ -30,11 +32,11 @@ public class FindLogging extends SimpleEvent {
 
   public Boolean finish;
 
-  public FindLogging() {
+  public OpLogging() {
     this.messages = "";
   }
 
-  public FindLogging(long id, BigInteger src, long time) {
+  public OpLogging(long id, BigInteger src, long time) {
     this.id = id;
     this.messages = "";
     this.start = time;
@@ -50,6 +52,7 @@ public class FindLogging extends SimpleEvent {
 
   public void SetStop(long time) {
     this.stop = time;
+    this.finish = true;
   }
 
   public long getId() {
@@ -60,14 +63,14 @@ public class FindLogging extends SimpleEvent {
     return this.finish;
   }
 
-  public void setFinished() {
-    this.finish = true;
-  }
-
   public String typeToString() {
     switch (type) {
       case OP_FIND:
         return "OP_FIND";
+      case OP_GET:
+        return "OP_GET";
+      case OP_PUT:
+        return "OP_PUT";
       default:
         return "UNKNOW:" + type;
     }
