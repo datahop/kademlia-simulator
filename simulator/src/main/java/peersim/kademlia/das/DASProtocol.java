@@ -15,13 +15,14 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import peersim.kademlia.KademliaEvents;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.transport.UnreliableTransport;
 
-public class DASProtocol implements Cloneable, EDProtocol {
+public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private static final String PAR_TRANSPORT = "transport";
   private static final String PAR_DASPROTOCOL = "dasprotocol";
@@ -271,5 +272,10 @@ public class DASProtocol implements Cloneable, EDProtocol {
 
   public BigInteger getKademliaId() {
     return this.getKademliaProtocol().getKademliaNode().getId();
+  }
+
+  @Override
+  public void nodesFound(BigInteger[] neighbours) {
+    logger.warning("DASProtocol Nodes found " + neighbours.length);
   }
 }

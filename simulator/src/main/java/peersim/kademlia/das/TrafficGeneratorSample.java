@@ -9,6 +9,7 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
+import peersim.kademlia.UniformRandomGenerator;
 
 /**
  * This control generates random search traffic from nodes to random destination node.
@@ -22,10 +23,12 @@ public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   /** MSPastry Protocol to act */
-  private static final String PAR_PROT = "protocol";
+  private static final String PAR_KADPROT = "kadprotocol";
+
+  private static final String PAR_DASPROT = "dasprotocol";
 
   /** MSPastry Protocol ID to act */
-  private final int pid;
+  private final int kadpid, daspid;
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -41,7 +44,9 @@ public class TrafficGeneratorSample implements Control {
   private boolean first = true, second = true;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
-    pid = Configuration.getPid(prefix + "." + PAR_PROT);
+    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
+    daspid = Configuration.getPid(prefix + "." + PAR_DASPROT);
+
     KademliaCommonConfig.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER =
         Configuration.getInt(prefix + "." + PAR_NUM_COPIES);
@@ -76,6 +81,25 @@ public class TrafficGeneratorSample implements Control {
 
     return m;
   }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateFindNodeMessage() {
+
+    UniformRandomGenerator urg =
+        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    BigInteger id = urg.generate();
+
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
   // ______________________________________________________________________________________________
   /**
    * every call of this control generates and send a random find node message
@@ -94,12 +118,12 @@ public class TrafficGeneratorSample implements Control {
 
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
-        DASProtocol dasProt = ((DASProtocol) (n.getProtocol(pid)));
+        DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
 
-        if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, pid);
+        if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
         else if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
           totalSamples++;
-          EDSimulator.add(0, generateNewSampleMessage(s), n, pid);
+          EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
           if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;
@@ -123,6 +147,31 @@ public class TrafficGeneratorSample implements Control {
               + " samples that are not within a region of a peer ");
       // System.exit(1);
     }
+
+    if (first) {
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        if (n.isUp()) {
+          for (int j = 0; j < 3; j++) {
+            int time = CommonState.r.nextInt(300000);
+            Node start = Network.get(i);
+            Message lookup = generateFindNodeMessage();
+            EDSimulator.add(time, lookup, start, kadpid);
+          }
+        }
+      }
+    } else {
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        if (n.isUp()) {
+          int time = CommonState.r.nextInt(300000);
+          Node start = Network.get(i);
+          Message lookup = generateFindNodeMessage();
+          EDSimulator.add(time, lookup, start, kadpid);
+        }
+      }
+    }
+    first = false;
     return false;
   }
 
