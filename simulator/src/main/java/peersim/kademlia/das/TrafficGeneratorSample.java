@@ -60,9 +60,9 @@ public class TrafficGeneratorSample implements Control {
    *
    * @return Message
    */
-  private Message generateNewBlockMessage(Sample s) {
+  private Message generateNewBlockMessage(Block b) {
 
-    Message m = Message.makeInitNewBlock(s);
+    Message m = Message.makeInitNewBlock(b);
     m.timestamp = CommonState.getTime();
 
     return m;
@@ -120,8 +120,9 @@ public class TrafficGeneratorSample implements Control {
         Node n = Network.get(i);
         DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
 
-        if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
-        else if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
+        // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
+        // else
+        if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
           totalSamples++;
           EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
           if (inRegion == false) {
@@ -130,6 +131,13 @@ public class TrafficGeneratorSample implements Control {
           }
         }
       }
+    }
+
+    for (int i = 0; i < Network.size(); i++) {
+      Node n = Network.get(i);
+      DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+      Block bis = (Block) b.clone();
+      if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
     }
 
     System.out.println(
