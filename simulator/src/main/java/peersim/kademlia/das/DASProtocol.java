@@ -50,6 +50,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private int pendingSamples;
 
+  private SearchTable searchTable;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -78,6 +80,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
     kv = new KeyValueStore();
     pendingSamples = 0;
+    searchTable = new SearchTable();
   }
 
   /**
@@ -139,9 +142,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   public KademliaProtocol getKademliaProtocol() {
-    // System.out.println(
-    //    "getKademliaProtocol " + kademliaId + " " + (Network.prototype).getProtocol(kademliaId));
-    // return (KademliaProtocol) (Network.prototype).getProtocol(kademliaId);
     return kadProtocol;
   }
 
@@ -168,11 +168,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param myPid the sender Pid
    */
   private void handleInitNewBlock(Message m, int myPid) {
-    Sample s = (Sample) m.body;
+    Block b = (Block) m.body;
 
     if (isBuilder()) {
-      logger.info("Builder new sample:" + s.getId());
-      kv.add(s.getId(), s);
+
+      logger.info("Builder new block:" + b.getBlockId());
+      while (b.hasNext()) {
+        Sample s = b.next();
+        kv.add(s.getId(), s);
+      }
     }
   }
 
@@ -276,6 +280,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   @Override
   public void nodesFound(BigInteger[] neighbours) {
-    logger.warning("DASProtocol Nodes found " + neighbours.length);
+    searchTable.addNode(neighbours);
   }
 }

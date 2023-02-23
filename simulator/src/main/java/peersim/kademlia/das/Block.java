@@ -6,7 +6,7 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.kademlia.KademliaCommonConfig;
 
-public class Block implements Iterator<Sample> {
+public class Block implements Iterator<Sample>, Cloneable {
 
   /** The square matrix of samples */
   private Sample[][] blockSamples;
@@ -68,6 +68,18 @@ public class Block implements Iterator<Sample> {
         blockSamples[i][j] = new Sample(blockId, i, j, this);
       }
     }
+  }
+
+  /**
+   * Replicate this object by returning an identical copy.<br>
+   * It is called by the initializer and do not fill any particular field.
+   *
+   * @return Object
+   */
+  public Object clone() {
+    initIterator();
+    Block dolly = new Block(this.SIZE);
+    return dolly;
   }
 
   /** Compute the radius of the region containing the desired number of copies of each sample */
