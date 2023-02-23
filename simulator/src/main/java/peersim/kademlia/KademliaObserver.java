@@ -130,7 +130,7 @@ public class KademliaObserver implements Control {
       writeMap(messages, logFolderName + "/" + "messages.csv");
     }
     if (!find_log.isEmpty()) {
-      writeMapFind(find_log, logFolderName + "/" + "find_op.csv");
+      writeMapFind(find_log, logFolderName + "/" + "operation.csv");
     }
   }
 
@@ -178,7 +178,7 @@ public class KademliaObserver implements Control {
     messages.put(String.valueOf(m.id), m.toMap(sent));
   }
 
-  public static void reportFindOp(FindLogging fLog) {
+  public static void reportFindOp(OpLogging fLog) {
     // messages without source are control messages sent by the traffic control
     // we don't want to log them
     if (fLog.src == null) {
