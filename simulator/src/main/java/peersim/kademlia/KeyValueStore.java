@@ -100,7 +100,6 @@ public class KeyValueStore {
     return mem.values();
   }
 
-
   /**
    * Delete an entry from the memory store
    *

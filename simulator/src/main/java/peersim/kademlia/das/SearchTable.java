@@ -22,7 +22,7 @@ public class SearchTable {
   }
 
   public BigInteger getNode() {
-
+    if (nodes.isEmpty()) return null;
     BigInteger node = nodes.get(CommonState.r.nextInt(nodes.size()));
     nodes.remove(node);
     return node;
