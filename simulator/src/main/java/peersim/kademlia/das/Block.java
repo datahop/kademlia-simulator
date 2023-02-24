@@ -45,6 +45,7 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     this.blockId = (ID_GENERATOR++);
     blockSamples = new Sample[SIZE][SIZE];
+    samples = new HashMap<>();
     row = column = 0;
     for (int i = 0; i < blockSamples.length; i++) {
 
