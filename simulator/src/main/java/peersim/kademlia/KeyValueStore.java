@@ -1,6 +1,7 @@
 package peersim.kademlia;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -89,6 +90,16 @@ public class KeyValueStore {
       return null;
     }
   }
+
+  /**
+   * Get all objectrs
+   *
+   * @return All objects in the store
+   */
+  public Collection<Object> getAll() {
+    return mem.values();
+  }
+
 
   /**
    * Delete an entry from the memory store
