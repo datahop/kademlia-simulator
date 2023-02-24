@@ -108,54 +108,6 @@ public class TrafficGeneratorSample implements Control {
    */
   public boolean execute() {
 
-    Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
-    BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
-    int samplesWithinRegion = 0; // samples that are within at least one node's region
-    int totalSamples = 0;
-    while (b.hasNext()) {
-      Sample s = b.next();
-      boolean inRegion = false;
-
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
-
-        // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
-        // else
-        if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
-          totalSamples++;
-          EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
-          }
-        }
-      }
-    }
-
-    for (int i = 0; i < Network.size(); i++) {
-      Node n = Network.get(i);
-      DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
-      Block bis = (Block) b.clone();
-      if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
-    }
-
-    System.out.println(
-        ""
-            + samplesWithinRegion
-            + " samples out of "
-            + b.getNumSamples()
-            + " samples are within a node's region");
-
-    System.out.println("" + totalSamples + " total samples distributed");
-    if (samplesWithinRegion != b.getNumSamples()) {
-      System.out.println(
-          "Error: there are "
-              + (b.getNumSamples() - samplesWithinRegion)
-              + " samples that are not within a region of a peer ");
-      // System.exit(1);
-    }
-
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
@@ -177,6 +129,53 @@ public class TrafficGeneratorSample implements Control {
           Message lookup = generateFindNodeMessage();
           EDSimulator.add(time, lookup, start, kadpid);
         }
+      }
+
+      Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
+      BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
+      int samplesWithinRegion = 0; // samples that are within at least one node's region
+      int totalSamples = 0;
+      while (b.hasNext()) {
+        Sample s = b.next();
+        boolean inRegion = false;
+
+        for (int i = 0; i < Network.size(); i++) {
+          Node n = Network.get(i);
+          DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+
+          // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
+          // else
+          if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
+            totalSamples++;
+            EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
+            }
+          }
+        }
+      }
+
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        Block bis = (Block) b.clone();
+        EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
+      }
+
+      System.out.println(
+          ""
+              + samplesWithinRegion
+              + " samples out of "
+              + b.getNumSamples()
+              + " samples are within a node's region");
+
+      System.out.println("" + totalSamples + " total samples distributed");
+      if (samplesWithinRegion != b.getNumSamples()) {
+        System.out.println(
+            "Error: there are "
+                + (b.getNumSamples() - samplesWithinRegion)
+                + " samples that are not within a region of a peer ");
+        // System.exit(1);
       }
     }
     first = false;
