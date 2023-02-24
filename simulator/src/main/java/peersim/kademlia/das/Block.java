@@ -14,8 +14,6 @@ public class Block implements Iterator<Sample>, Cloneable {
   /** Block identifier */
   private long blockId;
 
-  private static long ID_GENERATOR = 0;
-
   /** Row and column numbers used by the iterator */
   private int row, column;
 
@@ -34,13 +32,13 @@ public class Block implements Iterator<Sample>, Cloneable {
   /** number of samples in a block */
   private int numSamples;
 
-  public Block() {
+  public Block(long id) {
 
     SIZE = 512;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
 
-    this.blockId = (ID_GENERATOR++);
+    this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
     for (int i = 0; i < blockSamples.length; i++) {
@@ -52,13 +50,13 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
   }
 
-  public Block(int size) {
+  public Block(int size, long id) {
 
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
 
-    this.blockId = (ID_GENERATOR++);
+    this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
     for (int i = 0; i < blockSamples.length; i++) {
@@ -78,7 +76,7 @@ public class Block implements Iterator<Sample>, Cloneable {
    */
   public Object clone() {
     initIterator();
-    Block dolly = new Block(this.SIZE);
+    Block dolly = new Block(this.SIZE, this.blockId);
     return dolly;
   }
 
