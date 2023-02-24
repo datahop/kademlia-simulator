@@ -1,7 +1,6 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Iterator;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -35,8 +34,6 @@ public class Block implements Iterator<Sample>, Cloneable {
   /** number of samples in a block */
   private int numSamples;
 
-  private HashMap<BigInteger, Sample> samples;
-
   public Block() {
 
     SIZE = 512;
@@ -45,7 +42,6 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     this.blockId = (ID_GENERATOR++);
     blockSamples = new Sample[SIZE][SIZE];
-    samples = new HashMap<>();
     row = column = 0;
     for (int i = 0; i < blockSamples.length; i++) {
 
@@ -61,7 +57,6 @@ public class Block implements Iterator<Sample>, Cloneable {
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
-    samples = new HashMap<>();
 
     this.blockId = (ID_GENERATOR++);
     blockSamples = new Sample[SIZE][SIZE];
@@ -71,7 +66,6 @@ public class Block implements Iterator<Sample>, Cloneable {
       for (int j = 0; j < blockSamples[0].length; j++) {
 
         blockSamples[i][j] = new Sample(blockId, i, j, this);
-        samples.put(blockSamples[i][j].getId(), blockSamples[i][j]);
       }
     }
   }
@@ -160,10 +154,6 @@ public class Block implements Iterator<Sample>, Cloneable {
 
   public int getNumSamples() {
     return this.numSamples;
-  }
-
-  public boolean isBlockSample(BigInteger sampleId) {
-    return samples.keySet().contains(sampleId);
   }
 
   private void _init() {
