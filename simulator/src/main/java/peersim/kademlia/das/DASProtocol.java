@@ -52,6 +52,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private SearchTable searchTable;
 
+  private Block currentBlock;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -168,15 +169,30 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param myPid the sender Pid
    */
   private void handleInitNewBlock(Message m, int myPid) {
-    Block b = (Block) m.body;
+    currentBlock = (Block) m.body;
 
     if (isBuilder()) {
 
-      logger.info("Builder new block:" + b.getBlockId());
-      while (b.hasNext()) {
-        Sample s = b.next();
+      logger.info("Builder new block:" + currentBlock.getBlockId());
+      while (currentBlock.hasNext()) {
+        Sample s = currentBlock.next();
         kv.add(s.getId(), s);
       }
+    } else {
+
+      for(int i=0;i<75;i++){
+        currentBlock.computeRegionRadius(i)
+        Message msg = generateGetMessage(sampleId);
+        msg.src = this.getKademliaProtocol().getKademliaNode();
+        msg.dst =
+            this.getKademliaProtocol()
+                .nodeIdtoNode(builderAddress)
+                .getKademliaProtocol()
+                .getKademliaNode();
+        sendMessage(msg, builderAddress, myPid);
+
+      }
+
     }
   }
 
