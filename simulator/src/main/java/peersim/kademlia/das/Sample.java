@@ -24,6 +24,7 @@ public class Sample {
     this.block = b;
     this.row = row;
     this.column = column;
+    this.blockId = blockId;
     computeID();
   }
 
