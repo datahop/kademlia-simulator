@@ -41,6 +41,8 @@ public class TrafficGeneratorSample implements Control {
   int mapfn;
 
   Block b;
+  private long ID_GENERATOR = 0;
+
   private boolean first = true, second = true;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
@@ -107,7 +109,6 @@ public class TrafficGeneratorSample implements Control {
    * @return boolean
    */
   public boolean execute() {
-
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
@@ -131,7 +132,7 @@ public class TrafficGeneratorSample implements Control {
         }
       }
 
-      Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
+      Block b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE, ID_GENERATOR);
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
@@ -178,6 +179,7 @@ public class TrafficGeneratorSample implements Control {
         // System.exit(1);
       }
     }
+    ID_GENERATOR++;
     first = false;
     return false;
   }

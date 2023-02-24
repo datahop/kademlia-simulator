@@ -40,6 +40,8 @@ public class TrafficGeneratorSamplePut implements Control {
   int mapfn;
 
   Block b;
+  private long ID_GENERATOR = 0;
+
   private boolean first = true, second = true;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSamplePut(String prefix) {
@@ -104,7 +106,7 @@ public class TrafficGeneratorSamplePut implements Control {
       first = false;
     }*/
     if (first) {
-      b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE);
+      b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE, ID_GENERATOR);
       System.out.println("Number of samples in the block: " + b.getNumSamples());
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
@@ -160,6 +162,7 @@ public class TrafficGeneratorSamplePut implements Control {
 
       second = false;
     }
+    ID_GENERATOR++;
     return false;
   }
 
