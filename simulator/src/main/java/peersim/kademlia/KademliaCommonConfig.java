@@ -32,6 +32,9 @@ public class KademliaCommonConfig {
   /** Block matrix dimension */
   public static int BLOCK_DIM_SIZE = 10;
 
+  /** Number of samples retrieved for the random sampling */
+  public static int N_SAMPLES = 75;
+
   /**
    * short information about current mspastry configuration
    *
