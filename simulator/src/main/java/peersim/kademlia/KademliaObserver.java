@@ -184,8 +184,6 @@ public class KademliaObserver implements Control {
     if (fLog.src == null) {
       return;
     }
-
-    assert (!find_log.keySet().contains(String.valueOf(fLog.id)));
     find_log.put(String.valueOf(fLog.id), fLog.toMap());
   }
 }
