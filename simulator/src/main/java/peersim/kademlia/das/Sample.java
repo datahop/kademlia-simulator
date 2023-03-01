@@ -4,7 +4,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import peersim.kademlia.KademliaCommonConfig;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Sample {
 
@@ -46,7 +47,7 @@ public class Sample {
 
   /** Map this sample to the DHT keyspace */
   public void computeID() {
-    if (KademliaCommonConfig.MAPPING_FN == KademliaCommonConfig.SAMPLE_MAPPING_RANDOM) {
+    if (KademliaCommonConfigDas.MAPPING_FN == KademliaCommonConfigDas.SAMPLE_MAPPING_RANDOM) {
       try {
         String idName =
             String.valueOf(blockId) + "_" + String.valueOf(row) + "x" + String.valueOf(column);
@@ -56,8 +57,8 @@ public class Sample {
       } catch (NoSuchAlgorithmException e) {
         e.printStackTrace();
       }
-    } else if (KademliaCommonConfig.MAPPING_FN
-        == KademliaCommonConfig.SAMPLE_MAPPING_REGION_BASED) {
+    } else if (KademliaCommonConfigDas.MAPPING_FN
+        == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
       this.id = Block.INTER_SAMPLE_GAP.multiply(BigInteger.valueOf(this.sampleNumberByRow()));
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
@@ -74,6 +75,16 @@ public class Sample {
     } else {
       return false;
     }
+  }
+
+  public BigInteger[] getNodesInRegion(BigInteger[] nodes, BigInteger radius) {
+
+    List<BigInteger> result = new ArrayList<>();
+    for (BigInteger peerID : nodes)
+      if ((this.id.compareTo(peerID.subtract(radius)) == 1)
+          && (this.id.compareTo(peerID.add(radius)) == -1)) result.add(peerID);
+
+    return (BigInteger[]) result.toArray();
   }
 
   public int getRow() {

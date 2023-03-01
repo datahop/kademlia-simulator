@@ -7,7 +7,6 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaNode;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.Message;
@@ -46,11 +45,12 @@ public class TrafficGeneratorSamplePut implements Control {
   // ______________________________________________________________________________________________
   public TrafficGeneratorSamplePut(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
-    KademliaCommonConfig.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
-    KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER =
+    KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
+    KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
         Configuration.getInt(prefix + "." + PAR_NUM_COPIES);
-    KademliaCommonConfig.BLOCK_DIM_SIZE =
-        Configuration.getInt(prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfig.BLOCK_DIM_SIZE);
+    KademliaCommonConfigDas.BLOCK_DIM_SIZE =
+        Configuration.getInt(
+            prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfigDas.BLOCK_DIM_SIZE);
   }
 
   // ______________________________________________________________________________________________
@@ -106,9 +106,9 @@ public class TrafficGeneratorSamplePut implements Control {
       first = false;
     }*/
     if (first) {
-      b = new Block(KademliaCommonConfig.BLOCK_DIM_SIZE, ID_GENERATOR);
+      b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
       System.out.println("Number of samples in the block: " + b.getNumSamples());
-      BigInteger radius = b.computeRegionRadius(KademliaCommonConfig.NUM_SAMPLE_COPIES_PER_PEER);
+      BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
       while (b.hasNext()) {

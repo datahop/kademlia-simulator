@@ -115,6 +115,17 @@ public class Block implements Iterator<Sample>, Cloneable {
     return samples;
   }
 
+  public Sample[] getNRandomSamples(int n) {
+
+    Sample[] samples = new Sample[n];
+    for (int i = 0; i < samples.length; i++) {
+      int r = CommonState.r.nextInt(SIZE);
+      int c = CommonState.r.nextInt(SIZE);
+      samples[i] = this.blockSamples[r][c];
+    }
+    return samples;
+  }
+
   public Sample getSample(int row, int column) {
     return this.blockSamples[row][column];
   }

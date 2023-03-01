@@ -10,6 +10,7 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -22,6 +23,7 @@ import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
+import peersim.kademlia.das.operations.RandomSamplingOperation;
 import peersim.transport.UnreliableTransport;
 
 public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
@@ -53,6 +55,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   private SearchTable searchTable;
 
   private Block currentBlock;
+
+  private LinkedHashMap<Long, RandomSamplingOperation> samplingOp;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -81,6 +86,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     kv = new KeyValueStore();
     pendingSamples = 0;
     searchTable = new SearchTable();
+    samplingOp = new LinkedHashMap<Long, RandomSamplingOperation>();
   }
 
   /**
@@ -263,18 +269,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       System.exit(1);
     } else if (pendingSamples == 0) {
       logger.info("Received samples " + kv.occupancy());
-
-      for (int i = 0; i < KademliaCommonConfig.N_SAMPLES; i++) {
-        // logger.warning("Builder new block getting random sample");
-        BigInteger dest = searchTable.getNode();
-        if (dest == null) break;
-        if (dest.compareTo(builderAddress) == 0) continue;
-        Message msg = generateGetAnySampleMessage();
-        msg.src = this.getKademliaProtocol().getKademliaNode();
-        msg.dst =
-            this.getKademliaProtocol().nodeIdtoNode(dest).getKademliaProtocol().getKademliaNode();
-        sendMessage(msg, dest, myPid);
-      }
+      startRandomSampling(m, myPid);
     }
   }
 
@@ -344,5 +339,40 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   @Override
   public void nodesFound(BigInteger[] neighbours) {
     searchTable.addNode(neighbours);
+  }
+
+  private void startRandomSampling(Message m, int myPid) {
+
+    RandomSamplingOperation lop =
+        new RandomSamplingOperation(this.getKademliaId(), null, searchTable, m.timestamp);
+    samplingOp.put(lop.getId(), lop);
+
+    Message msg = new Message(Message.MSG_GET_SAMPLE);
+    msg.operationId = lop.getId();
+    msg.src = this.kadProtocol.getKademliaNode();
+
+    // send ALPHA messages
+    for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
+      BigInteger nextNode = lop.getNeighbour();
+      if (nextNode != null) {
+        msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
+        sendMessage(m.copy(), nextNode, myPid);
+        // System.out.println("Send topic lookup to: " + nextNode +" at
+        // distance:"+Util.logDistance(lop.topic.topicID, nextNode));
+        lop.nrHops++;
+      }
+    }
+
+    /*for (int i = 0; i < KademliaCommonConfigDas.N_SAMPLES; i++) {
+      // logger.warning("Builder new block getting random sample");
+      BigInteger dest = searchTable.getNode();
+      if (dest == null) break;
+      if (dest.compareTo(builderAddress) == 0) continue;
+      Message msg = generateGetAnySampleMessage();
+      msg.src = this.getKademliaProtocol().getKademliaNode();
+      msg.dst =
+          this.getKademliaProtocol().nodeIdtoNode(dest).getKademliaProtocol().getKademliaNode();
+      sendMessage(msg, dest, myPid);
+    }*/
   }
 }
