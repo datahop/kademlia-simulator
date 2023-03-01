@@ -78,7 +78,7 @@ public class KademliaObserver implements Control {
       for (Map<String, Object> entry : messages.values()) {
         String line = "";
         for (Object key : keySet) {
-          line += "," + entry.get(key).toString();
+          line += entry.get(key).toString() + ",";
         }
         // remove the last comma
         line = line.substring(0, line.length() - 1);
@@ -108,7 +108,7 @@ public class KademliaObserver implements Control {
       for (Map<String, Object> entry : find_log.values()) {
         String line = "";
         for (Object key : keySet) {
-          line += "," + entry.get(key).toString();
+          line += entry.get(key).toString() + ",";
         }
         // remove the last comma
         line = line.substring(0, line.length());
