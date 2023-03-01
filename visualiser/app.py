@@ -1,6 +1,7 @@
 from dash import dcc, Input, Output, callback, html, dash_table
 from plotly.subplots import make_subplots
 from rich.console import Console
+from pprint import pprint
 
 import os
 import sys
@@ -24,9 +25,9 @@ if not os.path.exists(logsdir):
     sys.exit(0)
 
 try:
-    op_df = pd.read_csv(os.path.join(logsdir, "operations.csv"))
+    op_df = pd.read_csv(os.path.join(logsdir, "operations.csv"), index_col=False)
 except FileNotFoundError as e:
-    op_df = pd.read_csv(os.path.join(logsdir, "operation.csv"))
+    op_df = pd.read_csv(os.path.join(logsdir, "operation.csv"), index_col=False)
     
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -121,9 +122,9 @@ app.layout = html.Div(
 @callback(Output("graph", "figure"), Input("table", "active_cell"))
 def update_graphs(active_cell):
     try:
-        msg_df = pd.read_csv(os.path.join(logsdir, "msg.csv"))
+        msg_df = pd.read_csv(os.path.join(logsdir, "msg.csv"), index_col=False)
     except FileNotFoundError as e:
-        msg_df = pd.read_csv(os.path.join(logsdir, "messages.csv"))
+        msg_df = pd.read_csv(os.path.join(logsdir, "messages.csv"), index_col=False)
     
     if active_cell:
         op_id = active_cell["row_id"]
@@ -131,6 +132,7 @@ def update_graphs(active_cell):
         for _, row in op_df.iterrows():
             if int(row["id"]) == int(op_id):
                 op = row
+        
 
         message_ids = [int(x) for x in op["messages"].split("|")]
         msg_dsts = list((msg_df.loc[ msg_df["id"].isin(message_ids) ])["dst"])
@@ -138,7 +140,6 @@ def update_graphs(active_cell):
         # ? op_id is the id of the op so that we can plot multiple operations by using the op_id on the y-axis
         # ? op_src is the src node (node all the way on the left)
         # ? msg_dsts is the list of nodes that have received from the op_src (nodes on the line in an ordered fashion)
-
         x = [op["src"]] + msg_dsts
         y = [op_id] * len(msg_dsts) + [op_id]
 
@@ -155,13 +156,17 @@ def update_graphs(active_cell):
 
         return fig
     else:
-        max_op_id = op_df.loc[op_df["src"].idxmax()]["id"] * 1.01
-        min_op_id = op_df.loc[op_df["src"].idxmin()]["id"] * 0.99
-        
+        if len(op_df) > 1:
+            max_op_id = op_df.loc[op_df["src"].idxmax()]["id"] * 1.01
+            min_op_id = op_df.loc[op_df["src"].idxmin()]["id"] * 0.99
+        else:
+            max_op_id = op_df["id"]
+            min_op_id = op_df["id"]
+            
         fig = make_subplots(rows=1, cols=1)
         
         for _, row in op_df.iterrows():
-            message_ids = [int(x) for x in row["messages"].split("|")]
+            message_ids = [int(x) for x in row["messages"].split("|") if len(x) > 0]
             msg_dsts = list((msg_df.loc[ msg_df["id"].isin(message_ids) ])["dst"])
             
             # ? op_id is the id of the op so that we can plot multiple operations by using the op_id on the y-axis
