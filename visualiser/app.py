@@ -1,12 +1,33 @@
 from dash import dcc, Input, Output, callback, html, dash_table
 from plotly.subplots import make_subplots
+from rich.console import Console
 
+import os
+import sys
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
 
-op_df = pd.read_csv("log_folder/operations.csv")
+console = Console()
+
+args = sys.argv[1:]
+
+if len(args) > 0:
+    logsdir = args[0]
+else:
+    logsdir = "log_folder"
+    console.print(f"No <logs_dir> argument given. Using 'log_folder'.", style="bold white")
+
+if not os.path.exists(logsdir):
+    console.print(f"{logsdir} is NOT a valid path.", style="bold red")
+    sys.exit(0)
+
+try:
+    op_df = pd.read_csv(os.path.join(logsdir, "operations.csv"))
+except FileNotFoundError as e:
+    op_df = pd.read_csv(os.path.join(logsdir, "operation.csv"))
+    
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -99,7 +120,10 @@ app.layout = html.Div(
 
 @callback(Output("graph", "figure"), Input("table", "active_cell"))
 def update_graphs(active_cell):
-    msg_df = pd.read_csv("log_folder/msg.csv")
+    try:
+        msg_df = pd.read_csv(os.path.join(logsdir, "msg.csv"))
+    except FileNotFoundError as e:
+        msg_df = pd.read_csv(os.path.join(logsdir, "messages.csv"))
     
     if active_cell:
         op_id = active_cell["row_id"]
@@ -151,6 +175,7 @@ def update_graphs(active_cell):
                 go.Scatter(
                     x = x, 
                     y = y, 
+                    
                     marker=dict(size = 50)
                 )
             )
