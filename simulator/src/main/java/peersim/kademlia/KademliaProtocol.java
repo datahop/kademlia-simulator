@@ -130,7 +130,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param searchNodeId BigInteger
    * @return Node
    */
-  private Node nodeIdtoNode(BigInteger searchNodeId) {
+  public Node nodeIdtoNode(BigInteger searchNodeId) {
     if (searchNodeId == null) return null;
 
     int inf = 0;
