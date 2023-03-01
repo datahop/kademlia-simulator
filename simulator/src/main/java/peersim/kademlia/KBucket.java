@@ -3,6 +3,8 @@ package peersim.kademlia;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.TreeMap;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
@@ -67,6 +69,46 @@ public class KBucket implements Cloneable {
         BigInteger n = replacements.get(CommonState.r.nextInt(replacements.size()));
         neighbours.add(n);
         replacements.remove(n);
+      }
+    }
+  }
+
+  public void checkAndReplaceLast() {
+    if (neighbours.size() == 0 || CommonState.getTime() == 0)
+      // Entry has moved, don't replace it.
+      return;
+
+    // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
+    // "+CommonState.getTime());
+
+    // Get a random node
+    Random random = new Random();
+
+    int min = 0;
+    int max = neighbours.size();
+    BigInteger randomIndex = new BigInteger(String.valueOf(random.nextInt(max - min + 1) + min));
+
+    // KademliaProtocol object to access nodeIDtoNode()
+    KademliaProtocol kProtocol = new KademliaProtocol(null);
+
+    Node node = kProtocol.nodeIdtoNode(randomIndex);
+
+    // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
+    // "+CommonState.getTime());
+
+    // System.out.println("checkAndReplaceLast "+remote.getNode().getId()+" at
+    // "+CommonState.getTime()+" at "+rTable.nodeId);
+
+    if (node.getFailState() != Node.OK) {
+      // Still the last entry.
+      removeNeighbour(randomIndex);
+
+      if (replacements.size() > 0) {
+        // Random rand = new Random();
+        // BigInteger n = replacements.get(rand.nextInt(replacements.size()));
+        BigInteger n = replacements.get(CommonState.r.nextInt(replacements.size()));
+        addNeighbour(n);
+        removeReplacement(n);
       }
     }
   }
