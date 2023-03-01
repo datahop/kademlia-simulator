@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 // logging
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -178,6 +179,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       routingTable.addNeighbour(m.src.getId());
     }
     FindOperation fop = this.findOp.get(m.operationId);
+
     if (fop != null) {
       fop.elaborateResponse((BigInteger[]) m.body);
 
@@ -508,20 +510,19 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
       m = (Message) event;
       if (this.findLog.get(m.operationId) == null) {
-        fLog = new OpLogging(m.operationId, this.node.getId(), CommonState.getTime());
+        fLog = new OpLogging(m.operationId, this.node.getId(), CommonState.getTime(), m.getType());
         findLog.put(m.operationId, fLog);
       } else {
         fLog = this.findLog.get(m.operationId);
       }
       /*Operation Logging */
       fLog.AddMessage(m.id);
+      fLog.SetStop(CommonState.getTime());
       findLog.put(m.operationId, fLog);
-      if (this.findOp.get(m.operationId) != null) {
-        if (this.findOp.get(m.operationId).isFinished() && !fLog.isFinished()) {
-          fLog.SetStop((CommonState.getTime()));
-          KademliaObserver.reportFindOp(fLog);
-        }
-      }
+    }
+
+    for (Map.Entry<Long, OpLogging> entry : findLog.entrySet()) {
+      KademliaObserver.reportFindOp(entry.getValue());
     }
   }
 
