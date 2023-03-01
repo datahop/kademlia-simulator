@@ -1,36 +1,26 @@
 # Visualiser
 
-This visualiser works by showing the nodes being communicated with during an operation. It shows the nodes involved in the lookup relative to the hash space. You can either use the command line version (`index.py`) or the Dash web application (`app.py`).
+This visualiser works by showing the nodes being communicated with during an operation. It shows the nodes involved in the lookup relative to the hash space. 
 
-## Dependencies
-Make sure that the directory follows this structure:
-```
-- 📂 log_folder
-    - 📃 msg.csv
-    - 📃 operations.csv
-- 📃 index.py
-- 📃 app.py
-```
+~~You can either use the command line version (`index.py`) or the Dash web application (`app.py`).~~
 
 ## Usage
 
 To run it just run:
 ```
-python index.py
-```
-or
-```
-python app.py
+python app.py <logs_dir>
 ```
 
-To visualise a specific operation (using the command line tool - `index.py`) just pass in the operation ID:
+Where the `<logs_dir>` is the path that points to the folder with the logs in it (the `message.csv` and `operation.csv` files).
+
+<!-- To visualise a specific operation (using the command line tool - `index.py`) just pass in the operation ID:
 ```
 python index.py <operation_id>
 ```
 Example:
 ```
 python index.py 21
-```
+``` -->
 
 ## How It Works
 1. Read and store the contents of operations.csv.
