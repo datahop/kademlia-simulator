@@ -11,6 +11,9 @@ public class SearchTable {
 
   private List<BigInteger> nodes;
 
+  Block b;
+  Sample[] samples;
+
   public SearchTable() {
 
     nodes = new ArrayList<>();
@@ -18,7 +21,14 @@ public class SearchTable {
 
   // add a neighbour to the correct k-bucket
   public void addNode(BigInteger[] neighbours) {
-    nodes.addAll(Arrays.asList(neighbours));
+    if (samples == null) nodes.addAll(Arrays.asList(neighbours));
+    else {
+      for (Sample s : samples) {
+        BigInteger radius =
+            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+        for (BigInteger id : nodes) if (s.isInRegion(id, radius)) nodes.add(id);
+      }
+    }
   }
 
   public BigInteger getNode() {
@@ -31,5 +41,23 @@ public class SearchTable {
   // remove a neighbour from the correct k-bucket
   public void removeNeighbour(BigInteger node) {
     nodes.remove(node);
+  }
+
+  public int size() {
+    return nodes.size();
+  }
+
+  public BigInteger[] getAllNeighbours() {
+    return (BigInteger[]) nodes.toArray();
+  }
+
+  public void initSet(Block b) {
+
+    Sample[] samples = b.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
+
+    for (Sample s : samples) {
+      BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+      for (BigInteger id : nodes) if (!s.isInRegion(id, radius)) nodes.remove(id);
+    }
   }
 }
