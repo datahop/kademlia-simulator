@@ -1,7 +1,9 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.TreeSet;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.kademlia.KademliaCommonConfig;
@@ -32,12 +34,15 @@ public class Block implements Iterator<Sample>, Cloneable {
   /** number of samples in a block */
   private int numSamples;
 
+  private TreeSet<BigInteger> samples;
+
   public Block(long id) {
 
     SIZE = 512;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
 
+    samples = new TreeSet<>();
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
@@ -46,6 +51,7 @@ public class Block implements Iterator<Sample>, Cloneable {
       for (int j = 0; j < blockSamples[0].length; j++) {
 
         blockSamples[i][j] = new Sample(blockId, i, j, this);
+        samples.add(blockSamples[i][j].getId());
       }
     }
   }
@@ -55,6 +61,7 @@ public class Block implements Iterator<Sample>, Cloneable {
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
+    samples = new TreeSet<>();
 
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
@@ -64,6 +71,7 @@ public class Block implements Iterator<Sample>, Cloneable {
       for (int j = 0; j < blockSamples[0].length; j++) {
 
         blockSamples[i][j] = new Sample(blockId, i, j, this);
+        samples.add(blockSamples[i][j].getId());
       }
     }
   }
@@ -163,6 +171,14 @@ public class Block implements Iterator<Sample>, Cloneable {
 
   public int getNumSamples() {
     return this.numSamples;
+  }
+
+  public BigInteger[] getSamplesByRadius(BigInteger peerId, BigInteger radius) {
+    BigInteger top = peerId.add(radius);
+    BigInteger bottom = peerId.subtract(radius);
+
+    Collection subSet = samples.subSet(top, true, bottom, true);
+    return (BigInteger[]) subSet.toArray();
   }
 
   private void _init() {
