@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -50,8 +51,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private KeyValueStore kv;
 
-  private int pendingSamples;
-
   private SearchTable searchTable;
 
   private Block currentBlock;
@@ -84,7 +83,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
     kv = new KeyValueStore();
-    pendingSamples = 0;
     searchTable = new SearchTable();
     samplingOp = new LinkedHashMap<Long, RandomSamplingOperation>();
   }
@@ -201,7 +199,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param myPid the sender Pid
    */
   private void handleInitGetSample(Message m, int myPid) {
-    BigInteger sampleId = (BigInteger) m.body;
+    BigInteger[] sampleId = new BigInteger[1];
+    sampleId[0] = (BigInteger) m.body;
 
     if (isBuilder()) return;
 
@@ -214,22 +213,24 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
             .getKademliaProtocol()
             .getKademliaNode();
     sendMessage(msg, builderAddress, myPid);
-    pendingSamples++;
   }
 
   private void handleGetSample(Message m, int myPid) {
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
-    logger.warning("Get sample " + m.body);
+    BigInteger[] samples = (BigInteger[]) m.body;
+    logger.warning("Get sample " + samples[0]);
 
-    Sample s = (Sample) kv.get((BigInteger) m.body);
+    List<Sample> s = new ArrayList<>();
+
+    for (BigInteger id : samples) s.add((Sample) kv.get(id));
 
     if (s == null) {
       logger.warning("Sample not found");
       return;
     }
 
-    Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, s);
+    Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, s.toArray());
     response.operationId = m.operationId;
     response.dst = m.dst;
     response.src = this.kadProtocol.getKademliaNode();
@@ -259,17 +260,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private void handleGetSampleResponse(Message m, int myPid) {
 
-    Sample s = (Sample) m.body;
-    logger.info("Received sample:" + s.getId());
-    kv.add((BigInteger) s.getId(), s);
-    pendingSamples--;
-
-    if (pendingSamples < 0) {
-      System.err.println("There has been some error in the protocol");
-      System.exit(1);
-    } else if (pendingSamples == 0) {
-      logger.info("Received samples " + kv.occupancy());
-      startRandomSampling(m, myPid);
+    Sample[] samples = (Sample[]) m.body;
+    for (Sample s : samples) {
+      logger.info("Received sample:" + s.getId());
+      kv.add((BigInteger) s.getId(), s);
     }
   }
 
@@ -310,7 +304,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    *
    * @return Message
    */
-  private Message generateGetSampleMessage(BigInteger sampleId) {
+  private Message generateGetSampleMessage(BigInteger[] sampleId) {
 
     Message m = new Message(Message.MSG_GET_SAMPLE, sampleId);
     m.timestamp = CommonState.getTime();
@@ -362,17 +356,5 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         lop.nrHops++;
       }
     }
-
-    /*for (int i = 0; i < KademliaCommonConfigDas.N_SAMPLES; i++) {
-      // logger.warning("Builder new block getting random sample");
-      BigInteger dest = searchTable.getNode();
-      if (dest == null) break;
-      if (dest.compareTo(builderAddress) == 0) continue;
-      Message msg = generateGetAnySampleMessage();
-      msg.src = this.getKademliaProtocol().getKademliaNode();
-      msg.dst =
-          this.getKademliaProtocol().nodeIdtoNode(dest).getKademliaProtocol().getKademliaNode();
-      sendMessage(msg, dest, myPid);
-    }*/
   }
 }
