@@ -46,10 +46,9 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
     for (int i = 0; i < blockSamples.length; i++) {
-
       for (int j = 0; j < blockSamples[0].length; j++) {
-
         blockSamples[i][j] = new Sample(blockId, i, j, this);
         samples.add(blockSamples[i][j].getId());
       }
@@ -66,10 +65,9 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
     for (int i = 0; i < blockSamples.length; i++) {
-
       for (int j = 0; j < blockSamples[0].length; j++) {
-
         blockSamples[i][j] = new Sample(blockId, i, j, this);
         samples.add(blockSamples[i][j].getId());
       }
@@ -177,8 +175,8 @@ public class Block implements Iterator<Sample>, Cloneable {
     BigInteger top = peerId.add(radius);
     BigInteger bottom = peerId.subtract(radius);
 
-    Collection subSet = samples.subSet(top, true, bottom, true);
-    return (BigInteger[]) subSet.toArray();
+    Collection subSet = samples.subSet(bottom, true, top, true);
+    return (BigInteger[]) subSet.toArray(new BigInteger[0]);
   }
 
   private void _init() {
