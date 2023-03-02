@@ -49,7 +49,7 @@ public class SearchTable {
   }
 
   public BigInteger[] getAllNeighbours() {
-    return (BigInteger[]) nodes.toArray();
+    return (BigInteger[]) nodes.toArray(new BigInteger[0]);
   }
 
   /*public void initSet(Block b) {

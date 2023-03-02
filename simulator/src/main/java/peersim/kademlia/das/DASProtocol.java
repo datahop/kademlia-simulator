@@ -9,7 +9,7 @@ package peersim.kademlia.das;
  */
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -137,14 +137,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         m = (Message) event;
         handleGetSampleResponse(m, myPid);
         break;
-      case Message.MSG_GET_ANY_SAMPLE:
-        m = (Message) event;
-        handleGetAnySample(m, myPid);
-        break;
-      case Message.MSG_GET_ANY_SAMPLE_RESPONSE:
-        m = (Message) event;
-        handleGetAnySampleResponse(m, myPid);
-        break;
+        /*case Message.MSG_GET_ANY_SAMPLE:
+          m = (Message) event;
+          handleGetAnySample(m, myPid);
+          break;
+        case Message.MSG_GET_ANY_SAMPLE_RESPONSE:
+          m = (Message) event;
+          handleGetAnySampleResponse(m, myPid);
+          break;*/
     }
   }
 
@@ -189,6 +189,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         Sample s = currentBlock.next();
         kv.add(s.getId(), s);
       }
+    } else {
+      startRandomSampling(m, myPid);
     }
   }
 
@@ -204,7 +206,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     if (isBuilder()) return;
 
-    logger.warning("Getting sample from builder " + sampleId);
+    logger.info("Getting sample from builder " + sampleId);
     Message msg = generateGetSampleMessage(sampleId);
     msg.src = this.getKademliaProtocol().getKademliaNode();
     msg.dst =
@@ -218,27 +220,82 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   private void handleGetSample(Message m, int myPid) {
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
+    logger.warning("KV size " + kv.occupancy());
     BigInteger[] samples = (BigInteger[]) m.body;
-    logger.warning("Get sample " + samples[0]);
+    for (BigInteger id : samples)
+      if (!isBuilder()) logger.warning("Get sample request " + id + " from:" + m.src.getId());
 
     List<Sample> s = new ArrayList<>();
 
-    for (BigInteger id : samples) s.add((Sample) kv.get(id));
-
-    if (s == null) {
-      logger.warning("Sample not found");
-      return;
+    for (BigInteger id : samples) {
+      Sample sample = (Sample) kv.get(id);
+      if (sample != null) s.add(sample);
+      else logger.warning("Sample not found");
     }
 
-    Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, s.toArray());
+    logger.warning("Responding with " + s.size() + " samples");
+
+    Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, s.toArray(new Sample[0]));
     response.operationId = m.operationId;
-    response.dst = m.dst;
+    response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
     sendMessage(response, m.src.getId(), myPid);
   }
 
-  private void handleGetAnySample(Message m, int myPid) {
+  private void handleGetSampleResponse(Message m, int myPid) {
+
+    if (m.body == null) return;
+
+    Sample[] samples = (Sample[]) m.body;
+    for (Sample s : samples) {
+      logger.warning("Received sample:" + s.getId());
+      kv.add((BigInteger) s.getId(), s);
+    }
+
+    RandomSamplingOperation op = samplingOp.get(m.operationId);
+    if (op != null) {
+      op.elaborateResponse(samples);
+      logger.warning("Continue operation " + op.getId() + " " + op.getAvailableRequests());
+
+      while ((op.getAvailableRequests() > 0)) { // I can send a new find request
+
+        // get an available neighbour
+        BigInteger nextNode = op.getNeighbour();
+
+        if (nextNode != null) {
+          if (!op.completed()) {
+
+            // create a new request to send to neighbour
+
+            BigInteger[] reqSamples = op.getSamples(currentBlock, nextNode);
+            Message msg = generateGetSampleMessage(reqSamples);
+            msg.operationId = op.getId();
+            msg.src = this.kadProtocol.getKademliaNode();
+
+            msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
+            if (nextNode.compareTo(builderAddress) == 0) {
+              logger.warning("Error sending to builder");
+              continue;
+            }
+            sendMessage(msg, nextNode, myPid);
+            op.nrHops++;
+
+            // send find request
+            // sendMessage(request, neighbour, myPid);
+          }
+        } else if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
+          // no new neighbour and no outstanding requests
+          // search operation finished
+
+        } else { // no neighbour available but exists oustanding request to wait
+          return;
+        }
+      }
+    }
+  }
+
+  /*private void handleGetAnySample(Message m, int myPid) {
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
 
@@ -258,22 +315,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     sendMessage(response, m.src.getId(), myPid);
   }
 
-  private void handleGetSampleResponse(Message m, int myPid) {
-
-    Sample[] samples = (Sample[]) m.body;
-    for (Sample s : samples) {
-      logger.info("Received sample:" + s.getId());
-      kv.add((BigInteger) s.getId(), s);
-    }
-  }
-
   private void handleGetAnySampleResponse(Message m, int myPid) {
 
     Sample[] sArray = (Sample[]) m.body;
     logger.warning("Received sample array:" + sArray.length);
 
     for (Sample s : sArray) kv.add((BigInteger) s.getId(), s);
-  }
+  }*/
 
   /**
    * send a message with current transport layer and starting the timeout timer (wich is an event)
@@ -317,43 +365,48 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * generates a GET any sample message.
    *
    * @return Message
+   *     <p>private Message generateGetAnySampleMessage() {
+   *     <p>Message m = new Message(Message.MSG_GET_ANY_SAMPLE, null); m.timestamp =
+   *     CommonState.getTime();
+   *     <p>return m; }
    */
-  private Message generateGetAnySampleMessage() {
-
-    Message m = new Message(Message.MSG_GET_ANY_SAMPLE, null);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
   public BigInteger getKademliaId() {
     return this.getKademliaProtocol().getKademliaNode().getId();
   }
 
   @Override
   public void nodesFound(BigInteger[] neighbours) {
-    searchTable.addNode(neighbours);
+    List<BigInteger> list = new ArrayList<>(Arrays.asList(neighbours));
+    list.remove(builderAddress);
+    searchTable.addNode(list.toArray(new BigInteger[0]));
   }
 
   private void startRandomSampling(Message m, int myPid) {
 
-    RandomSamplingOperation lop =
+    RandomSamplingOperation op =
         new RandomSamplingOperation(this.getKademliaId(), null, searchTable, m.timestamp);
-    samplingOp.put(lop.getId(), lop);
+    samplingOp.put(op.getId(), op);
 
-    Message msg = new Message(Message.MSG_GET_SAMPLE);
-    msg.operationId = lop.getId();
-    msg.src = this.kadProtocol.getKademliaNode();
+    op.setAvailableRequests(KademliaCommonConfig.ALPHA);
 
     // send ALPHA messages
     for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
-      BigInteger nextNode = lop.getNeighbour();
+      BigInteger nextNode = op.getNeighbour();
       if (nextNode != null) {
+        BigInteger[] samples = op.getSamples(currentBlock, nextNode);
+        Message msg = generateGetSampleMessage(samples);
+        msg.operationId = op.getId();
+        msg.src = this.kadProtocol.getKademliaNode();
+
         msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-        sendMessage(m.copy(), nextNode, myPid);
-        // System.out.println("Send topic lookup to: " + nextNode +" at
-        // distance:"+Util.logDistance(lop.topic.topicID, nextNode));
-        lop.nrHops++;
+        if (nextNode.compareTo(builderAddress) == 0) {
+          logger.warning("Error sending to builder");
+          continue;
+        }
+        sendMessage(msg, nextNode, myPid);
+        logger.warning(
+            "Sending sample request to: " + nextNode + " " + samples.length + " samples");
+        op.nrHops++;
       }
     }
   }
