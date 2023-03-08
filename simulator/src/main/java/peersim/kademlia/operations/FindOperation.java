@@ -54,6 +54,10 @@ public class FindOperation extends Operation {
     return this.available_requests;
   }
 
+  public void increaseAvailableRequests() {
+    this.available_requests++;
+  }
+
   public void setAvailableRequests(int requests) {
     this.available_requests = requests;
   }

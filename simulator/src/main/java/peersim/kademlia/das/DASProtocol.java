@@ -220,20 +220,20 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   private void handleGetSample(Message m, int myPid) {
     // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
     // create a response message containing the neighbours (with the same id of the request)
-    logger.warning("KV size " + kv.occupancy());
+    logger.info("KV size " + kv.occupancy());
     BigInteger[] samples = (BigInteger[]) m.body;
-    for (BigInteger id : samples)
-      if (!isBuilder()) logger.warning("Get sample request " + id + " from:" + m.src.getId());
+    // for (BigInteger id : samples)
+    //  if (!isBuilder()) logger.warning("Get sample request " + id + " from:" + m.src.getId());
 
     List<Sample> s = new ArrayList<>();
 
     for (BigInteger id : samples) {
       Sample sample = (Sample) kv.get(id);
       if (sample != null) s.add(sample);
-      else logger.warning("Sample not found");
+      // else logger.warning("Sample not found");
     }
 
-    logger.warning("Responding with " + s.size() + " samples");
+    logger.info("Get sample request responding with " + s.size() + " samples");
 
     Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, s.toArray(new Sample[0]));
     response.operationId = m.operationId;
@@ -249,14 +249,22 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
-      logger.warning("Received sample:" + s.getId());
+      logger.info("Received sample:" + s.getId());
       kv.add((BigInteger) s.getId(), s);
     }
 
     RandomSamplingOperation op = samplingOp.get(m.operationId);
     if (op != null) {
       op.elaborateResponse(samples);
-      logger.warning("Continue operation " + op.getId() + " " + op.getAvailableRequests());
+      logger.info(
+          "Continue operation "
+              + op.getId()
+              + " "
+              + op.getAvailableRequests()
+              + " "
+              + op.nrHops
+              + " "
+              + op.getSamples().size());
 
       while ((op.getAvailableRequests() > 0)) { // I can send a new find request
 
@@ -275,7 +283,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
             msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
             if (nextNode.compareTo(builderAddress) == 0) {
-              logger.warning("Error sending to builder");
+              logger.info("Error sending to builder or 0 samples assigned");
               continue;
             }
             sendMessage(msg, nextNode, myPid);
@@ -283,10 +291,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
             // send find request
             // sendMessage(request, neighbour, myPid);
+          } else {
+            logger.warning("Operation completed with " + op.getSamples().size() + " samples");
           }
         } else if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
           // no new neighbour and no outstanding requests
           // search operation finished
+          logger.warning("Operation completed " + op.completed() + " no new nodes to ask");
 
         } else { // no neighbour available but exists oustanding request to wait
           return;
@@ -386,7 +397,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     RandomSamplingOperation op =
         new RandomSamplingOperation(this.getKademliaId(), null, searchTable, m.timestamp);
     samplingOp.put(op.getId(), op);
-
     op.setAvailableRequests(KademliaCommonConfig.ALPHA);
 
     // send ALPHA messages
@@ -394,18 +404,19 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       BigInteger nextNode = op.getNeighbour();
       if (nextNode != null) {
         BigInteger[] samples = op.getSamples(currentBlock, nextNode);
+
+        if (nextNode.compareTo(builderAddress) == 0 || samples.length == 0) {
+          logger.warning("No samples to request");
+          op.increaseAvailableRequests();
+          continue;
+        }
         Message msg = generateGetSampleMessage(samples);
         msg.operationId = op.getId();
         msg.src = this.kadProtocol.getKademliaNode();
-
         msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-        if (nextNode.compareTo(builderAddress) == 0) {
-          logger.warning("Error sending to builder");
-          continue;
-        }
+
         sendMessage(msg, nextNode, myPid);
-        logger.warning(
-            "Sending sample request to: " + nextNode + " " + samples.length + " samples");
+        logger.info("Sending sample request to: " + nextNode + " " + samples.length + " samples");
         op.nrHops++;
       }
     }
