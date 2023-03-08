@@ -133,8 +133,7 @@ def update_graphs(active_cell):
             if int(row["id"]) == int(op_id):
                 op = row
         
-
-        message_ids = [int(x) for x in op["messages"].split("|")]
+        message_ids = [int(x) for x in op["messages"].split("|") if x]
         msg_dsts = list((msg_df.loc[ msg_df["id"].isin(message_ids) ])["dst"])
         
         # ? op_id is the id of the op so that we can plot multiple operations by using the op_id on the y-axis
