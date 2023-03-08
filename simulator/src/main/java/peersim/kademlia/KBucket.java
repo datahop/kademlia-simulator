@@ -3,7 +3,6 @@ package peersim.kademlia;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
@@ -18,6 +17,8 @@ public class KBucket implements Cloneable {
   // Replacement bucket
   protected List<BigInteger> replacements;
 
+  protected RoutingTable rTable;
+
   // k-bucket array
   protected List<BigInteger> neighbours = null;
 
@@ -30,11 +31,12 @@ public class KBucket implements Cloneable {
     replacements = new ArrayList<BigInteger>();
   }
 
-  public KBucket(int k, int maxReplacements) {
+  public KBucket(RoutingTable rTable, int k, int maxReplacements) {
     neighbours = new ArrayList<BigInteger>();
     replacements = new ArrayList<BigInteger>();
     this.k = k;
     this.maxReplacements = maxReplacements;
+    this.rTable = rTable;
   }
 
   public void checkAndReplaceLast() {
@@ -45,34 +47,26 @@ public class KBucket implements Cloneable {
     // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
     // "+CommonState.getTime());
 
-    // Get a random node
-    Random random = new Random();
-
-    int min = 0;
-    int max = neighbours.size();
-    BigInteger randomIndex = new BigInteger(String.valueOf(random.nextInt(max - min + 1) + min));
-
-    // KademliaProtocol object to access nodeIDtoNode()
     KademliaProtocol kProtocol = new KademliaProtocol(null);
-
-    Node node = kProtocol.nodeIdtoNode(randomIndex);
-
+    Node node = kProtocol.nodeIdtoNode(neighbours.get(neighbours.size() - 1));
     // System.out.println("Replace node "+neighbours.get(neighbours.size()-1)+" at
     // "+CommonState.getTime());
+    // KademliaProtocol remote = node.getKademliaProtocol();
+
+    if (kProtocol.routingTable != null) kProtocol.routingTable.sendToFront(rTable.nodeId);
 
     // System.out.println("checkAndReplaceLast "+remote.getNode().getId()+" at
     // "+CommonState.getTime()+" at "+rTable.nodeId);
 
     if (node.getFailState() != Node.OK) {
       // Still the last entry.
-      removeNeighbour(randomIndex);
-
+      neighbours.remove(neighbours.size() - 1);
       if (replacements.size() > 0) {
         // Random rand = new Random();
         // BigInteger n = replacements.get(rand.nextInt(replacements.size()));
         BigInteger n = replacements.get(CommonState.r.nextInt(replacements.size()));
-        addNeighbour(n);
-        removeReplacement(n);
+        neighbours.add(n);
+        replacements.remove(n);
       }
     }
   }
