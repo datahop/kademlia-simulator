@@ -364,6 +364,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         this.routingTable.getNeighbours((BigInteger) m.body, this.getKademliaNode().getId());
     fop.elaborateResponse(neighbours);
     fop.setAvailableRequests(KademliaCommonConfig.ALPHA);
+
     // set message operation id
     m.operationId = fop.getId();
 

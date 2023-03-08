@@ -69,8 +69,12 @@ public class RandomSamplingOperation extends FindOperation {
         peerId, b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
   }
 
+  public List<BigInteger> getSamples() {
+    return samples;
+  }
+
   public boolean completed() {
-    System.out.println("Samples num " + samples.size());
+    // System.out.println("Samples num " + samples.size());
     if (samples.size() >= KademliaCommonConfigDas.N_SAMPLES) return true;
     else return false;
   }
