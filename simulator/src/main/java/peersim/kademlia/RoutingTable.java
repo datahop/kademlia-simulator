@@ -70,14 +70,14 @@ public class RoutingTable implements Cloneable {
   public BigInteger[] getNeighbours(final int dist) {
     BigInteger[] result = new BigInteger[0];
     ArrayList<BigInteger> resultList = new ArrayList<BigInteger>();
-    resultList.addAll(bucketAtDistance(dist).neighbours.keySet());
+    resultList.addAll(bucketAtDistance(dist).neighbours);
 
     if (resultList.size() < k && (dist + 1) <= 256) {
-      resultList.addAll(bucketAtDistance(dist + 1).neighbours.keySet());
+      resultList.addAll(bucketAtDistance(dist + 1).neighbours);
       while (resultList.size() > k) resultList.remove(resultList.size() - 1);
     }
     if (resultList.size() < k & (dist - 1) >= 0) {
-      resultList.addAll(bucketAtDistance(dist - 1).neighbours.keySet());
+      resultList.addAll(bucketAtDistance(dist - 1).neighbours);
       while (resultList.size() > k) resultList.remove(resultList.size() - 1);
     }
     return resultList.toArray(result);
@@ -97,13 +97,13 @@ public class RoutingTable implements Cloneable {
     if (prefix_len < 0) return new BigInteger[] {nodeId};
     // return the k-bucket if is full
     if (bucketAtDistance(prefix_len).neighbours.size() >= KademliaCommonConfig.K) {
-      return bucketAtDistance(prefix_len).neighbours.keySet().toArray(result);
+      return bucketAtDistance(prefix_len).neighbours.toArray(result);
     }
 
     // else get k closest node from all k-buckets
     prefix_len = 0;
     while (prefix_len < KademliaCommonConfig.BITS) {
-      neighbour_candidates.addAll(bucketAtDistance(prefix_len).neighbours.keySet());
+      neighbour_candidates.addAll(bucketAtDistance(prefix_len).neighbours);
       // remove source id
       neighbour_candidates.remove(src);
       prefix_len++;

@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
@@ -20,19 +19,19 @@ public class KBucket implements Cloneable {
   protected List<BigInteger> replacements;
 
   // k-bucket array
-  protected TreeMap<BigInteger, Long> neighbours = null;
+  protected List<BigInteger> neighbours = null;
 
   // k-bucket size, max replacement bucket size
   protected int k, maxReplacements;
 
   // empty constructor
   public KBucket() {
-    neighbours = new TreeMap<BigInteger, Long>();
+    neighbours = new ArrayList<BigInteger>();
     replacements = new ArrayList<BigInteger>();
   }
 
   public KBucket(int k, int maxReplacements) {
-    neighbours = new TreeMap<BigInteger, Long>();
+    neighbours = new ArrayList<BigInteger>();
     replacements = new ArrayList<BigInteger>();
     this.k = k;
     this.maxReplacements = maxReplacements;
@@ -80,10 +79,9 @@ public class KBucket implements Cloneable {
 
   // add a neighbour to this k-bucket
   public boolean addNeighbour(BigInteger node) {
-    long time = CommonState.getTime();
     if (neighbours.size() < k) { // k-bucket isn't full
 
-      neighbours.put(node, time); // add neighbour to the tail of the list
+      neighbours.add(node); // add neighbour to the tail of the list
       removeReplacement(node);
 
       return true;
@@ -120,8 +118,8 @@ public class KBucket implements Cloneable {
 
   public Object clone() {
     KBucket dolly = new KBucket();
-    for (BigInteger node : neighbours.keySet()) {
-      dolly.neighbours.put(new BigInteger(node.toByteArray()), 0l);
+    for (BigInteger node : neighbours) {
+      dolly.neighbours.add(new BigInteger(node.toByteArray()));
     }
     return dolly;
   }
@@ -129,7 +127,7 @@ public class KBucket implements Cloneable {
   public String toString() {
     String res = "{\n";
 
-    for (BigInteger node : neighbours.keySet()) {
+    for (BigInteger node : neighbours) {
       res += node + "\n";
     }
 
