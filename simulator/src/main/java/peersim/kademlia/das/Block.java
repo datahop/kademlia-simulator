@@ -74,6 +74,16 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
   }
 
+  public Block(Sample[][] blockSamples, TreeSet<BigInteger> samples, int size, long id) {
+    SIZE = size;
+    this.numSamples = this.SIZE * this.SIZE;
+    _init();
+    this.samples = samples;
+    this.blockSamples = blockSamples;
+    row = column = 0;
+    this.blockId = id;
+  }
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -82,7 +92,7 @@ public class Block implements Iterator<Sample>, Cloneable {
    */
   public Object clone() {
     initIterator();
-    Block dolly = new Block(this.SIZE, this.blockId);
+    Block dolly = new Block(this.blockSamples, this.samples, this.SIZE, this.blockId);
     return dolly;
   }
 
