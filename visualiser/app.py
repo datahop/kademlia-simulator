@@ -2,6 +2,7 @@ from dash import dcc, Input, Output, callback, html, dash_table
 from plotly.subplots import make_subplots
 from rich.console import Console
 from pprint import pprint
+from decimal import Decimal
 
 import os
 import sys
@@ -29,6 +30,15 @@ try:
 except FileNotFoundError as e:
     op_df = pd.read_csv(os.path.join(logsdir, "operation.csv"), index_col=False)
     
+def truncate_string(s, length):
+    if isinstance(s, str) and len(s) > length:
+        return s[:length] + "..."
+    else:
+        return s
+    
+op_df["src_truncated"] = op_df['src'].apply(truncate_string, length = 5)
+    
+columns = [{"name": i, "id": i} for i in ['id', 'src_truncated', 'messages', 'type', 'src', 'start', 'stop']]
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -80,8 +90,8 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             dash_table.DataTable(
-                                op_df.to_dict("records"), 
-                                [{"name": i, "id": i} for i in op_df.columns],
+                                data=op_df.to_dict("records"), 
+                                columns=columns,
                                 id="table",
                                 style_cell={"textAlign": "center"}
                             ),
@@ -91,7 +101,7 @@ app.layout = html.Div(
                             }
                         )
                     ],
-                    width=3
+                    width=4
                 ),
                 dbc.Col(
                     [
@@ -102,7 +112,7 @@ app.layout = html.Div(
                             }
                         ),
                     ],
-                    width=9
+                    width=8
                 )
             ],
             style={
@@ -132,7 +142,7 @@ def update_graphs(active_cell):
         for _, row in op_df.iterrows():
             if int(row["id"]) == int(op_id):
                 op = row
-        
+            
         message_ids = [int(x) for x in op["messages"].split("|") if x]
         msg_dsts = list((msg_df.loc[ msg_df["id"].isin(message_ids) ])["dst"])
         
@@ -156,8 +166,13 @@ def update_graphs(active_cell):
         return fig
     else:
         if len(op_df) > 1:
-            max_op_id = op_df.loc[op_df["src"].idxmax()]["id"] * 1.01
-            min_op_id = op_df.loc[op_df["src"].idxmin()]["id"] * 0.99
+            
+            op_srcs = []
+            for index, row in op_df.iterrows():
+                op_srcs.append(Decimal(row.loc["src"]))
+            
+            max_op_id = op_df.iloc[ op_df['src'].astype(float).idxmax() ]
+            min_op_id = op_df.iloc[ op_df['src'].astype(float).idxmin() ]
         else:
             max_op_id = op_df["id"]
             min_op_id = op_df["id"]
