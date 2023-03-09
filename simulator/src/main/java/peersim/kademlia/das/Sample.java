@@ -80,6 +80,7 @@ public class Sample {
     }
   }
 
+  /** Returns the samples ids that are in the region of set of nodes. */
   public BigInteger[] getNodesInRegion(BigInteger[] nodes, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
@@ -90,18 +91,22 @@ public class Sample {
     return (BigInteger[]) result.toArray();
   }
 
+  /** Row of the sample */
   public int getRow() {
     return this.row;
   }
 
+  /** Column of the sample */
   public int getColumn() {
     return this.column;
   }
 
+  /** Block id which the sample is part of */
   public long getBlockId() {
     return blockId;
   }
 
+  /** Computed identifier of the sample, depending of the mapping mode */
   public BigInteger getId() {
     return id;
   }

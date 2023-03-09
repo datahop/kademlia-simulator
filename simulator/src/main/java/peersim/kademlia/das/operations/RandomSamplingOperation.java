@@ -11,11 +11,9 @@ import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.FindOperation;
 
 /**
- * This class represents a random sampling operation and offer the methods needed to maintain and
- * update the closest set.<br>
- * It also maintains the number of parallel requsts that can has a maximum of ALPHA.
+ * This class represents a random sampling operation that collects samples from random nodes
  *
- * @author Daniele Furlan, Maurizio Bonani
+ * @author Sergi Rene
  * @version 1.0
  */
 public class RandomSamplingOperation extends FindOperation {
@@ -23,7 +21,7 @@ public class RandomSamplingOperation extends FindOperation {
   private SearchTable rou;
   private List<BigInteger> samples;
   /**
-   * defaul constructor
+   * default constructor
    *
    * @param srcNode Id of the node to find
    * @param destNode Id of the node to find
