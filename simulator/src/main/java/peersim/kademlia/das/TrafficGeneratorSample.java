@@ -12,9 +12,9 @@ import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
 
 /**
- * This control generates random search traffic from nodes to random destination node.
- *
- * @author Daniele Furlan, Maurizio Bonani
+ * This control generates samples every 5 min that are stored in a single node (builder) and starts random sampling from the rest of the nodes
+ * In parallel, random lookups are started to start discovering nodes
+ * @author Sergi Rene
  * @version 1.0
  */
 
