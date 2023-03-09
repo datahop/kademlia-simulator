@@ -10,6 +10,7 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -88,9 +89,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   /**
-   * This procedure is called only once and allow to inizialize the internal state of
-   * KademliaProtocol. Every node shares the same configuration, so it is sufficient to call this
-   * routine once.
+   * This procedure is called only once and allow to inizialize the internal state of protocol.
+   * Every node shares the same configuration, so it is sufficient to call this routine once.
    */
   private void _init() {
     // execute once
@@ -108,11 +108,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    */
   public void processEvent(Node myNode, int myPid, Object event) {
 
-    // Parse message content Activate the correct event manager fot the particular event
-    // this.protocolId = myPid;
-
     Message m;
-    // logger.warning("Message received");
 
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
@@ -137,22 +133,24 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         m = (Message) event;
         handleGetSampleResponse(m, myPid);
         break;
-        /*case Message.MSG_GET_ANY_SAMPLE:
-          m = (Message) event;
-          handleGetAnySample(m, myPid);
-          break;
-        case Message.MSG_GET_ANY_SAMPLE_RESPONSE:
-          m = (Message) event;
-          handleGetAnySampleResponse(m, myPid);
-          break;*/
     }
   }
 
+  /**
+   * sets the kademliaprotocol instance can be used to run kad operations
+   *
+   * @param prot KademliaProtocol
+   */
   public void setKademliaProtocol(KademliaProtocol prot) {
     this.kadProtocol = prot;
     this.logger = prot.getLogger();
   }
 
+  /**
+   * sets the kademliaprotocol instance can be used to run kad operations
+   *
+   * @return KademliaProtocol
+   */
   public KademliaProtocol getKademliaProtocol() {
     return kadProtocol;
   }
@@ -218,18 +216,20 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   private void handleGetSample(Message m, int myPid) {
-    // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
-    // create a response message containing the neighbours (with the same id of the request)
-    logger.info("KV size " + kv.occupancy());
-    BigInteger[] samples = (BigInteger[]) m.body;
-    // for (BigInteger id : samples)
-    //  if (!isBuilder()) logger.warning("Get sample request " + id + " from:" + m.src.getId());
 
+    logger.info("KV size " + kv.occupancy());
+
+    List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     List<Sample> s = new ArrayList<>();
+
+    Collections.shuffle(samples);
 
     for (BigInteger id : samples) {
       Sample sample = (Sample) kv.get(id);
-      if (sample != null) s.add(sample);
+      if (sample != null) {
+        s.add(sample);
+        if (s.size() == KademliaCommonConfigDas.MAX_SAMPLES_RETURNED) break;
+      }
       // else logger.warning("Sample not found");
     }
 
@@ -306,34 +306,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     }
   }
 
-  /*private void handleGetAnySample(Message m, int myPid) {
-    // for (BigInteger neigh : neighbours) logger.warning("Neighbours " + neigh);
-    // create a response message containing the neighbours (with the same id of the request)
-
-    Collection<Sample> samples = new ArrayList<Sample>();
-    for (Object sample : kv.getAll()) {
-      Sample s = (Sample) sample;
-      if (currentBlock.getBlockId() == s.getBlockId()) samples.add(s);
-    }
-
-    Sample[] samplesArray = samples.toArray(new Sample[samples.size()]);
-
-    Message response = new Message(Message.MSG_GET_ANY_SAMPLE_RESPONSE, samplesArray);
-    response.operationId = m.operationId;
-    response.dst = m.dst;
-    response.src = this.kadProtocol.getKademliaNode();
-    response.ackId = m.id; // set ACK number
-    sendMessage(response, m.src.getId(), myPid);
-  }
-
-  private void handleGetAnySampleResponse(Message m, int myPid) {
-
-    Sample[] sArray = (Sample[]) m.body;
-    logger.warning("Received sample array:" + sArray.length);
-
-    for (Sample s : sArray) kv.add((BigInteger) s.getId(), s);
-  }*/
-
   /**
    * send a message with current transport layer and starting the timeout timer (wich is an event)
    * if the message is a request
@@ -373,18 +345,19 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   // ______________________________________________________________________________________________
   /**
-   * generates a GET any sample message.
+   * Returns the dht id of the kademlia protocol
    *
    * @return Message
-   *     <p>private Message generateGetAnySampleMessage() {
-   *     <p>Message m = new Message(Message.MSG_GET_ANY_SAMPLE, null); m.timestamp =
-   *     CommonState.getTime();
-   *     <p>return m; }
    */
   public BigInteger getKademliaId() {
     return this.getKademliaProtocol().getKademliaNode().getId();
   }
 
+  /**
+   * Callback of the kademlia protocol of the nodes found and contacted
+   *
+   * @param neihbours array with the ids of the nodes found
+   */
   @Override
   public void nodesFound(BigInteger[] neighbours) {
     List<BigInteger> list = new ArrayList<>(Arrays.asList(neighbours));
@@ -392,6 +365,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     searchTable.addNode(list.toArray(new BigInteger[0]));
   }
 
+  /**
+   * Starts the random sampling operation
+   *
+   * @param m initial message
+   * @param myPid protocol pid
+   */
   private void startRandomSampling(Message m, int myPid) {
 
     RandomSamplingOperation op =

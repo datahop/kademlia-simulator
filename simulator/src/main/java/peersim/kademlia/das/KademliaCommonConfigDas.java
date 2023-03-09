@@ -1,10 +1,9 @@
 package peersim.kademlia.das;
 
 /**
- * Fixed Parameters of a kademlia network. They have a default value and can be configured at
- * startup of the network, once only.
+ * Fixed Parameters for the DAS protocol.
  *
- * @author Daniele Furlan, Maurizio Bonani
+ * @author Sergi Rene
  * @version 1.0
  */
 public class KademliaCommonConfigDas {
@@ -34,6 +33,9 @@ public class KademliaCommonConfigDas {
 
   /** Number of samples retrieved for the random sampling */
   public static int N_SAMPLES = 75;
+
+  /** Number of samples returned by a single node */
+  public static int MAX_SAMPLES_RETURNED = 3;
 
   /**
    * short information about current mspastry configuration
