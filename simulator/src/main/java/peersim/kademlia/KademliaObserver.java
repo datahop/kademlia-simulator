@@ -45,6 +45,9 @@ public class KademliaObserver implements Control {
   private static HashMap<String, Map<String, Object>> messages =
       new HashMap<String, Map<String, Object>>();
 
+  private static HashMap<String, Map<String, Object>> find_log =
+      new HashMap<String, Map<String, Object>>();
+
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
 
@@ -57,13 +60,16 @@ public class KademliaObserver implements Control {
     logFolderName = "./logs";
   }
 
+  /** Message writeMap */
   private static void writeMap(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
       Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
+
       String header = "";
       for (Object key : keySet) {
         header += key + ",";
       }
+
       // remove the last comma
       header = header.substring(0, header.length() - 1);
       header += "\n";
@@ -72,10 +78,40 @@ public class KademliaObserver implements Control {
       for (Map<String, Object> entry : messages.values()) {
         String line = "";
         for (Object key : keySet) {
-          line += "," + entry.get(key).toString();
+          line += entry.get(key).toString() + ",";
         }
         // remove the last comma
         line = line.substring(0, line.length() - 1);
+        line += "\n";
+        writer.write(line);
+      }
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /** Write map find operation */
+  private static void writeMapFind(Map<String, Map<String, Object>> map, String filename) {
+    try (FileWriter writer = new FileWriter(filename)) {
+      Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
+      String header = "";
+      for (Object key : keySet) {
+        header += key + ",";
+      }
+
+      // remove the last comma
+      header = header.substring(0, header.length() - 1);
+      header += "\n";
+      writer.write(header);
+
+      for (Map<String, Object> entry : find_log.values()) {
+        String line = "";
+        for (Object key : keySet) {
+          line += entry.get(key).toString() + ",";
+        }
+        // remove the last comma
+        line = line.substring(0, line.length());
         line += "\n";
         writer.write(line);
       }
@@ -92,6 +128,9 @@ public class KademliaObserver implements Control {
     }
     if (!messages.isEmpty()) {
       writeMap(messages, logFolderName + "/" + "messages.csv");
+    }
+    if (!find_log.isEmpty()) {
+      writeMapFind(find_log, logFolderName + "/" + "operation.csv");
     }
   }
 
@@ -137,5 +176,14 @@ public class KademliaObserver implements Control {
 
     assert (!messages.keySet().contains(String.valueOf(m.id)));
     messages.put(String.valueOf(m.id), m.toMap(sent));
+  }
+
+  public static void reportFindOp(OpLogging fLog) {
+    // messages without source are control messages sent by the traffic control
+    // we don't want to log them
+    if (fLog.src == null) {
+      return;
+    }
+    find_log.put(String.valueOf(fLog.id), fLog.toMap());
   }
 }

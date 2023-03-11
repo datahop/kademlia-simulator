@@ -10,6 +10,7 @@ package peersim.kademlia;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -63,6 +64,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private KeyValueStore kv;
 
   private KademliaEvents callback;
+
+  public LinkedHashMap<Long, OpLogging> findLog;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -95,6 +99,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     sentMsg = new TreeMap<Long, Long>();
 
     findOp = new LinkedHashMap<Long, FindOperation>();
+
+    findLog = new LinkedHashMap<Long, OpLogging>();
 
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
@@ -178,8 +184,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     if (m.src != null) {
       routingTable.addNeighbour(m.src.getId());
     }
-
-    // get corresponding find operation (using the message field operationId)
     FindOperation fop = this.findOp.get(m.operationId);
 
     if (fop != null) {
@@ -201,6 +205,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
       if (fop instanceof GetOperation && m.value != null && !fop.isFinished()) {
         fop.setFinished(true);
+
         ((GetOperation) fop).setValue(m.value);
         logger.warning(
             "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
@@ -229,6 +234,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
             // send find request
             sendMessage(request, neighbour, myPid);
+            if (request.getType() == Message.MSG_FIND
+                || request.getType() == Message.MSG_FIND_DIST) {}
           }
         } else if (fop.getAvailableRequests()
             == KademliaCommonConfig.ALPHA) { // no new neighbour and no outstanding requests
@@ -299,7 +306,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // get the ALPHA closest node to destNode
 
     logger.info("handleFind received from " + m.src.getId() + " " + m.operationId);
-
     BigInteger[] neighbours = new BigInteger[KademliaCommonConfig.K];
     if (m.getType() == Message.MSG_FIND || m.getType() == Message.MSG_GET) {
       neighbours = this.routingTable.getNeighbours((BigInteger) m.body, m.src.getId());
@@ -340,6 +346,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // FindOperation fop = new FindOperation(m.dest, m.timestamp);
 
     FindOperation fop;
+
     switch (m.type) {
       case Message.MSG_INIT_FIND:
         fop = new FindOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
@@ -369,7 +376,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     m.operationId = fop.getId();
 
     m.src = this.getKademliaNode();
-
+    
     // send ALPHA messages
     for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
       BigInteger nextNode = fop.getNeighbour();
@@ -389,7 +396,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         logger.info("sendMessage to " + nextNode);
 
         sendMessage(m.copy(), nextNode, myPid);
-        fop.nrHops++;
+        if (m.getType() == Message.MSG_FIND_DIST) {
+          fop.nrHops++;
+        }
       }
     }
   }
@@ -438,7 +447,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // Parse message content Activate the correct event manager fot the particular event
     this.kademliaid = myPid;
-
     Message m;
     if (event instanceof Message) {
       m = (Message) event;
@@ -453,14 +461,26 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         break;
 
       case Message.MSG_INIT_FIND:
+        m = (Message) event;
+        handleInit(m, myPid);
+        break;
       case Message.MSG_INIT_GET:
+        m = (Message) event;
+        break;
+
       case Message.MSG_INIT_PUT:
         m = (Message) event;
         handleInit(m, myPid);
         break;
 
       case Message.MSG_FIND:
+        m = (Message) event;
+        handleFind(m, myPid);
+        break;
       case Message.MSG_FIND_DIST:
+        m = (Message) event;
+        handleFind(m, myPid);
+        break;
       case Message.MSG_GET:
         m = (Message) event;
         handleFind(m, myPid);
@@ -496,6 +516,25 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           this.handleResponse(m1, myPid);
         }
         break;*/
+    }
+    if (event instanceof Message) {
+      OpLogging fLog;
+
+      m = (Message) event;
+      if (this.findLog.get(m.operationId) == null) {
+        fLog = new OpLogging(m.operationId, this.node.getId(), CommonState.getTime(), m.getType());
+        findLog.put(m.operationId, fLog);
+      } else {
+        fLog = this.findLog.get(m.operationId);
+      }
+      /*Operation Logging */
+      fLog.AddMessage(m.id);
+      fLog.SetStop(CommonState.getTime());
+      findLog.put(m.operationId, fLog);
+    }
+
+    for (Map.Entry<Long, OpLogging> entry : findLog.entrySet()) {
+      KademliaObserver.reportFindOp(entry.getValue());
     }
   }
 
