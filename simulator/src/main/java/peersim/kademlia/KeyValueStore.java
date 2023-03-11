@@ -1,6 +1,7 @@
 package peersim.kademlia;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -91,6 +92,15 @@ public class KeyValueStore {
   }
 
   /**
+   * Get all objectrs
+   *
+   * @return All objects in the store
+   */
+  public Collection<Object> getAll() {
+    return mem.values();
+  }
+
+  /**
    * Delete an entry from the memory store
    *
    * @param key The key to delete
@@ -107,5 +117,10 @@ public class KeyValueStore {
   /** Empty the memory store */
   public void erase() {
     mem = new HashMap<BigInteger, Object>();
+  }
+
+  /** Get occupancy */
+  public int occupancy() {
+    return mem.size();
   }
 }

@@ -1,20 +1,20 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.TreeSet;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.kademlia.KademliaCommonConfig;
 
-public class Block implements Iterator<Sample> {
+public class Block implements Iterator<Sample>, Cloneable {
 
   /** The square matrix of samples */
   private Sample[][] blockSamples;
 
   /** Block identifier */
   private long blockId;
-
-  private static long ID_GENERATOR = 0;
 
   /** Row and column numbers used by the iterator */
   private int row, column;
@@ -34,55 +34,82 @@ public class Block implements Iterator<Sample> {
   /** number of samples in a block */
   private int numSamples;
 
-  public Block() {
+  private TreeSet<BigInteger> samples;
+
+  public Block(long id) {
 
     SIZE = 512;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
 
-    this.blockId = (ID_GENERATOR++);
+    samples = new TreeSet<>();
+    this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
     for (int i = 0; i < blockSamples.length; i++) {
-
       for (int j = 0; j < blockSamples[0].length; j++) {
-
         blockSamples[i][j] = new Sample(blockId, i, j, this);
+        samples.add(blockSamples[i][j].getId());
       }
     }
   }
 
-  public Block(int size) {
+  public Block(int size, long id) {
 
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
+    samples = new TreeSet<>();
 
-    this.blockId = (ID_GENERATOR++);
+    this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
     for (int i = 0; i < blockSamples.length; i++) {
-
       for (int j = 0; j < blockSamples[0].length; j++) {
-
         blockSamples[i][j] = new Sample(blockId, i, j, this);
+        samples.add(blockSamples[i][j].getId());
       }
     }
+  }
+
+  public Block(Sample[][] blockSamples, TreeSet<BigInteger> samples, int size, long id) {
+    SIZE = size;
+    this.numSamples = this.SIZE * this.SIZE;
+    _init();
+    this.samples = samples;
+    this.blockSamples = blockSamples;
+    row = column = 0;
+    this.blockId = id;
+  }
+
+  /**
+   * Replicate this object by returning an identical copy.<br>
+   * It is called by the initializer and do not fill any particular field.
+   *
+   * @return Object
+   */
+  public Object clone() {
+    initIterator();
+    Block dolly = new Block(this.blockSamples, this.samples, this.SIZE, this.blockId);
+    return dolly;
   }
 
   /** Compute the radius of the region containing the desired number of copies of each sample */
   public BigInteger computeRegionRadius(int numberOfCopiesPerSample) {
 
-    double totalSamples = ((1.0 * this.numSamples) / Network.size()) * numberOfCopiesPerSample;
-    if (totalSamples < 1.0) totalSamples = 1.0;
-    totalSamples = totalSamples / 2.0;
-
-    System.out.println("INTER_SAMPLE_GAP: " + INTER_SAMPLE_GAP.toString(2));
-
-    BigInteger reg_size = INTER_SAMPLE_GAP.multiply(BigInteger.valueOf(((long) totalSamples)));
-    System.out.println("Radius: " + reg_size.toString(2));
-
-    return reg_size;
+    /**
+     * Calculate the radius by dividing Id space by number of nodes in the network, and multiplying
+     * by number of copies per sample The result is divided by 2 to calculate the radius (instead of
+     * diameter)
+     */
+    BigInteger radius =
+        MAX_KEY
+            .divide(BigInteger.valueOf(Network.size()))
+            .multiply(BigInteger.valueOf(numberOfCopiesPerSample));
+    radius = radius.shiftRight(1);
+    return radius;
   }
 
   public long getBlockId() {
@@ -104,6 +131,17 @@ public class Block implements Iterator<Sample> {
     return samples;
   }
 
+  public Sample[] getNRandomSamples(int n) {
+
+    Sample[] samples = new Sample[n];
+    for (int i = 0; i < samples.length; i++) {
+      int r = CommonState.r.nextInt(SIZE);
+      int c = CommonState.r.nextInt(SIZE);
+      samples[i] = this.blockSamples[r][c];
+    }
+    return samples;
+  }
+
   public Sample getSample(int row, int column) {
     return this.blockSamples[row][column];
   }
@@ -111,7 +149,6 @@ public class Block implements Iterator<Sample> {
   @Override
   public boolean hasNext() {
 
-    // System.out.println("Column " + column + " row " + row);
     if (row < SIZE) return true;
 
     return false;
@@ -144,12 +181,19 @@ public class Block implements Iterator<Sample> {
     return this.numSamples;
   }
 
+  public BigInteger[] getSamplesByRadius(BigInteger peerId, BigInteger radius) {
+    BigInteger top = peerId.add(radius);
+    BigInteger bottom = peerId.subtract(radius);
+
+    Collection subSet = samples.subSet(bottom, true, top, true);
+    return (BigInteger[]) subSet.toArray(new BigInteger[0]);
+  }
+
   private void _init() {
 
     // execute once
     if (_ALREADY_INITIALISED) return;
-
-    MAX_KEY = BigInteger.ZERO.setBit(KademliaCommonConfig.BITS).subtract(BigInteger.ONE);
+    MAX_KEY = BigInteger.ONE.shiftLeft(KademliaCommonConfig.BITS).subtract(BigInteger.ONE);
 
     try {
       INTER_SAMPLE_GAP = MAX_KEY.divide(BigInteger.valueOf(this.numSamples));

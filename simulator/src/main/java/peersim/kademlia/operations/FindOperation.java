@@ -27,12 +27,12 @@ import peersim.kademlia.Util;
 public class FindOperation extends Operation {
 
   /** number of available find request message to send (it must be always less than ALPHA) */
-  private int available_requests;
+  protected int available_requests;
   /**
    * This map contains the K closest nodes and corresponding boolean value that indicates if the
    * nodes has been already queried or not
    */
-  private HashMap<BigInteger, Boolean> closestSet;
+  protected HashMap<BigInteger, Boolean> closestSet;
 
   /**
    * defaul constructor
@@ -52,6 +52,10 @@ public class FindOperation extends Operation {
 
   public int getAvailableRequests() {
     return this.available_requests;
+  }
+
+  public void increaseAvailableRequests() {
+    this.available_requests++;
   }
 
   public void setAvailableRequests(int requests) {

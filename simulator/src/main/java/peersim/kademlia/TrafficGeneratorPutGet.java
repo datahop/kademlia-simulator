@@ -53,7 +53,7 @@ public class TrafficGeneratorPutGet implements Control {
       id = new BigInteger(1, hash);
       Message m = Message.makeInitPutValue(id, value);
       m.timestamp = CommonState.getTime();
-      System.out.println("Put message " + m.body + " " + m.value);
+      // System.out.println("Put message " + m.body + " " + m.value);
       return m;
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();

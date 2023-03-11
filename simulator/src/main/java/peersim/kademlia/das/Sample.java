@@ -4,7 +4,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import peersim.kademlia.KademliaCommonConfig;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Sample {
 
@@ -24,6 +25,7 @@ public class Sample {
     this.block = b;
     this.row = row;
     this.column = column;
+    this.blockId = blockId;
     computeID();
   }
 
@@ -45,7 +47,7 @@ public class Sample {
 
   /** Map this sample to the DHT keyspace */
   public void computeID() {
-    if (KademliaCommonConfig.MAPPING_FN == KademliaCommonConfig.SAMPLE_MAPPING_RANDOM) {
+    if (KademliaCommonConfigDas.MAPPING_FN == KademliaCommonConfigDas.SAMPLE_MAPPING_RANDOM) {
       try {
         String idName =
             String.valueOf(blockId) + "_" + String.valueOf(row) + "x" + String.valueOf(column);
@@ -55,10 +57,12 @@ public class Sample {
       } catch (NoSuchAlgorithmException e) {
         e.printStackTrace();
       }
-    } else if (KademliaCommonConfig.MAPPING_FN
-        == KademliaCommonConfig.SAMPLE_MAPPING_REGION_BASED) {
-      this.id = Block.INTER_SAMPLE_GAP.multiply(BigInteger.valueOf(this.sampleNumberByRow()));
-
+    } else if (KademliaCommonConfigDas.MAPPING_FN
+        == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
+      this.id =
+          Block.INTER_SAMPLE_GAP
+              .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
+              .add(BigInteger.valueOf(blockId));
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
       System.exit(1);
@@ -69,23 +73,40 @@ public class Sample {
   public boolean isInRegion(BigInteger peerID, BigInteger radius) {
     /** (peerID - radius) < this.id < (peerID + radius) */
     if ((this.id.compareTo(peerID.subtract(radius)) == 1)
-        && (this.id.compareTo(peerID.add(radius)) == -1)) return true;
-
-    return false;
+        && (this.id.compareTo(peerID.add(radius)) == -1)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
+  /** Returns the samples ids that are in the region of set of nodes. */
+  public BigInteger[] getNodesInRegion(BigInteger[] nodes, BigInteger radius) {
+
+    List<BigInteger> result = new ArrayList<>();
+    for (BigInteger peerID : nodes)
+      if ((this.id.compareTo(peerID.subtract(radius)) == 1)
+          && (this.id.compareTo(peerID.add(radius)) == -1)) result.add(peerID);
+
+    return (BigInteger[]) result.toArray();
+  }
+
+  /** Row of the sample */
   public int getRow() {
     return this.row;
   }
 
+  /** Column of the sample */
   public int getColumn() {
     return this.column;
   }
 
+  /** Block id which the sample is part of */
   public long getBlockId() {
     return blockId;
   }
 
+  /** Computed identifier of the sample, depending of the mapping mode */
   public BigInteger getId() {
     return id;
   }

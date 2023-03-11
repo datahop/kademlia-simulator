@@ -7,26 +7,28 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
-import peersim.kademlia.KademliaNode;
-import peersim.kademlia.KademliaProtocol;
+import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
+import peersim.kademlia.UniformRandomGenerator;
 
 /**
- * This control generates random search traffic from nodes to random destination node.
- *
- * @author Daniele Furlan, Maurizio Bonani
+ * This control generates samples every 5 min that are stored in a single node (builder) and starts random sampling from the rest of the nodes
+ * In parallel, random lookups are started to start discovering nodes
+ * @author Sergi Rene
  * @version 1.0
  */
 
 // ______________________________________________________________________________________________
-public class TrafficGeneratorSamplePut implements Control {
+public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   /** MSPastry Protocol to act */
-  private static final String PAR_PROT = "protocol";
+  private static final String PAR_KADPROT = "kadprotocol";
+
+  private static final String PAR_DASPROT = "dasprotocol";
 
   /** MSPastry Protocol ID to act */
-  private final int pid;
+  private final int kadpid, daspid;
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -43,8 +45,10 @@ public class TrafficGeneratorSamplePut implements Control {
 
   private boolean first = true, second = true;
   // ______________________________________________________________________________________________
-  public TrafficGeneratorSamplePut(String prefix) {
-    pid = Configuration.getPid(prefix + "." + PAR_PROT);
+  public TrafficGeneratorSample(String prefix) {
+    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
+    daspid = Configuration.getPid(prefix + "." + PAR_DASPROT);
+
     KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
         Configuration.getInt(prefix + "." + PAR_NUM_COPIES);
@@ -55,15 +59,15 @@ public class TrafficGeneratorSamplePut implements Control {
 
   // ______________________________________________________________________________________________
   /**
-   * generates a PUT message for t1 key and string message
+   * generates a GET message for t1 key.
    *
    * @return Message
    */
-  private Message generatePutSampleMessage(Sample s) {
+  private Message generateNewBlockMessage(Block b) {
 
-    Message m = Message.makeInitPutValue(s.getId(), s);
+    Message m = Message.makeInitNewBlock(b);
     m.timestamp = CommonState.getTime();
-    System.out.println("Put message " + m.body + " " + m.value);
+
     return m;
   }
 
@@ -73,11 +77,28 @@ public class TrafficGeneratorSamplePut implements Control {
    *
    * @return Message
    */
-  private Message generateGetSampleMessage(BigInteger sampleId) {
+  private Message generateNewSampleMessage(Sample s) {
 
-    Message m = Message.makeInitGetValue(sampleId);
+    Message m = Message.makeInitGetSample(s.getId());
     m.timestamp = CommonState.getTime();
-    System.out.println("Get message " + m.body + " " + m.value);
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateFindNodeMessage() {
+
+    UniformRandomGenerator urg =
+        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    BigInteger id = urg.generate();
+
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
 
     return m;
   }
@@ -89,80 +110,78 @@ public class TrafficGeneratorSamplePut implements Control {
    * @return boolean
    */
   public boolean execute() {
-
-    /*
-    Node start;
-    do {
-      start = Network.get(CommonState.r.nextInt(Network.size()));
-    } while ((start == null) || (!start.isUp()));
-    */
-    /*
     if (first) {
-      b = new Block(10);
-
-      while (b.hasNext()) {
-        EDSimulator.add(0, generatePutSampleMessage(b.next()), start, pid);
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        if (n.isUp()) {
+          for (int j = 0; j < 3; j++) {
+            int time = CommonState.r.nextInt(300000);
+            Node start = Network.get(i);
+            Message lookup = generateFindNodeMessage();
+            EDSimulator.add(time, lookup, start, kadpid);
+          }
+        }
       }
-      first = false;
-    }*/
-    if (first) {
-      b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-      System.out.println("Number of samples in the block: " + b.getNumSamples());
+    } else {
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        if (n.isUp()) {
+          int time = CommonState.r.nextInt(300000);
+          Node start = Network.get(i);
+          Message lookup = generateFindNodeMessage();
+          EDSimulator.add(time, lookup, start, kadpid);
+        }
+      }
+
+      Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
       while (b.hasNext()) {
         Sample s = b.next();
         boolean inRegion = false;
+
         for (int i = 0; i < Network.size(); i++) {
           Node n = Network.get(i);
-          KademliaProtocol kadProt = ((KademliaProtocol) (n.getProtocol(pid)));
-          KademliaNode kadNode = kadProt.getKademliaNode();
-          if (n.isUp() && s.isInRegion(kadNode.getId(), radius)) {
+          DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
 
-            EDSimulator.add(0, generatePutSampleMessage(s), n, pid);
+          // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
+          // else
+          if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
             totalSamples++;
+            EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
             if (inRegion == false) {
               samplesWithinRegion++;
               inRegion = true;
-              System.out.println(
-                  s.getId().toString(2)
-                      + " is within the radius of "
-                      + kadNode.getId().toString(2));
             }
           }
         }
       }
-      System.out.println("Total samples " + totalSamples);
+
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        Block bis = (Block) b.clone();
+        EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
+      }
+
       System.out.println(
           ""
               + samplesWithinRegion
               + " samples out of "
               + b.getNumSamples()
               + " samples are within a node's region");
+
+      System.out.println("" + totalSamples + " total samples distributed");
       if (samplesWithinRegion != b.getNumSamples()) {
         System.out.println(
             "Error: there are "
                 + (b.getNumSamples() - samplesWithinRegion)
                 + " samples that are not within a region of a peer ");
-        System.exit(1);
+        // System.exit(1);
       }
-    } else if (second) {
-      b.initIterator();
-
-      for (int i = 0; i < Network.size(); i++) {
-        Node start = Network.get(i);
-        if (start.isUp()) {
-          BigInteger[] samples = b.getNRandomSamplesIds(10);
-          for (int j = 0; j < samples.length; j++) {
-            EDSimulator.add(0, generateGetSampleMessage(samples[j]), start, pid);
-          }
-        }
-      }
-
-      second = false;
     }
     ID_GENERATOR++;
+    first = false;
     return false;
   }
 

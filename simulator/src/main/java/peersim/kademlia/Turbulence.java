@@ -115,7 +115,8 @@ public class Turbulence implements Control {
             Node n2 = (Node) o2;
             KademliaProtocol p1 = (KademliaProtocol) (n1.getProtocol(kademliaid));
             KademliaProtocol p2 = (KademliaProtocol) (n2.getProtocol(kademliaid));
-            return Util.put0(p1.getNode().getId()).compareTo(Util.put0(p2.getNode().getId()));
+            return Util.put0(p1.getKademliaNode().getId())
+                .compareTo(Util.put0(p2.getKademliaNode().getId()));
           }
 
           // ______________________________________________________________________________________
@@ -207,13 +208,14 @@ public class Turbulence implements Control {
     } while ((start == null) || (!start.isUp()));
 
     // create auto-search message (search message with destination my own Id)
-    Message m = Message.makeInitFindNode(newKad.getNode().getId());
+    Message m = Message.makeInitFindNode(newKad.getKademliaNode().getId());
     m.timestamp = CommonState.getTime();
 
     // perform initialization
     newKad
         .getRoutingTable()
-        .addNeighbour(((KademliaProtocol) (start.getProtocol(kademliaid))).getNode().getId());
+        .addNeighbour(
+            ((KademliaProtocol) (start.getProtocol(kademliaid))).getKademliaNode().getId());
 
     // start auto-search
     EDSimulator.add(0, m, newNode, kademliaid);
