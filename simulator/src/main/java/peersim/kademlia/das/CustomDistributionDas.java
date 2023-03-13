@@ -19,18 +19,30 @@ import peersim.kademlia.UniformRandomGenerator;
  */
 public class CustomDistributionDas implements peersim.core.Control {
 
-  private static final String PAR_PROT = "protocolkad";
+  private static final String PAR_PROT_KAD = "protocolkad";
   private static final String PAR_PROT_DAS = "protocoldas";
+  private static final String PAR_PROT_EVIL_KAD = "protocolEvilkad";
+  private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
+  private static final String PAR_EVIL_RATIO = "evilNodeRatio";
 
-  private int protocolID;
+  /** Protocol identifiers for Kademlia, DAS, etc. * */
+  private int protocolKadID;
+
+  private int protocolEvilKadID;
   private int protocolDasID;
+  private int protocolEvilDasID;
+  /** Ratio of evil nodes to total number of nodes * */
+  private double evilRatio;
 
   private BigInteger builderAddress;
   private UniformRandomGenerator urg;
 
   public CustomDistributionDas(String prefix) {
-    protocolID = Configuration.getPid(prefix + "." + PAR_PROT);
+    protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
+    protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
     protocolDasID = Configuration.getPid(prefix + "." + PAR_PROT_DAS);
+    protocolEvilDasID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_DAS);
+    evilRatio = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO, 0.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
   }
 
@@ -41,29 +53,43 @@ public class CustomDistributionDas implements peersim.core.Control {
    * @return boolean always false
    */
   public boolean execute() {
-    // BigInteger tmp;
+    int numEvilNodes = (int) (Network.size() * evilRatio);
+    System.out.println("Number of malicious nodes: " + numEvilNodes);
+
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
       BigInteger id;
-      // BigInteger attackerID = null;
       KademliaNode node;
-      // String ip_address;
       id = urg.generate();
-      // node = new KademliaNode(id, randomIpAddress(r), 0);
       node = new KademliaNode(id, "0.0.0.0", 0);
 
-      KademliaProtocol kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolID)));
+      KademliaProtocol kadProt = null;
+      DASProtocol dasProt = null;
+
+      /** Generate honest and evil nodes * */
+      if ((i > 0) && (i < (numEvilNodes + 1))) {
+        kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolEvilKadID)));
+        dasProt = ((EvilDASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
+        kadProt.setProtocolID(protocolEvilKadID);
+        node.setEvil(true);
+        dasProt.setDASProtocolID(protocolEvilDasID);
+      } else {
+        kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
+        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
+        dasProt.setDASProtocolID(protocolDasID);
+        kadProt.setProtocolID(protocolKadID);
+      }
+
       generalNode.setKademliaProtocol(kadProt);
+      generalNode.setDASProtocol(dasProt);
       kadProt.setNode(node);
-      kadProt.setProtocolID(protocolID);
-      DASProtocol dasProtocol = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
-      dasProtocol.setKademliaProtocol(kadProt);
-      kadProt.setEventsCallback(dasProtocol);
+      dasProt.setKademliaProtocol(kadProt);
+      kadProt.setEventsCallback(dasProt);
 
       if (i == 0) {
-        dasProtocol.setBuilder(true);
-        builderAddress = dasProtocol.getKademliaProtocol().getKademliaNode().getId();
-      } else dasProtocol.setBuilderAddress(builderAddress);
+        dasProt.setBuilder(true);
+        builderAddress = dasProt.getKademliaProtocol().getKademliaNode().getId();
+      } else dasProt.setBuilderAddress(builderAddress);
     }
 
     return false;

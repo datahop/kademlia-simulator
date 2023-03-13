@@ -12,8 +12,10 @@ import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
 
 /**
- * This control generates samples every 5 min that are stored in a single node (builder) and starts random sampling from the rest of the nodes
- * In parallel, random lookups are started to start discovering nodes
+ * This control generates samples every 5 min that are stored in a single node (builder) and starts
+ * random sampling from the rest of the nodes In parallel, random lookups are started to start
+ * discovering nodes
+ *
  * @author Sergi Rene
  * @version 1.0
  */
@@ -118,6 +120,7 @@ public class TrafficGeneratorSample implements Control {
             int time = CommonState.r.nextInt(300000);
             Node start = Network.get(i);
             Message lookup = generateFindNodeMessage();
+            int kadpid = n.getKademliaProtocol().getProtocolID();
             EDSimulator.add(time, lookup, start, kadpid);
           }
         }
@@ -129,6 +132,7 @@ public class TrafficGeneratorSample implements Control {
           int time = CommonState.r.nextInt(300000);
           Node start = Network.get(i);
           Message lookup = generateFindNodeMessage();
+          int kadpid = n.getKademliaProtocol().getProtocolID();
           EDSimulator.add(time, lookup, start, kadpid);
         }
       }
@@ -143,12 +147,11 @@ public class TrafficGeneratorSample implements Control {
 
         for (int i = 0; i < Network.size(); i++) {
           Node n = Network.get(i);
-          DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+          DASProtocol dasProt = (DASProtocol) (n.getDASProtocol());
 
-          // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
-          // else
           if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
             totalSamples++;
+            int daspid = n.getDASProtocol().getDASProtocolID();
             EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
             if (inRegion == false) {
               samplesWithinRegion++;
@@ -161,6 +164,7 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         Block bis = (Block) b.clone();
+        int daspid = n.getDASProtocol().getDASProtocolID();
         EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
       }
 

@@ -20,6 +20,7 @@ package peersim.core;
 
 import peersim.config.*;
 import peersim.kademlia.KademliaProtocol;
+import peersim.kademlia.das.DASProtocol;
 
 /** This is the default {@link Node} class that is used to compose the {@link Network}. */
 public class GeneralNode implements Node {
@@ -50,6 +51,9 @@ public class GeneralNode implements Node {
 
   /** The KademliaProtocol instance that this node is running. */
   private KademliaProtocol kadProtocol;
+
+  /** The DASProtocol instance that this node is running. */
+  private DASProtocol dasProtocol;
 
   // ================ constructor and initialization =================
   // =================================================================
@@ -181,7 +185,17 @@ public class GeneralNode implements Node {
   }
 
   // ------------------------------------------------------------------
+  public void setDASProtocol(DASProtocol proto) {
+    this.dasProtocol = proto;
+  }
 
+  // ------------------------------------------------------------------
+
+  public DASProtocol getDASProtocol() {
+    return this.dasProtocol;
+  }
+
+  // ------------------------------------------------------------------
   /**
    * Returns the ID of this node. The IDs are generated using a counter (i.e. they are not random).
    */
