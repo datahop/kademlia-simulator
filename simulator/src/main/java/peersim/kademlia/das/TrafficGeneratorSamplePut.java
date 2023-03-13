@@ -119,8 +119,8 @@ public class TrafficGeneratorSamplePut implements Control {
           KademliaProtocol kadProt = ((KademliaProtocol) (n.getProtocol(pid)));
           KademliaNode kadNode = kadProt.getKademliaNode();
           if (n.isUp() && s.isInRegion(kadNode.getId(), radius)) {
-
-            EDSimulator.add(0, generatePutSampleMessage(s), n, pid);
+            int daspid = n.getDASProtocol().getDASProtocolID();
+            EDSimulator.add(0, generatePutSampleMessage(s), n, daspid);
             totalSamples++;
             if (inRegion == false) {
               samplesWithinRegion++;
@@ -155,7 +155,8 @@ public class TrafficGeneratorSamplePut implements Control {
         if (start.isUp()) {
           BigInteger[] samples = b.getNRandomSamplesIds(10);
           for (int j = 0; j < samples.length; j++) {
-            EDSimulator.add(0, generateGetSampleMessage(samples[j]), start, pid);
+            int daspid = start.getDASProtocol().getDASProtocolID();
+            EDSimulator.add(0, generateGetSampleMessage(samples[j]), start, daspid);
           }
         }
       }

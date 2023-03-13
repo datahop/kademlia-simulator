@@ -7,12 +7,11 @@ import java.util.List;
 // import java.util.Random;
 import peersim.core.CommonState;
 
-/**Structure used to store discovered nodes in the network and feed the random sampling process */
+/** Structure used to store discovered nodes in the network and feed the random sampling process */
 public class SearchTable {
 
   /** List of ids discovered */
   private List<BigInteger> nodes;
-
 
   public SearchTable() {
 
@@ -23,7 +22,6 @@ public class SearchTable {
   public void addNode(BigInteger[] neighbours) {
     // if (samples == null)
     nodes.addAll(Arrays.asList(neighbours));
-
   }
 
   /** Get any randomn node from the list */
@@ -47,5 +45,4 @@ public class SearchTable {
   public BigInteger[] getAllNeighbours() {
     return (BigInteger[]) nodes.toArray(new BigInteger[0]);
   }
-
 }

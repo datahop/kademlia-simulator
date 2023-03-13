@@ -556,6 +556,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     this.kademliaid = protocolID;
   }
 
+  /** Get the protocol ID for this node. */
+  public int getProtocolID() {
+    return this.kademliaid;
+  }
+
   /**
    * set the current NodeId
    *

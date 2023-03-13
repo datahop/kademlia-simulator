@@ -34,29 +34,29 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   private static final String PAR_DASPROTOCOL = "dasprotocol";
   private static final String PAR_KADEMLIA = "kademlia";
 
-  private static String prefix = null;
-  private UnreliableTransport transport;
-  private int tid;
-  private int kademliaId;
-  // private int kademliaId;
+  protected static String prefix = null;
+  protected UnreliableTransport transport;
+  protected int tid;
+  protected int kademliaId;
+  protected int dasID;
 
-  private KademliaProtocol kadProtocol;
+  protected KademliaProtocol kadProtocol;
   /** allow to call the service initializer only once */
-  private static boolean _ALREADY_INSTALLED = false;
+  protected static boolean _ALREADY_INSTALLED = false;
 
-  private Logger logger;
+  protected Logger logger;
 
-  private BigInteger builderAddress;
+  protected BigInteger builderAddress;
 
-  private boolean isBuilder;
+  protected boolean isBuilder;
 
-  private KeyValueStore kv;
+  protected KeyValueStore kv;
 
-  private SearchTable searchTable;
+  protected SearchTable searchTable;
 
-  private Block currentBlock;
+  protected Block currentBlock;
 
-  private LinkedHashMap<Long, RandomSamplingOperation> samplingOp;
+  protected LinkedHashMap<Long, RandomSamplingOperation> samplingOp;
 
   /**
    * Replicate this object by returning an identical copy.<br>
@@ -77,10 +77,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    */
   public DASProtocol(String prefix) {
 
-    DASProtocol.prefix = prefix;
+    if (DASProtocol.prefix == null) DASProtocol.prefix = prefix;
     _init();
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
-    // System.out.println("New DASProtocol");
 
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
     kv = new KeyValueStore();
@@ -92,7 +91,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * This procedure is called only once and allow to inizialize the internal state of protocol.
    * Every node shares the same configuration, so it is sufficient to call this routine once.
    */
-  private void _init() {
+  protected void _init() {
     // execute once
     if (_ALREADY_INSTALLED) return;
 
@@ -141,7 +140,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    *
    * @param prot KademliaProtocol
    */
-  public void setKademliaProtocol(KademliaProtocol prot) {
+  protected void setKademliaProtocol(KademliaProtocol prot) {
     this.kadProtocol = prot;
     this.logger = prot.getLogger();
   }
@@ -151,7 +150,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    *
    * @return KademliaProtocol
    */
-  public KademliaProtocol getKademliaProtocol() {
+  protected KademliaProtocol getKademliaProtocol() {
     return kadProtocol;
   }
 
@@ -177,7 +176,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInitNewBlock(Message m, int myPid) {
+  protected void handleInitNewBlock(Message m, int myPid) {
     currentBlock = (Block) m.body;
 
     if (isBuilder()) {
@@ -198,7 +197,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInitGetSample(Message m, int myPid) {
+  protected void handleInitGetSample(Message m, int myPid) {
     BigInteger[] sampleId = new BigInteger[1];
     sampleId[0] = (BigInteger) m.body;
 
@@ -215,7 +214,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     sendMessage(msg, builderAddress, myPid);
   }
 
-  private void handleGetSample(Message m, int myPid) {
+  protected void handleGetSample(Message m, int myPid) {
 
     logger.info("KV size " + kv.occupancy());
 
@@ -243,7 +242,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     sendMessage(response, m.src.getId(), myPid);
   }
 
-  private void handleGetSampleResponse(Message m, int myPid) {
+  protected void handleGetSampleResponse(Message m, int myPid) {
 
     if (m.body == null) return;
 
@@ -314,7 +313,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param destId the Id of the destination node
    * @param myPid the sender Pid
    */
-  private void sendMessage(Message m, BigInteger destId, int myPid) {
+  protected void sendMessage(Message m, BigInteger destId, int myPid) {
 
     // int destpid;
     assert m.src != null;
@@ -325,8 +324,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
+    int daspid = dest.getDASProtocol().getDASProtocolID();
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
-    transport.send(src, dest, m, myPid);
+    transport.send(src, dest, m, daspid);
   }
 
   // ______________________________________________________________________________________________
@@ -335,7 +335,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    *
    * @return Message
    */
-  private Message generateGetSampleMessage(BigInteger[] sampleId) {
+  protected Message generateGetSampleMessage(BigInteger[] sampleId) {
 
     Message m = new Message(Message.MSG_GET_SAMPLE, sampleId);
     m.timestamp = CommonState.getTime();
@@ -371,7 +371,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param m initial message
    * @param myPid protocol pid
    */
-  private void startRandomSampling(Message m, int myPid) {
+  protected void startRandomSampling(Message m, int myPid) {
 
     RandomSamplingOperation op =
         new RandomSamplingOperation(this.getKademliaId(), null, searchTable, m.timestamp);
@@ -399,5 +399,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         op.nrHops++;
       }
     }
+  }
+
+  /** Set the protocol ID for this node. */
+  public void setDASProtocolID(int protocolID) {
+    this.dasID = protocolID;
+  }
+
+  /** Get the protocol ID for this node. */
+  public int getDASProtocolID() {
+    return this.dasID;
   }
 }
