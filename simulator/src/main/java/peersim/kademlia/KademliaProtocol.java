@@ -376,7 +376,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     m.operationId = fop.getId();
 
     m.src = this.getKademliaNode();
-    
+
     // send ALPHA messages
     for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
       BigInteger nextNode = fop.getNeighbour();
@@ -551,6 +551,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** Set the protocol ID for this node. */
   public void setProtocolID(int protocolID) {
     this.kademliaid = protocolID;
+  }
+
+  /** Get the protocol ID for this node. */
+  public int getProtocolID() {
+    return this.kademliaid;
   }
 
   /**
