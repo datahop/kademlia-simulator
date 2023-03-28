@@ -198,7 +198,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         kv.add(s.getId(), s);
       }
     } else if (isValidator()) {
-      startRowsandColumnsFetch(m,myPid);
+      startRowsandColumnsFetch(m, myPid);
       startRandomSampling(m, myPid);
     } else {
       startRandomSampling(m, myPid);
@@ -414,14 +414,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     }
   }
 
-
   /**
-   * Starts  getting rows and columns, only for validators
+   * Starts getting rows and columns, only for validators
    *
    * @param m initial message
    * @param myPid protocol pid
    */
-  private void startRowsandColumnsFetch(Message m, int myPid) {
-  }
-
+  private void startRowsandColumnsFetch(Message m, int myPid) {}
 }
