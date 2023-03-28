@@ -50,6 +50,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private boolean isBuilder;
 
+  private boolean isValidator;
+
   private KeyValueStore kv;
 
   private SearchTable searchTable;
@@ -163,6 +165,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     this.isBuilder = isBuilder;
   }
 
+  public boolean isValidator() {
+    return this.isValidator;
+  }
+
+  public void setValidator(boolean isValidator) {
+    this.isValidator = isValidator;
+  }
+
   public void setBuilderAddress(BigInteger address) {
     this.builderAddress = address;
   }
@@ -187,6 +197,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         Sample s = currentBlock.next();
         kv.add(s.getId(), s);
       }
+    } else if (isValidator()) {
+      startRowsandColumnsFetch(m,myPid);
+      startRandomSampling(m, myPid);
     } else {
       startRandomSampling(m, myPid);
     }
@@ -400,4 +413,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       }
     }
   }
+
+
+  /**
+   * Starts  getting rows and columns, only for validators
+   *
+   * @param m initial message
+   * @param myPid protocol pid
+   */
+  private void startRowsandColumnsFetch(Message m, int myPid) {
+  }
+
 }
