@@ -17,7 +17,7 @@ public class Sample {
   private BigInteger id;
   /** The key of a sample in the DHT keyspace using rows number */
   private BigInteger idByRow;
-  /** The key of a sample in the DHT keyspace using column number*/
+  /** The key of a sample in the DHT keyspace using column number */
   private BigInteger idByColumn;
   /** Block that this sample is part of */
   private Block block;
@@ -70,9 +70,10 @@ public class Sample {
               .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
               .add(BigInteger.valueOf(blockId));
       this.idByRow = this.id;
-      this.idByColumn =           Block.INTER_SAMPLE_GAP
-      .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
-      .add(BigInteger.valueOf(blockId));
+      this.idByColumn =
+          Block.INTER_SAMPLE_GAP
+              .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
+              .add(BigInteger.valueOf(blockId));
 
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
@@ -85,6 +86,28 @@ public class Sample {
     /** (peerID - radius) < this.id < (peerID + radius) */
     if ((this.id.compareTo(peerID.subtract(radius)) == 1)
         && (this.id.compareTo(peerID.add(radius)) == -1)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /** Given the peerID of a node, determine if this sample falls within the region of the node. */
+  public boolean isInRegionByColumn(BigInteger peerID, BigInteger radius) {
+    /** (peerID - radius) < this.id < (peerID + radius) */
+    if ((this.idByColumn.compareTo(peerID.subtract(radius)) == 1)
+        && (this.idByColumn.compareTo(peerID.add(radius)) == -1)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /** Given the peerID of a node, determine if this sample falls within the region of the node. */
+  public boolean isInRegionByRow(BigInteger peerID, BigInteger radius) {
+    /** (peerID - radius) < this.id < (peerID + radius) */
+    if ((this.idByRow.compareTo(peerID.subtract(radius)) == 1)
+        && (this.idByRow.compareTo(peerID.add(radius)) == -1)) {
       return true;
     } else {
       return false;
@@ -122,16 +145,18 @@ public class Sample {
     return id;
   }
 
-  /** Computed identifier of the sample, using rows as reference
-   * The id is equal to general id in case of random mapping
+  /**
+   * Computed identifier of the sample, using rows as reference The id is equal to general id in
+   * case of random mapping
    */
   public BigInteger getIdByRow() {
     return idByRow;
   }
 
-  /** Computed identifier of the sample, using columns as reference 
-   * The id is equal to general id in case of random mapping
-  */
+  /**
+   * Computed identifier of the sample, using columns as reference The id is equal to general id in
+   * case of random mapping
+   */
   public BigInteger getIdByColumn() {
     return idByColumn;
   }
