@@ -15,9 +15,9 @@ public class Sample {
   private long blockId;
   /** The key of a sample in the DHT keyspace (after mapping) */
   private BigInteger id;
-  /** The key of a sample in the DHT keyspace (after mapping) */
+  /** The key of a sample in the DHT keyspace using rows number */
   private BigInteger idByRow;
-  /** The key of a sample in the DHT keyspace (after mapping) */
+  /** The key of a sample in the DHT keyspace using column number*/
   private BigInteger idByColumn;
   /** Block that this sample is part of */
   private Block block;
@@ -73,7 +73,7 @@ public class Sample {
       this.idByColumn =           Block.INTER_SAMPLE_GAP
       .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
       .add(BigInteger.valueOf(blockId));
-      
+
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
       System.exit(1);
@@ -120,5 +120,19 @@ public class Sample {
   /** Computed identifier of the sample, depending of the mapping mode */
   public BigInteger getId() {
     return id;
+  }
+
+  /** Computed identifier of the sample, using rows as reference
+   * The id is equal to general id in case of random mapping
+   */
+  public BigInteger getIdByRow() {
+    return idByRow;
+  }
+
+  /** Computed identifier of the sample, using columns as reference 
+   * The id is equal to general id in case of random mapping
+  */
+  public BigInteger getIdByColumn() {
+    return idByColumn;
   }
 }
