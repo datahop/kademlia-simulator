@@ -205,6 +205,22 @@ public class Block implements Iterator<Sample>, Cloneable {
     return samples;
   }
 
+  public BigInteger[] getSamplesIdsByRowId(int row) {
+    BigInteger[] samples = new BigInteger[this.SIZE];
+    for (int i = 0; i < samples.length; i++) {
+      samples[i] = this.blockSamples[row][i].getIdByRow();
+    }
+    return samples;
+  }
+
+  public BigInteger[] getSamplesIdsByColumnId(int column) {
+    BigInteger[] samples = new BigInteger[this.SIZE];
+    for (int i = 0; i < samples.length; i++) {
+      samples[i] = this.blockSamples[i][column].getIdByColumn();
+    }
+    return samples;
+  }
+
   private void _init() {
 
     // execute once
