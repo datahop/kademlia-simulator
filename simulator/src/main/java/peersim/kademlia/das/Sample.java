@@ -15,13 +15,17 @@ public class Sample {
   private long blockId;
   /** The key of a sample in the DHT keyspace (after mapping) */
   private BigInteger id;
+  /** The key of a sample in the DHT keyspace (after mapping) */
+  private BigInteger idByRow;
+  /** The key of a sample in the DHT keyspace (after mapping) */
+  private BigInteger idByColumn;
   /** Block that this sample is part of */
   private Block block;
 
   /** Initialise a sample instance and map it to the keyspace */
   public Sample(long blockId, int row, int column, Block b) {
 
-    this.id = null;
+    this.id = this.idByColumn = this.idByRow = null;
     this.block = b;
     this.row = row;
     this.column = column;
@@ -54,6 +58,8 @@ public class Sample {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(idName.getBytes(StandardCharsets.UTF_8));
         this.id = new BigInteger(1, hash);
+        this.idByColumn = this.id;
+        this.idByRow = this.id;
       } catch (NoSuchAlgorithmException e) {
         e.printStackTrace();
       }
@@ -63,6 +69,11 @@ public class Sample {
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
               .add(BigInteger.valueOf(blockId));
+      this.idByRow = this.id;
+      this.idByColumn =           Block.INTER_SAMPLE_GAP
+      .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
+      .add(BigInteger.valueOf(blockId));
+      
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
       System.exit(1);
