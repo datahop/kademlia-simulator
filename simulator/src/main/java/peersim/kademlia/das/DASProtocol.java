@@ -189,7 +189,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    */
   private void handleInitNewBlock(Message m, int myPid) {
     currentBlock = (Block) m.body;
-
+    kv.erase();
     if (isBuilder()) {
 
       logger.info("Builder new block:" + currentBlock.getBlockId());
