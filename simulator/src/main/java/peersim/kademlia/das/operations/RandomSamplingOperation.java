@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import peersim.core.CommonState;
+import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Sample;
@@ -18,7 +19,6 @@ import peersim.kademlia.operations.FindOperation;
  */
 public class RandomSamplingOperation extends FindOperation {
 
-  private SearchTable rou;
   private List<BigInteger> samples;
   /**
    * default constructor
@@ -30,7 +30,6 @@ public class RandomSamplingOperation extends FindOperation {
   public RandomSamplingOperation(
       BigInteger srcNode, BigInteger destNode, SearchTable rou, long timestamp) {
     super(srcNode, destNode, timestamp);
-    this.rou = rou;
     samples = new ArrayList<>();
     for (BigInteger id : rou.getAllNeighbours()) closestSet.put(id, false);
   }
@@ -75,5 +74,33 @@ public class RandomSamplingOperation extends FindOperation {
     // System.out.println("Samples num " + samples.size());
     if (samples.size() >= KademliaCommonConfigDas.N_SAMPLES) return true;
     else return false;
+  }
+
+  public BigInteger[] startSampling() {
+    setAvailableRequests(KademliaCommonConfig.ALPHA);
+
+    List<BigInteger> nextNodes = new ArrayList<>();
+    // send ALPHA messages
+    for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
+      BigInteger nextNode = getNeighbour();
+      if (nextNode != null) {
+        nextNodes.add(nextNode);
+      }
+    }
+    return nextNodes.toArray(new BigInteger[0]);
+  }
+
+  public BigInteger[] continueSampling() {
+
+    List<BigInteger> nextNodes = new ArrayList<>();
+
+    while ((getAvailableRequests() > 0)) { // I can send a new find request
+
+      // get an available neighbour
+      BigInteger nextNode = getNeighbour();
+      nextNodes.add(nextNode);
+    }
+
+    return nextNodes.toArray(new BigInteger[0]);
   }
 }
