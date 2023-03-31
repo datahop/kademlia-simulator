@@ -25,6 +25,7 @@ import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.operations.RandomSamplingOperation;
+import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 import peersim.transport.UnreliableTransport;
 
@@ -58,7 +59,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private Block currentBlock;
 
-  private LinkedHashMap<Long, RandomSamplingOperation> samplingOp;
+  private LinkedHashMap<Long, SamplingOperation> samplingOp;
 
   /**
    * Replicate this object by returning an identical copy.<br>
@@ -87,7 +88,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
     kv = new KeyValueStore();
     searchTable = new SearchTable();
-    samplingOp = new LinkedHashMap<Long, RandomSamplingOperation>();
+    samplingOp = new LinkedHashMap<Long, SamplingOperation>();
   }
 
   /**
@@ -197,11 +198,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         Sample s = currentBlock.next();
         kv.add(s.getId(), s);
       }
-    } else if (isValidator()) {
+    } else /*if (isValidator()) {
+             startRowsandColumnsFetch(m, myPid);
+             startRandomSampling(m, myPid);
+           } else */ {
       startRowsandColumnsFetch(m, myPid);
-      startRandomSampling(m, myPid);
-    } else {
-      startRandomSampling(m, myPid);
+      // startRandomSampling(m, myPid);
     }
   }
 
@@ -266,18 +268,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       kv.add((BigInteger) s.getId(), s);
     }
 
-    RandomSamplingOperation op = samplingOp.get(m.operationId);
+    SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     if (op != null) {
       op.elaborateResponse(samples);
-      logger.info(
-          "Continue operation "
-              + op.getId()
-              + " "
-              + op.getAvailableRequests()
-              + " "
-              + op.nrHops
-              + " "
-              + op.getSamples().size());
+      logger.warning(
+          "Continue operation " + op.getId() + " " + op.getAvailableRequests() + " " + op.nrHops);
+      // + " "
+      // + op.getReceivedSamples().length);
 
       if (!op.completed()) {
         BigInteger[] nextNodes = op.continueSampling();
@@ -296,9 +293,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
           op.nrHops++;
         }
       } else {
-        logger.warning("Operation completed with " + op.getSamples().size() + " samples");
+        // logger.warning("Operation completed with " + op.getReceivedSamples().length + "
+        // samples");
       }
- 
     }
   }
 
@@ -400,12 +397,21 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param myPid protocol pid
    */
   private void startRowsandColumnsFetch(Message m, int myPid) {
+    logger.info("Starting rows and columns fetch");
     ValidatorSamplingOperation op =
-    new ValidatorSamplingOperation(this.getKademliaId(), null, searchTable, m.timestamp);
+        new ValidatorSamplingOperation(
+            this.getKademliaId(), null, searchTable, m.timestamp, currentBlock);
     samplingOp.put(op.getId(), op);
     BigInteger[] nodes = op.startSampling();
 
+    if (nodes == null || nodes.length == 0) {
+      logger.warning("No nodes found");
+      return;
+    }
+
     for (BigInteger nextNode : nodes) {
+      logger.warning("Next node " + nextNode);
+
       BigInteger[] samples = op.getSamples(currentBlock, nextNode);
 
       if (nextNode.compareTo(builderAddress) == 0 || samples.length == 0) {
@@ -419,7 +425,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
 
       sendMessage(msg, nextNode, myPid);
-      // logger.info("Sending sample request to: " + nextNode + " " + samples.length + " samples");
+      logger.warning("Sending sample request to: " + nextNode + " " + samples.length + " samples");
       op.nrHops++;
     }
   }

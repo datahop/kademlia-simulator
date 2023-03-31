@@ -114,8 +114,8 @@ public class Sample {
     }
   }
 
-  /** Returns the samples ids that are in the region of set of nodes. */
-  public BigInteger[] getSamplesInNodeRegion(BigInteger[] nodes, BigInteger radius) {
+  /** Given a set of nodes returns the nodes that are in the region of the sample. */
+  public BigInteger[] getNodesInSampleRegion(BigInteger[] nodes, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
     for (BigInteger peerID : nodes)

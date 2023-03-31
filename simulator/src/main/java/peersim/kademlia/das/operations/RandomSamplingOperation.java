@@ -9,7 +9,6 @@ import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
-import peersim.kademlia.operations.FindOperation;
 
 /**
  * This class represents a random sampling operation that collects samples from random nodes
@@ -17,7 +16,7 @@ import peersim.kademlia.operations.FindOperation;
  * @author Sergi Rene
  * @version 1.0
  */
-public class RandomSamplingOperation extends FindOperation {
+public class RandomSamplingOperation extends SamplingOperation {
 
   private List<BigInteger> samples;
   /**
@@ -45,7 +44,7 @@ public class RandomSamplingOperation extends FindOperation {
 
     if (res != null) {
       closestSet.remove(res);
-      closestSet.put(res, true);
+      // closestSet.put(res, true);
       // increaseUsed(res);
       this.available_requests--; // decrease available request
     }
@@ -66,9 +65,9 @@ public class RandomSamplingOperation extends FindOperation {
         peerId, b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
   }
 
-  public List<BigInteger> getSamples() {
+  /*public List<BigInteger> getReceivedSamples() {
     return samples;
-  }
+  }*/
 
   public boolean completed() {
     // System.out.println("Samples num " + samples.size());
