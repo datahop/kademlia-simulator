@@ -8,7 +8,7 @@ import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Sample;
-import peersim.kademlia.das.SearchTable;
+// import peersim.kademlia.das.SearchTable;
 
 /**
  * This class represents a random sampling operation that collects samples from random nodes
@@ -26,11 +26,10 @@ public class RandomSamplingOperation extends SamplingOperation {
    * @param destNode Id of the node to find
    * @param timestamp Id of the node to find
    */
-  public RandomSamplingOperation(
-      BigInteger srcNode, BigInteger destNode, SearchTable rou, long timestamp) {
+  public RandomSamplingOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
     super(srcNode, destNode, timestamp);
     samples = new ArrayList<>();
-    for (BigInteger id : rou.getAllNeighbours()) closestSet.put(id, false);
+    // for (BigInteger id : rou.getAllNeighbours()) closestSet.put(id, false);
   }
 
   public BigInteger getNeighbour() {
@@ -101,5 +100,13 @@ public class RandomSamplingOperation extends SamplingOperation {
     }
 
     return nextNodes.toArray(new BigInteger[0]);
+  }
+
+  @Override
+  public void addNodes(List<BigInteger> nodes) {
+
+    for (BigInteger node : nodes) {
+      closestSet.put(node, false);
+    }
   }
 }

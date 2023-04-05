@@ -118,20 +118,32 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         nextNodes.add(nextNode);
       }
     }
-    return nextNodes.toArray(new BigInteger[0]);
+    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
+    return new BigInteger[0];
   }
 
   public BigInteger[] continueSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    while ((getAvailableRequests() > 0)) { // I can send a new find request
+    System.out.println("continueSampling " + getAvailableRequests());
+    while (getAvailableRequests() > 0) { // I can send a new find request
 
       // get an available neighbour
       BigInteger nextNode = getNeighbour();
-      nextNodes.add(nextNode);
+      if (nextNode != null) {
+        nextNodes.add(nextNode);
+      } else {
+        break;
+      }
     }
+    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
+    return new BigInteger[0];
+  }
 
-    return nextNodes.toArray(new BigInteger[0]);
+  @Override
+  public void addNodes(List<BigInteger> nodes) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'addNodes'");
   }
 }
