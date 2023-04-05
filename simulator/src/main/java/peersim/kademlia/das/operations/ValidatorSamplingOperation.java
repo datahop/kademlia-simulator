@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaCommonConfig;
+import peersim.kademlia.RoutingTable;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Sample;
-import peersim.kademlia.das.SearchTable;
 
 /**
  * This class represents a random sampling operation that collects samples from random nodes
@@ -22,6 +22,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   private HashMap<BigInteger, Boolean> row;
   private HashMap<BigInteger, Boolean> column;
   private boolean completed;
+  private RoutingTable rou;
+  private BigInteger rowId, columnId;
   /**
    * default constructor
    *
@@ -30,23 +32,28 @@ public class ValidatorSamplingOperation extends SamplingOperation {
    * @param timestamp Id of the node to find
    */
   public ValidatorSamplingOperation(
-      BigInteger srcNode, BigInteger destNode, SearchTable rou, long timestamp, Block block) {
+      BigInteger srcNode, BigInteger destNode, long timestamp, Block block) {
     super(srcNode, destNode, timestamp);
     row = new HashMap<>();
     column = new HashMap<>();
+
     for (BigInteger sample : block.getSamplesIdsByColumn(CommonState.r.nextInt(block.getSize()))) {
+      if (rowId == null) rowId = sample;
       column.put(sample, false);
     }
     for (BigInteger sample : block.getSamplesIdsByRow(CommonState.r.nextInt(block.getSize()))) {
+      if (columnId == null) columnId = sample;
       row.put(sample, false);
     }
+
+    rou = new RoutingTable(KademliaCommonConfig.NBUCKETS, 0, 0);
     completed = false;
-    for (BigInteger id : rou.getAllNeighbours()) {
+    /*for (BigInteger id : rou.getAllNeighbours()) {
       BigInteger[] samples = getSamples(block, id);
       for (BigInteger s : samples) {
-        if (row.containsKey(s) || row.containsKey(s)) closestSet.put(id, false);
+        if (row.containsKey(s) || column.containsKey(s)) closestSet.put(id, false);
       }
-    }
+    }*/
   }
 
   public BigInteger getNeighbour() {
@@ -65,6 +72,14 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       this.available_requests--; // decrease available request
     }
     return res;
+  }
+
+  public BigInteger getRow() {
+    return rowId;
+  }
+
+  public BigInteger getColumn() {
+    return columnId;
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -126,7 +141,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    System.out.println("continueSampling " + getAvailableRequests());
+    // System.out.println("continueSampling " + getAvailableRequests());
     while (getAvailableRequests() > 0) { // I can send a new find request
 
       // get an available neighbour

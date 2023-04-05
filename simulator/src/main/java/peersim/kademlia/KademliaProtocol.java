@@ -25,6 +25,7 @@ import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
+import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
 import peersim.transport.UnreliableTransport;
 
@@ -193,19 +194,19 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       // save received neighbour in the closest Set of fin operation
 
       BigInteger[] neighbours = (BigInteger[]) m.body;
-      if (callback != null) callback.nodesFound(neighbours);
+      if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
       if (!fop.isFinished() && Arrays.asList(neighbours).contains(fop.getDestNode())) {
         logger.warning("Found node " + fop.getDestNode());
-
+        if (callback != null) callback.operationComplete(fop);
         KademliaObserver.find_ok.add(1);
         fop.setFinished(true);
       }
 
       if (fop instanceof GetOperation && m.value != null && !fop.isFinished()) {
         fop.setFinished(true);
-
+        callback.operationComplete(fop);
         ((GetOperation) fop).setValue(m.value);
         logger.warning(
             "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
@@ -260,8 +261,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             logger.warning("Getprocess finished not found ");
 
           } else {
+            logger.warning("Find operation finished not found ");
+
             findOp.remove(fop.getId());
           }
+          if (callback != null) callback.operationComplete(fop);
 
           if (fop.getBody().equals("Automatically Generated Traffic")
               && fop.getClosest().containsKey(fop.getDestNode())) {
@@ -337,7 +341,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInit(Message m, int myPid) {
+  public Operation handleInit(Message m, int myPid) {
 
     logger.info("handleInitFind " + (BigInteger) m.body);
     KademliaObserver.find_op.add(1);
@@ -401,6 +405,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         }
       }
     }
+    return fop;
   }
 
   /**
@@ -466,6 +471,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         break;
       case Message.MSG_INIT_GET:
         m = (Message) event;
+        handleInit(m, myPid);
         break;
 
       case Message.MSG_INIT_PUT:
