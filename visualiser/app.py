@@ -25,9 +25,14 @@ if not os.path.exists(logsdir):
     console.print(f"{logsdir} is NOT a valid path.", style="bold red")
     sys.exit()
 
-if len(os.listdir(logsdir)) == 0:
+csv_files = [_ for _ in os.listdir(logsdir) if '.csv' in _]
+
+if len(csv_files) == 0:
     console.print(f"No files found in {logsdir}.", style="bold red")
     sys.exit()
+
+op_file = [_ for _ in csv_files if 'op' in _][0]
+asdf
 
 try:
     op_df = pd.read_csv(os.path.join(logsdir, "operations.csv"), index_col=False)
