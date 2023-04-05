@@ -32,13 +32,10 @@ if len(csv_files) == 0:
     sys.exit()
 
 op_file = [_ for _ in csv_files if 'op' in _][0]
-asdf
+msg_file = [_ for _ in csv_files if 'message' in _ or 'msg' in _][0]
 
-try:
-    op_df = pd.read_csv(os.path.join(logsdir, "operations.csv"), index_col=False)
-except FileNotFoundError as e:
-    op_df = pd.read_csv(os.path.join(logsdir, "operation.csv"), index_col=False)
-    
+op_df = pd.read_csv(os.path.join(logsdir, op_file), index_col=False)
+
 def truncate_string(s, length):
     if isinstance(s, str) and len(s) > length:
         return s[:length] + "..."
@@ -140,10 +137,7 @@ app.layout = html.Div(
 
 @callback(Output("graph", "figure"), Input("table", "active_cell"))
 def update_graphs(active_cell):
-    try:
-        msg_df = pd.read_csv(os.path.join(logsdir, "msg.csv"), index_col=False)
-    except FileNotFoundError as e:
-        msg_df = pd.read_csv(os.path.join(logsdir, "messages.csv"), index_col=False)
+    msg_df = pd.read_csv(os.path.join(logsdir, msg_file), index_col=False)
     
     if active_cell:
         op_id = active_cell["row_id"]
