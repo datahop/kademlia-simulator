@@ -42,9 +42,20 @@ def truncate_string(s, length):
     else:
         return s
     
-op_df["src_truncated"] = op_df['src'].apply(truncate_string, length = 5)
-    
-columns = [{"name": i, "id": i} for i in ['id', 'src_truncated', 'messages', 'type', 'src', 'start', 'stop']]
+# op_df["src_truncated"] = op_df['src'].apply(truncate_string, length = 5)
+old_ids = op_df['src']
+mapping = {}
+for i in range(len(old_ids)):
+    mapping[old_ids[i]] = i + 1
+
+new_ids = []
+for id in old_ids:
+    new_id = mapping[id]
+    new_ids.append(new_id)
+
+op_df["new_src"] = new_ids
+
+columns = [{"name": i, "id": i} for i in ['id', 'new_src', 'messages', 'type', 'src', 'start', 'stop']]
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -133,7 +144,6 @@ app.layout = html.Div(
         "overflow": "hidden"
     }
 )
-
 
 @callback(Output("graph", "figure"), Input("table", "active_cell"))
 def update_graphs(active_cell):
