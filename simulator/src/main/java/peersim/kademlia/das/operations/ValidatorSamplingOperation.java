@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaCommonConfig;
-import peersim.kademlia.RoutingTable;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Sample;
@@ -22,8 +22,10 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   private HashMap<BigInteger, Boolean> row;
   private HashMap<BigInteger, Boolean> column;
   private boolean completed;
-  private RoutingTable rou;
+  // private RoutingTable rou;
   private BigInteger rowId, columnId;
+  private Block currentBlock;
+  private int countColumn = 0, countRow = 0;
   /**
    * default constructor
    *
@@ -36,17 +38,16 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     super(srcNode, destNode, timestamp);
     row = new HashMap<>();
     column = new HashMap<>();
-
+    currentBlock = block;
     for (BigInteger sample : block.getSamplesIdsByColumn(CommonState.r.nextInt(block.getSize()))) {
-      if (rowId == null) rowId = sample;
       column.put(sample, false);
     }
     for (BigInteger sample : block.getSamplesIdsByRow(CommonState.r.nextInt(block.getSize()))) {
-      if (columnId == null) columnId = sample;
       row.put(sample, false);
     }
 
-    rou = new RoutingTable(KademliaCommonConfig.NBUCKETS, 0, 0);
+    // System.out.println("Rows " + row.size() + " columns" + column.size());
+    // rou = new RoutingTable(KademliaCommonConfig.NBUCKETS, 0, 0);
     completed = false;
     /*for (BigInteger id : rou.getAllNeighbours()) {
       BigInteger[] samples = getSamples(block, id);
@@ -74,12 +75,12 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     return res;
   }
 
-  public BigInteger getRow() {
-    return rowId;
+  public Set<BigInteger> getRow() {
+    return row.keySet();
   }
 
-  public BigInteger getColumn() {
-    return columnId;
+  public Set<BigInteger> getColumn() {
+    return column.keySet();
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -87,22 +88,21 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.available_requests++;
     for (Sample s : sam) {
       if (row.containsKey(s.getId())) {
-        row.remove(s.getId());
-        row.put(s.getId(), true);
+        if (!row.get(s.getId())) {
+          countRow++;
+          row.remove(s.getId());
+          row.put(s.getId(), true);
+        }
       }
       if (column.containsKey(s.getId())) {
-        column.remove(s.getId());
-        column.put(s.getId(), true);
+        if (!column.get(s.getId())) {
+          countColumn++;
+          column.remove(s.getId());
+          column.put(s.getId(), true);
+        }
       }
     }
-
-    int countRow = 0, countColumn = 0;
-    for (Boolean r : row.values()) {
-      if (r) countRow++;
-    }
-    for (Boolean r : column.values()) {
-      if (r) countColumn++;
-    }
+    System.out.println("Row " + countRow + " column " + countColumn);
     if (countColumn > column.size() / 2 && countRow > row.size() / 2) completed = true;
   }
 
@@ -141,7 +141,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    // System.out.println("continueSampling " + getAvailableRequests());
+    // System.out.println("continueSampling " + getAvailableRequests() + " " + closestSet.size());
     while (getAvailableRequests() > 0) { // I can send a new find request
 
       // get an available neighbour
@@ -158,7 +158,18 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   @Override
   public void addNodes(List<BigInteger> nodes) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'addNodes'");
+
+    for (BigInteger id : nodes) {
+      BigInteger[] samples = getSamples(currentBlock, id);
+      // System.out.println("Checking node " + id + " " + samples.length);
+
+      for (BigInteger s : samples) {
+        // System.out.println("Checking samples " + s);
+        if (row.containsKey(s) || column.containsKey(s)) {
+          closestSet.put(id, false);
+          // System.out.println("Node added " + closestSet.size());
+        }
+      }
+    }
   }
 }

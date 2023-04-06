@@ -66,6 +66,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private boolean samplingStarted;
 
+  private int pid;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -119,7 +121,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   public void processEvent(Node myNode, int myPid, Object event) {
 
     Message m;
-
+    pid = myPid;
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
       m = (Message) event;
@@ -267,9 +269,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
-      logger.info("Received sample:" + s.getId());
       kv.add((BigInteger) s.getId(), s);
     }
+    logger.info("Received sample:" + samples.length + " " + kv.occupancy());
 
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     if (op != null) {
@@ -306,6 +308,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         startRandomSampling(m, myPid);
       } else  {*/
       startRowsandColumnsFetch(m, myPid);
+      samplingStarted = true;
       // startRandomSampling(m, myPid);
     }
   }
@@ -398,26 +401,28 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    * @param myPid protocol pid
    */
   private void startRowsandColumnsFetch(Message m, int myPid) {
-    logger.info("Starting rows and columns fetch");
+    logger.warning("Starting rows and columns fetch");
     ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(this.getKademliaId(), null, m.timestamp, currentBlock);
     samplingOp.put(op.getId(), op);
 
-    Message lookup = generateFindNodeMessage(op.getRow());
-    // EDSimulator.add(0, lookup, start, kademliaId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    for (BigInteger id : op.getRow()) {
+      Message lookup = generateFindNodeMessage(id);
+      // EDSimulator.add(0, lookup, start, kademliaId);
+      kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    }
 
-    lookup = generateFindNodeMessage(op.getColumn());
-    // EDSimulator.add(0, lookup, start, kademliaId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    for (BigInteger id : op.getColumn()) {
+      Message lookup = generateFindNodeMessage(id);
+      // EDSimulator.add(0, lookup, start, kademliaId);
+      kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    }
 
     BigInteger[] nodes = op.startSampling();
 
     if (nodes == null || nodes.length == 0) {
-      logger.warning("No nodes found");
+      logger.info("No nodes found");
       return;
-    } else {
-      samplingStarted = true;
     }
 
     for (BigInteger nextNode : nodes) {
@@ -435,31 +440,41 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
 
       sendMessage(msg, nextNode, myPid);
-      logger.info("Sending sample request to: " + nextNode + " " + samples.length + " samples");
+      logger.warning("Sending sample request to: " + nextNode + " " + samples.length + " samples");
       op.nrHops++;
     }
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a random find node message, by selecting randomly the destination.
-   *
-   * @return Message
-   */
-  private Message generateFindNodeMessage(BigInteger id) {
-
-    Message m = Message.makeInitFindNode(id);
-    m.timestamp = CommonState.getTime();
-
-    return m;
   }
 
   @Override
   public void operationComplete(Operation op) {
     if (op instanceof FindOperation) {
-      logger.warning("Findoperation complete with result " + op.isFinished());
+      logger.info("Findoperation complete with result " + op.isFinished());
       if (kadOps.get(op) != null) {
-        logger.warning("Samping operation found");
+        logger.info("Samping operation found");
+        SamplingOperation sop = kadOps.get(op);
+        if (!sop.completed()) {
+          // sop.elaborateResponse(neighbours);
+          FindOperation fop = (FindOperation) op;
+
+          sop.addNodes(fop.getNeighboursList());
+          BigInteger[] nextNodes = sop.continueSampling();
+          for (BigInteger nextNode : nextNodes) {
+            BigInteger[] reqSamples = sop.getSamples(currentBlock, nextNode);
+            logger.warning("sending to node " + nextNode + " " + reqSamples.length);
+
+            Message msg = generateGetSampleMessage(reqSamples);
+            msg.operationId = sop.getId();
+            msg.src = this.kadProtocol.getKademliaNode();
+
+            msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
+            if (nextNode.compareTo(builderAddress) == 0) {
+              logger.info("Error sending to builder or 0 samples assigned");
+              continue;
+            }
+            sendMessage(msg, nextNode, pid);
+            op.nrHops++;
+          }
+        }
       } else {
         logger.warning("Samping operation not found");
       }
@@ -476,10 +491,24 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     List<BigInteger> list = new ArrayList<>(Arrays.asList(neighbours));
     list.remove(builderAddress);
     if (kadOps.get(op) != null) {
-      logger.warning("Samping operation found");
+      logger.info("Samping operation found");
     } else {
       logger.warning("Samping operation not found");
     }
     // searchTable.addNode(list.toArray(new BigInteger[0]));
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateFindNodeMessage(BigInteger id) {
+
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
+
+    return m;
   }
 }

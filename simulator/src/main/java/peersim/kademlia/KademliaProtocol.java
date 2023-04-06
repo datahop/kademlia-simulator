@@ -255,13 +255,13 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               fop.nrHops++;
               sendMessage(request, id, myPid);
             }
-            logger.warning("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
+            logger.info("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
           } else if (fop instanceof GetOperation) {
             findOp.remove(fop.getId());
-            logger.warning("Getprocess finished not found ");
+            logger.info("Getprocess finished not found ");
 
           } else {
-            logger.warning("Find operation finished not found ");
+            logger.info("Find operation finished not found ");
 
             findOp.remove(fop.getId());
           }

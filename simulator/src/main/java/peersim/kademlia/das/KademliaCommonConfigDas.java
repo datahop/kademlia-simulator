@@ -35,7 +35,7 @@ public class KademliaCommonConfigDas {
   public static int N_SAMPLES = 75;
 
   /** Number of samples returned by a single node */
-  public static int MAX_SAMPLES_RETURNED = 3;
+  public static int MAX_SAMPLES_RETURNED = 15;
 
   /**
    * short information about current mspastry configuration
