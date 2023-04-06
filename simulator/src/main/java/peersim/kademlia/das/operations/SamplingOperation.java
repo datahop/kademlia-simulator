@@ -1,8 +1,6 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
-import java.util.List;
-import peersim.kademlia.das.Block;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.operations.FindOperation;
 
@@ -17,11 +15,11 @@ public abstract class SamplingOperation extends FindOperation {
 
   public abstract boolean completed();
 
-  public abstract BigInteger[] getSamples(Block b, BigInteger peerId);
+  public abstract BigInteger[] getSamples(BigInteger peerId);
 
-  public abstract BigInteger[] startSampling();
+  // public abstract BigInteger[] startSampling();
 
-  public abstract BigInteger[] continueSampling();
+  public abstract BigInteger[] doSampling();
 
-  public abstract void addNodes(List<BigInteger> nodes);
+  // public abstract void addNodes(List<BigInteger> nodes);
 }
