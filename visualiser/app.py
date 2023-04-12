@@ -36,13 +36,6 @@ msg_file = [_ for _ in csv_files if 'message' in _ or 'msg' in _][0]
 
 op_df = pd.read_csv(os.path.join(logsdir, op_file), index_col=False)
 
-def truncate_string(s, length):
-    if isinstance(s, str) and len(s) > length:
-        return s[:length] + "..."
-    else:
-        return s
-    
-# op_df["src_truncated"] = op_df['src'].apply(truncate_string, length = 5)
 old_ids = op_df['src']
 mapping = {}
 for i in range(len(old_ids)):
