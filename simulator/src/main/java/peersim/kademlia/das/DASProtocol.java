@@ -408,6 +408,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     }
   }
 
+  public void addKnownValidator(BigInteger[] ids) {
+    searchTable.addNodes(ids);
+  }
+
   /**
    * Starts getting rows and columns, only for validators
    *

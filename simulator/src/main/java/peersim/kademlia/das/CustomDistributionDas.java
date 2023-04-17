@@ -1,6 +1,8 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -45,7 +47,8 @@ public class CustomDistributionDas implements peersim.core.Control {
     // BigInteger tmp;
 
     int numValidators = (int) (Network.size() * validatorRate);
-
+    List<BigInteger> validatorsIds = new ArrayList<>();
+    List<DASProtocol> validators = new ArrayList<>();
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
       BigInteger id;
@@ -64,11 +67,18 @@ public class CustomDistributionDas implements peersim.core.Control {
       dasProtocol.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProtocol);
 
-      if (numValidators >= i) dasProtocol.setValidator(true);
+      if (numValidators >= i) {
+        dasProtocol.setValidator(true);
+        validatorsIds.add(dasProtocol.getKademliaId());
+      }
       if (i == 0) {
         dasProtocol.setBuilder(true);
         builderAddress = dasProtocol.getKademliaProtocol().getKademliaNode().getId();
       } else dasProtocol.setBuilderAddress(builderAddress);
+    }
+
+    for (DASProtocol validator : validators) {
+      validator.addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }
 
     return false;
