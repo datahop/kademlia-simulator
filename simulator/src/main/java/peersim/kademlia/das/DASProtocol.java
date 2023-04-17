@@ -296,7 +296,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
               + " "
               + searchTable.nodesIndexed().size()
               + " "
-              + ((ValidatorSamplingOperation) op).samplesCount());
+              + ((SamplingOperation) op).samplesCount());
       // + " "
       // + op.getReceivedSamples().length);
 
@@ -330,7 +330,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     } else if (!samplingStarted) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
-        startRowsandColumnsSampling(m, myPid);
+        // startRowsandColumnsSampling(m, myPid);
         startRandomSampling(m, myPid);
         samplingStarted = true;
 

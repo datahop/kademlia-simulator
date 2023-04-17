@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import peersim.core.CommonState;
 
 public class SearchTable {
 
@@ -82,11 +81,11 @@ public class SearchTable {
     return samplesIndexed;
   }
 
-  public BigInteger getRandomSample() {
+  /*public BigInteger getRandomSample() {
 
     List<BigInteger> valuesList = new ArrayList<BigInteger>(sampleMap.keySet());
     return valuesList.get(CommonState.r.nextInt(valuesList.size()));
-  }
+  }*/
 
   public List<BigInteger> getNodesbySample(BigInteger id) {
 

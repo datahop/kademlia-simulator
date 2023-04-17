@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import peersim.core.CommonState;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -25,8 +24,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   private boolean completed;
   // private RoutingTable rou;
   private Block currentBlock;
-  private int samplesCount = 0;
-  private SearchTable searchTable;
 
   /**
    * default constructor
@@ -62,35 +59,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.searchTable = searchTable;
     setAvailableRequests(KademliaCommonConfig.ALPHA);
     completed = false;
-  }
-
-  public BigInteger getNeighbour() {
-
-    BigInteger res = null;
-    List<BigInteger> nodes = new ArrayList<>();
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample)) {
-        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
-        if (nodesBySample != null) nodes.addAll(nodesBySample);
-      }
-    }
-    // System.out.println("Get neighbour " + nodes.size());
-    if (nodes.size() > 0) {
-      // while (closestSet.get(res) != null)
-      res = nodes.get(CommonState.r.nextInt(nodes.size()));
-      while (closestSet.get(res) != null && nodes.size() > 0) {
-        res = nodes.get(CommonState.r.nextInt(nodes.size()));
-        nodes.remove(res);
-      }
-    }
-
-    if (res != null) {
-      // closestSet.remove(res);
-      closestSet.put(res, true);
-      // increaseUsed(res);
-      this.available_requests--; // decrease available request
-    }
-    return res;
   }
 
   public Set<BigInteger> getSamples() {
@@ -136,10 +104,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     return completed;
-  }
-
-  public int samplesCount() {
-    return samplesCount;
   }
 
   public BigInteger[] doSampling() {
