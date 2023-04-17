@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -20,13 +21,13 @@ import peersim.kademlia.das.SearchTable;
  */
 public class ValidatorSamplingOperation extends SamplingOperation {
 
-  private HashMap<BigInteger, Boolean> row;
-  private HashMap<BigInteger, Boolean> column;
+  private HashMap<BigInteger, Boolean> samples;
   private boolean completed;
   // private RoutingTable rou;
-  private BigInteger rowId, columnId;
   private Block currentBlock;
-  private int countColumn = 0, countRow = 0;
+  private int samplesCount = 0;
+  private SearchTable searchTable;
+
   /**
    * default constructor
    *
@@ -36,120 +37,110 @@ public class ValidatorSamplingOperation extends SamplingOperation {
    */
   public ValidatorSamplingOperation(
       BigInteger srcNode,
-      BigInteger destNode,
       long timestamp,
       Block block,
-      SearchTable searchTable) {
-    super(srcNode, destNode, timestamp);
-    row = new HashMap<>();
-    column = new HashMap<>();
+      SearchTable searchTable,
+      int row,
+      int column) {
+    super(srcNode, null, timestamp);
+    samples = new HashMap<>();
     currentBlock = block;
-    for (BigInteger sample : block.getSamplesIdsByColumn(CommonState.r.nextInt(block.getSize()))) {
-      column.put(sample, false);
-    }
-    for (BigInteger sample : block.getSamplesIdsByRow(CommonState.r.nextInt(block.getSize()))) {
-      row.put(sample, false);
-    }
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
-    // System.out.println("Rows " + row.size() + " columns" + column.size());
-    // rou = new RoutingTable(KademliaCommonConfig.NBUCKETS, 0, 0);
-    completed = false;
-    /*for (BigInteger id : rou.getAllNeighbours()) {
-      BigInteger[] samples = getSamples(block, id);
-      for (BigInteger s : samples) {
-        if (row.containsKey(s) || column.containsKey(s)) closestSet.put(id, false);
+
+    System.out.println("Row " + row + " column " + column);
+    assert (row == 0 || column == 0) : "Either row or column should be set";
+    assert (!(row == 0 && column == 0)) : "Both row or column are set";
+
+    if (row > 0) {
+      for (BigInteger sample : block.getSamplesIdsByRow(row)) {
+        samples.put(sample, false);
       }
-    }*/
+    } else if (column > 0) {
+      for (BigInteger sample : block.getSamplesIdsByColumn(column)) {
+        samples.put(sample, false);
+      }
+    }
+    this.searchTable = searchTable;
+    setAvailableRequests(KademliaCommonConfig.ALPHA);
+    completed = false;
   }
 
   public BigInteger getNeighbour() {
 
     BigInteger res = null;
-
-    if (closestSet.size() > 0) {
-      BigInteger[] results = (BigInteger[]) closestSet.keySet().toArray(new BigInteger[0]);
-      res = results[CommonState.r.nextInt(results.length)];
+    List<BigInteger> nodes = new ArrayList<>();
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample)) {
+        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
+        if (nodesBySample != null) nodes.addAll(nodesBySample);
+      }
+    }
+    // System.out.println("Get neighbour " + nodes.size());
+    if (nodes.size() > 0) {
+      // while (closestSet.get(res) != null)
+      res = nodes.get(CommonState.r.nextInt(nodes.size()));
+      while (closestSet.get(res) != null && nodes.size() > 0) {
+        res = nodes.get(CommonState.r.nextInt(nodes.size()));
+        nodes.remove(res);
+      }
     }
 
     if (res != null) {
-      closestSet.remove(res);
-      // closestSet.put(res, true);
+      // closestSet.remove(res);
+      closestSet.put(res, true);
       // increaseUsed(res);
       this.available_requests--; // decrease available request
     }
     return res;
   }
 
-  public Set<BigInteger> getRow() {
-    return row.keySet();
-  }
-
-  public Set<BigInteger> getColumn() {
-    return column.keySet();
+  public Set<BigInteger> getSamples() {
+    return samples.keySet();
   }
 
   public void elaborateResponse(Sample[] sam) {
 
     this.available_requests++;
     for (Sample s : sam) {
-      if (row.containsKey(s.getId())) {
-        if (!row.get(s.getId())) {
-          countRow++;
-          row.remove(s.getId());
-          row.put(s.getId(), true);
-        }
-      }
-      if (column.containsKey(s.getId())) {
-        if (!column.get(s.getId())) {
-          countColumn++;
-          column.remove(s.getId());
-          column.put(s.getId(), true);
+      if (samples.containsKey(s.getId())) {
+        if (!samples.get(s.getId())) {
+          samplesCount++;
+          samples.remove(s.getId());
+          samples.put(s.getId(), true);
         }
       }
     }
-    System.out.println("Row " + countRow + " column " + countColumn);
-    if (countColumn > column.size() / 2 && countRow > row.size() / 2) completed = true;
-  }
-
-  public BigInteger[] getAnySample() {
-    List<BigInteger> list = new ArrayList<>();
-    for (BigInteger id : column.keySet()) if (!column.get(id)) list.add(id);
-    for (BigInteger id : row.keySet()) if (!row.get(id)) list.add(id);
-
-    return list.toArray(new BigInteger[0]);
+    System.out.println("Row " + samplesCount + " " + samples.size());
+    if (samplesCount > samples.size() / 2) completed = true;
   }
 
   public BigInteger[] getSamples(BigInteger peerId) {
 
-    return currentBlock.getSamplesByRadius(
+    /*return currentBlock.getSamplesByRadius(
+    peerId,
+    currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));*/
+    List<BigInteger> result = new ArrayList<>();
+    /*Collections.addAll(
+    result,
+    currentBlock.getSamplesByRadiusByColumn(
         peerId,
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
+        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));*/
+    Collections.addAll(
+        result,
+        currentBlock.getSamplesByRadiusByRow(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+
+    return result.toArray(new BigInteger[0]);
   }
 
-  /*public List<BigInteger> getReceivedSamples() {
-    return samples;
-  }*/
-
   public boolean completed() {
-    // System.out.println("Samples num " + samples.size());
 
     return completed;
   }
 
-  /*public BigInteger[] startSampling() {
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-    // send ALPHA messages
-    for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      }
-    }
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    return new BigInteger[0];
-  }*/
+  public int samplesCount() {
+    return samplesCount;
+  }
 
   public BigInteger[] doSampling() {
 

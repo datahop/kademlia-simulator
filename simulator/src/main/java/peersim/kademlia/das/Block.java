@@ -34,7 +34,9 @@ public class Block implements Iterator<Sample>, Cloneable {
   /** number of samples in a block */
   private int numSamples;
 
-  private TreeSet<BigInteger> samples;
+  // private TreeSet<BigInteger> samples;
+  private TreeSet<BigInteger> samplesByRow;
+  private TreeSet<BigInteger> samplesByColumn;
 
   public Block(long id) {
 
@@ -42,15 +44,18 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.numSamples = this.SIZE * this.SIZE;
     _init();
 
-    samples = new TreeSet<>();
+    samplesByRow = new TreeSet<>();
+    samplesByColumn = new TreeSet<>();
+
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {
-        blockSamples[i][j] = new Sample(blockId, i, j, this);
-        samples.add(blockSamples[i][j].getId());
+        blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
+        samplesByRow.add(blockSamples[i][j].getIdByRow());
+        samplesByColumn.add(blockSamples[i][j].getIdByColumn());
       }
     }
   }
@@ -60,7 +65,8 @@ public class Block implements Iterator<Sample>, Cloneable {
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
-    samples = new TreeSet<>();
+    samplesByRow = new TreeSet<>();
+    samplesByColumn = new TreeSet<>();
 
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
@@ -68,20 +74,31 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {
-        blockSamples[i][j] = new Sample(blockId, i, j, this);
-        samples.add(blockSamples[i][j].getId());
+        blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
+        samplesByRow.add(blockSamples[i][j].getIdByRow());
+        samplesByColumn.add(blockSamples[i][j].getIdByColumn());
       }
     }
   }
 
-  public Block(Sample[][] blockSamples, TreeSet<BigInteger> samples, int size, long id) {
+  public Block(Sample[][] blockSamples, int size, long id) {
     SIZE = size;
     this.numSamples = this.SIZE * this.SIZE;
     _init();
-    this.samples = samples;
     this.blockSamples = blockSamples;
     row = column = 0;
     this.blockId = id;
+    // samples = new TreeSet<>();
+    samplesByRow = new TreeSet<>();
+    samplesByColumn = new TreeSet<>();
+
+    for (int i = 0; i < blockSamples.length; i++) {
+      for (int j = 0; j < blockSamples[0].length; j++) {
+        blockSamples[i][j] = new Sample(blockId, i, j, this);
+        samplesByRow.add(blockSamples[i][j].getIdByRow());
+        samplesByColumn.add(blockSamples[i][j].getIdByColumn());
+      }
+    }
   }
 
   /**
@@ -92,7 +109,7 @@ public class Block implements Iterator<Sample>, Cloneable {
    */
   public Object clone() {
     initIterator();
-    Block dolly = new Block(this.blockSamples, this.samples, this.SIZE, this.blockId);
+    Block dolly = new Block(this.blockSamples, this.SIZE, this.blockId);
     return dolly;
   }
 
@@ -185,14 +202,30 @@ public class Block implements Iterator<Sample>, Cloneable {
     BigInteger top = peerId.add(radius);
     BigInteger bottom = peerId.subtract(radius);
 
-    Collection subSet = samples.subSet(bottom, true, top, true);
+    Collection subSet = samplesByRow.subSet(bottom, true, top, true);
+    return (BigInteger[]) subSet.toArray(new BigInteger[0]);
+  }
+
+  public BigInteger[] getSamplesByRadiusByRow(BigInteger peerId, BigInteger radius) {
+    BigInteger top = peerId.add(radius);
+    BigInteger bottom = peerId.subtract(radius);
+
+    Collection subSet = samplesByRow.subSet(bottom, true, top, true);
+    return (BigInteger[]) subSet.toArray(new BigInteger[0]);
+  }
+
+  public BigInteger[] getSamplesByRadiusByColumn(BigInteger peerId, BigInteger radius) {
+    BigInteger top = peerId.add(radius);
+    BigInteger bottom = peerId.subtract(radius);
+
+    Collection subSet = samplesByColumn.subSet(bottom, true, top, true);
     return (BigInteger[]) subSet.toArray(new BigInteger[0]);
   }
 
   public BigInteger[] getSamplesIdsByRow(int row) {
     BigInteger[] samples = new BigInteger[this.SIZE];
     for (int i = 0; i < samples.length; i++) {
-      samples[i] = this.blockSamples[row][i].getId();
+      samples[i] = this.blockSamples[row - 1][i].getIdByRow();
     }
     return samples;
   }
@@ -200,23 +233,7 @@ public class Block implements Iterator<Sample>, Cloneable {
   public BigInteger[] getSamplesIdsByColumn(int column) {
     BigInteger[] samples = new BigInteger[this.SIZE];
     for (int i = 0; i < samples.length; i++) {
-      samples[i] = this.blockSamples[i][column].getId();
-    }
-    return samples;
-  }
-
-  public BigInteger[] getSamplesIdsByRowId(int row) {
-    BigInteger[] samples = new BigInteger[this.SIZE];
-    for (int i = 0; i < samples.length; i++) {
-      samples[i] = this.blockSamples[row][i].getIdByRow();
-    }
-    return samples;
-  }
-
-  public BigInteger[] getSamplesIdsByColumnId(int column) {
-    BigInteger[] samples = new BigInteger[this.SIZE];
-    for (int i = 0; i < samples.length; i++) {
-      samples[i] = this.blockSamples[i][column].getIdByColumn();
+      samples[i] = this.blockSamples[i][column - 1].getIdByColumn();
     }
     return samples;
   }

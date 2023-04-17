@@ -21,16 +21,17 @@ public class CustomDistributionDas implements peersim.core.Control {
 
   private static final String PAR_PROT = "protocolkad";
   private static final String PAR_PROT_DAS = "protocoldas";
-
+  private static final String PAR_VALIDATOR_RATE = "validator_rate";
   private int protocolID;
   private int protocolDasID;
-
+  private double validatorRate;
   private BigInteger builderAddress;
   private UniformRandomGenerator urg;
 
   public CustomDistributionDas(String prefix) {
     protocolID = Configuration.getPid(prefix + "." + PAR_PROT);
     protocolDasID = Configuration.getPid(prefix + "." + PAR_PROT_DAS);
+    validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
   }
 
@@ -42,6 +43,9 @@ public class CustomDistributionDas implements peersim.core.Control {
    */
   public boolean execute() {
     // BigInteger tmp;
+
+    int numValidators = (int) (Network.size() * validatorRate);
+
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
       BigInteger id;
@@ -60,6 +64,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       dasProtocol.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProtocol);
 
+      if (numValidators >= i) dasProtocol.setValidator(true);
       if (i == 0) {
         dasProtocol.setBuilder(true);
         builderAddress = dasProtocol.getKademliaProtocol().getKademliaNode().getId();

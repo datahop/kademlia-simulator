@@ -4,8 +4,6 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Sample {
 
@@ -13,8 +11,7 @@ public class Sample {
   private int row, column;
   /** The unique ID of the block that this sample belongs to */
   private long blockId;
-  /** The key of a sample in the DHT keyspace (after mapping) */
-  private BigInteger id;
+
   /** The key of a sample in the DHT keyspace using rows number */
   private BigInteger idByRow;
   /** The key of a sample in the DHT keyspace using column number */
@@ -25,7 +22,7 @@ public class Sample {
   /** Initialise a sample instance and map it to the keyspace */
   public Sample(long blockId, int row, int column, Block b) {
 
-    this.id = this.idByColumn = this.idByRow = null;
+    this.idByColumn = this.idByRow = null;
     this.block = b;
     this.row = row;
     this.column = column;
@@ -57,19 +54,18 @@ public class Sample {
             String.valueOf(blockId) + "_" + String.valueOf(row) + "x" + String.valueOf(column);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(idName.getBytes(StandardCharsets.UTF_8));
-        this.id = new BigInteger(1, hash);
-        this.idByColumn = this.id;
-        this.idByRow = this.id;
+        // this.id = new BigInteger(1, hash);
+        this.idByColumn = new BigInteger(1, hash);
+        this.idByRow = new BigInteger(1, hash);
       } catch (NoSuchAlgorithmException e) {
         e.printStackTrace();
       }
     } else if (KademliaCommonConfigDas.MAPPING_FN
         == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
-      this.id =
+      this.idByRow =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
               .add(BigInteger.valueOf(blockId));
-      this.idByRow = this.id;
       this.idByColumn =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
@@ -84,12 +80,7 @@ public class Sample {
   /** Given the peerID of a node, determine if this sample falls within the region of the node. */
   public boolean isInRegion(BigInteger peerID, BigInteger radius) {
     /** (peerID - radius) < this.id < (peerID + radius) */
-    if ((this.id.compareTo(peerID.subtract(radius)) == 1)
-        && (this.id.compareTo(peerID.add(radius)) == -1)) {
-      return true;
-    } else {
-      return false;
-    }
+    return isInRegionByRow(peerID, radius);
   }
 
   /** Given the peerID of a node, determine if this sample falls within the region of the node. */
@@ -115,7 +106,7 @@ public class Sample {
   }
 
   /** Given a set of nodes returns the nodes that are in the region of the sample. */
-  public BigInteger[] getNodesInSampleRegion(BigInteger[] nodes, BigInteger radius) {
+  /*public BigInteger[] getNodesInSampleRegion(BigInteger[] nodes, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
     for (BigInteger peerID : nodes)
@@ -123,7 +114,7 @@ public class Sample {
           && (this.id.compareTo(peerID.add(radius)) == -1)) result.add(peerID);
 
     return (BigInteger[]) result.toArray();
-  }
+  }*/
 
   /** Row of the sample */
   public int getRow() {
@@ -142,7 +133,7 @@ public class Sample {
 
   /** Computed identifier of the sample, depending of the mapping mode */
   public BigInteger getId() {
-    return id;
+    return idByRow;
   }
 
   /**

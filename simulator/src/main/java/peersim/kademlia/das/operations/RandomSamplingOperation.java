@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaCommonConfig;
@@ -49,6 +50,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     List<BigInteger> nodes = searchTable.getNodesbySample(searchTable.getRandomSample());
 
     if (nodes.size() > 0) {
+      // while (closestSet.get(res) != null)
       res = nodes.get(CommonState.r.nextInt(nodes.size()));
     }
 
@@ -72,9 +74,22 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   public BigInteger[] getSamples(BigInteger peerId) {
 
-    return currentBlock.getSamplesByRadius(
-        peerId,
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
+    /*return currentBlock.getSamplesByRadius(
+    peerId,
+    currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));*/
+    List<BigInteger> result = new ArrayList<>();
+    Collections.addAll(
+        result,
+        currentBlock.getSamplesByRadiusByColumn(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    Collections.addAll(
+        result,
+        currentBlock.getSamplesByRadiusByRow(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+
+    return result.toArray(new BigInteger[0]);
   }
 
   /*public List<BigInteger> getReceivedSamples() {

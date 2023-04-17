@@ -164,8 +164,10 @@ public class TrafficGeneratorDoubleSample implements Control {
 
     for (int i = 0; i < Network.size(); i++) {
       Node n = Network.get(i);
-      Block bis = (Block) b.clone();
-      EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
+      // System.out.println("Block " + b);
+      // Block bis = (Block) b.clone();
+      b.initIterator();
+      EDSimulator.add(0, generateNewBlockMessage(b), n, daspid);
     }
 
     System.out.println(
