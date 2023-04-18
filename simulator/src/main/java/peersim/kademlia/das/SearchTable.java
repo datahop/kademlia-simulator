@@ -28,17 +28,8 @@ public class SearchTable {
     this.currentBlock = currentBlock;
   }
 
-  /*public BigInteger[] getSamples(Block b, BigInteger peerId) {
-
-    return b.getSamplesByRadius(
-        peerId, b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
-  }*/
-
   public BigInteger[] getSamples(BigInteger peerId) {
 
-    /*return currentBlock.getSamplesByRadius(
-    peerId,
-    currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));*/
     List<BigInteger> result = new ArrayList<>();
     Collections.addAll(
         result,
@@ -80,12 +71,6 @@ public class SearchTable {
   public HashSet<BigInteger> samplesIndexed() {
     return samplesIndexed;
   }
-
-  /*public BigInteger getRandomSample() {
-
-    List<BigInteger> valuesList = new ArrayList<BigInteger>(sampleMap.keySet());
-    return valuesList.get(CommonState.r.nextInt(valuesList.size()));
-  }*/
 
   public List<BigInteger> getNodesbySample(BigInteger id) {
 

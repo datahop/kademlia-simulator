@@ -249,6 +249,8 @@ public class Message extends SimpleEvent {
         return "MSG_INIT_FIND";
       case MSG_FIND:
         return "MSG_FIND";
+      case MSG_FIND_DIST:
+        return "MSG_FIND_DIST";
       case MSG_RESPONSE:
         return "MSG_RESPONSE";
       case MSG_INIT_NEW_BLOCK:

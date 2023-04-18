@@ -3,7 +3,6 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import peersim.kademlia.KademliaCommonConfig;
@@ -20,11 +19,10 @@ import peersim.kademlia.das.SearchTable;
  */
 public class ValidatorSamplingOperation extends SamplingOperation {
 
-  private HashMap<BigInteger, Boolean> samples;
   private boolean completed;
   // private RoutingTable rou;
   private Block currentBlock;
-
+  private int row, column;
   /**
    * default constructor
    *
@@ -40,13 +38,14 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int row,
       int column) {
     super(srcNode, null, timestamp);
-    samples = new HashMap<>();
     currentBlock = block;
 
-    System.out.println("Row " + row + " column " + column);
+    // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
     assert (!(row == 0 && column == 0)) : "Both row or column are set";
 
+    this.row = row;
+    this.column = column;
     if (row > 0) {
       for (BigInteger sample : block.getSamplesIdsByRow(row)) {
         samples.put(sample, false);
@@ -83,21 +82,22 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   public BigInteger[] getSamples(BigInteger peerId) {
 
-    /*return currentBlock.getSamplesByRadius(
-    peerId,
-    currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));*/
     List<BigInteger> result = new ArrayList<>();
-    /*Collections.addAll(
-    result,
-    currentBlock.getSamplesByRadiusByColumn(
-        peerId,
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));*/
-    Collections.addAll(
-        result,
-        currentBlock.getSamplesByRadiusByRow(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-
+    if (row > 0) {
+      Collections.addAll(
+          result,
+          currentBlock.getSamplesByRadiusByRow(
+              peerId,
+              currentBlock.computeRegionRadius(
+                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    } else if (column > 0) {
+      Collections.addAll(
+          result,
+          currentBlock.getSamplesByRadiusByColumn(
+              peerId,
+              currentBlock.computeRegionRadius(
+                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    }
     return result.toArray(new BigInteger[0]);
   }
 

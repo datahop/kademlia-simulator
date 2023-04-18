@@ -12,9 +12,9 @@ public class Sample {
   /** The unique ID of the block that this sample belongs to */
   private long blockId;
 
-  /** The key of a sample in the DHT keyspace using rows number */
+  /** The key of a sample in the DHT keyspace using rows number as reference */
   private BigInteger idByRow;
-  /** The key of a sample in the DHT keyspace using column number */
+  /** The key of a sample in the DHT keyspace using column number as reference */
   private BigInteger idByColumn;
   /** Block that this sample is part of */
   private Block block;
@@ -104,17 +104,6 @@ public class Sample {
       return false;
     }
   }
-
-  /** Given a set of nodes returns the nodes that are in the region of the sample. */
-  /*public BigInteger[] getNodesInSampleRegion(BigInteger[] nodes, BigInteger radius) {
-
-    List<BigInteger> result = new ArrayList<>();
-    for (BigInteger peerID : nodes)
-      if ((this.id.compareTo(peerID.subtract(radius)) == 1)
-          && (this.id.compareTo(peerID.add(radius)) == -1)) result.add(peerID);
-
-    return (BigInteger[]) result.toArray();
-  }*/
 
   /** Row of the sample */
   public int getRow() {
