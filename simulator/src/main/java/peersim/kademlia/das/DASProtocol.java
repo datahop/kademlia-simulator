@@ -21,6 +21,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaEvents;
+import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
@@ -72,6 +73,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
   private SearchTable searchTable;
 
+  // public LinkedHashMap<Long, OpLogging> opLog;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -104,6 +107,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     samplingStarted = false;
     isValidator = false;
     searchTable = new SearchTable(currentBlock);
+    // opLog = new LinkedHashMap<Long, OpLogging>();
   }
 
   /**
@@ -132,6 +136,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     if (s instanceof Message) {
       m = (Message) event;
       m.dst = this.getKademliaProtocol().getKademliaNode();
+      KademliaObserver.reportMsg(m, false);
     }
 
     switch (((SimpleEvent) event).getType()) {
@@ -320,12 +325,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
         }
         if (nextNodes.length == 0) {
           logger.warning("No left nodes to ask");
-          if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA)
+          if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
             samplingOp.remove(m.operationId);
+            KademliaObserver.reportOperation(op);
+          }
         }
       } else {
         logger.warning("Operation completed");
         samplingOp.remove(m.operationId);
+        KademliaObserver.reportOperation(op);
       }
     } else if (!samplingStarted) {
       if (isValidator()) {

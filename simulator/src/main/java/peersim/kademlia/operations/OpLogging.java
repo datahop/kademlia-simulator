@@ -11,11 +11,6 @@ import java.util.Map;
 // ______________________________________________________________________________________
 public class OpLogging extends SimpleEvent {
 
-  public static final int OP_FIND = 5;
-  public static final int FIND_DIST = 6;
-  public static final int OP_GET = 8;
-  public static final int OP_PUT = 9;
-
   /** ID of the actual find operation. */
   public long id;
 
@@ -72,14 +67,11 @@ public class OpLogging extends SimpleEvent {
 
   public String typeToString() {
     switch (type) {
-      case OP_FIND:
+      case Message.MSG_FIND:
+      case Message.MSG_FIND_DIST:
+      case Message.MSG_INIT_FIND:
+      case Message.MSG_RESPONSE:
         return "OP_FIND";
-      case FIND_DIST:
-        return "OP_FIND";
-      case OP_GET:
-        return "OP_GET";
-      case OP_PUT:
-        return "OP_PUT";
       default:
         return "UNKNOW:" + type;
     }

@@ -3,7 +3,9 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
@@ -12,7 +14,7 @@ import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
 
 /**
- * This class represents a random sampling operation that collects samples from random nodes
+ * This class represents the validator sampling operation that collects row or columns of samples
  *
  * @author Sergi Rene
  * @version 1.0
@@ -123,5 +125,20 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
     return new BigInteger[0];
+  }
+
+  public Map<String, Object> toMap() {
+    System.out.println("Mapping");
+    Map<String, Object> result = new HashMap<String, Object>();
+
+    result.put("id", this.operationId);
+    result.put("src", this.srcNode);
+    result.put("type", this.getClass().getSimpleName());
+    result.put("messages", this.messages);
+    result.put("start", this.timestamp);
+    result.put("stop", this.stopTime);
+    result.put("hops", this.nrHops);
+    result.put("samples", this.samplesCount);
+    return result;
   }
 }
