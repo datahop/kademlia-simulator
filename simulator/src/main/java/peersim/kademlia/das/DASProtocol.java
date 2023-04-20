@@ -110,7 +110,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     samplingStarted = false;
     isValidator = false;
     searchTable = new SearchTable(currentBlock);
-    row = column = new int[512];
+    row = new int[512];
+    column = new int[512];
     // opLog = new LinkedHashMap<Long, OpLogging>();
     samplesRequested = 0;
   }
@@ -218,14 +219,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     currentBlock = (Block) m.body;
     kv.erase();
     samplesRequested = 0;
-    row = column = new int[512];
+    row = new int[512];
+    column = new int[512];
     if (isBuilder()) {
 
       logger.warning("Builder new block:" + currentBlock.getBlockId());
       while (currentBlock.hasNext()) {
         Sample s = currentBlock.next();
         kv.add(s.getIdByRow(), s);
-        kv.add(s.getIdByColumn(), s);
+        // kv.add(s.getIdByColumn(), s);
       }
     } else {
       // logger.warning("New block " + kv.occupancy());
@@ -301,9 +303,18 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
       kv.add((BigInteger) s.getIdByRow(), s);
-      kv.add((BigInteger) s.getIdByColumn(), s);
+      // kv.add((BigInteger) s.getIdByColumn(), s);
       column[s.getColumn() - 1]++;
       row[s.getRow() - 1]++;
+      logger.warning(
+          "Sample received "
+              + s.getRow()
+              + " "
+              + s.getColumn()
+              + " "
+              + row[s.getRow() - 1]
+              + " "
+              + column[s.getColumn() - 1]);
     }
     logger.warning("Received sample:" + samples.length + " " + kv.occupancy());
 

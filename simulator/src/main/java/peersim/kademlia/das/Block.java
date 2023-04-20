@@ -1,8 +1,11 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeSet;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -37,7 +40,7 @@ public class Block implements Iterator<Sample>, Cloneable {
   // private TreeSet<BigInteger> samples;
   private TreeSet<BigInteger> samplesByRow;
   private TreeSet<BigInteger> samplesByColumn;
-
+  private HashMap<BigInteger, BigInteger> sampleMap;
   // Constructor with block id
   public Block(long id) {
 
@@ -47,6 +50,7 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     samplesByRow = new TreeSet<>();
     samplesByColumn = new TreeSet<>();
+    sampleMap = new HashMap<>();
 
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
@@ -57,6 +61,7 @@ public class Block implements Iterator<Sample>, Cloneable {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
       }
     }
   }
@@ -69,6 +74,7 @@ public class Block implements Iterator<Sample>, Cloneable {
     _init();
     samplesByRow = new TreeSet<>();
     samplesByColumn = new TreeSet<>();
+    sampleMap = new HashMap<>();
 
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
@@ -79,6 +85,7 @@ public class Block implements Iterator<Sample>, Cloneable {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
       }
     }
   }
@@ -100,6 +107,7 @@ public class Block implements Iterator<Sample>, Cloneable {
         blockSamples[i][j] = new Sample(blockId, i, j, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
       }
     }
   }
@@ -233,7 +241,12 @@ public class Block implements Iterator<Sample>, Cloneable {
     BigInteger bottom = peerId.subtract(radius);
 
     Collection<BigInteger> subSet = samplesByColumn.subSet(bottom, true, top, true);
-    return (BigInteger[]) subSet.toArray(new BigInteger[0]);
+
+    List<BigInteger> result = new ArrayList<>();
+    for (BigInteger sampleId : subSet) {
+      result.add(sampleMap.get(sampleId));
+    }
+    return (BigInteger[]) result.toArray(new BigInteger[0]);
   }
 
   /* Returns the ids of the all the samples in a specific row*/

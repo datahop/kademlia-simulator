@@ -70,7 +70,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     this.available_requests++;
     for (Sample s : sam) {
-      if(row>0){
+      if (row > 0) {
         if (samples.containsKey(s.getIdByRow())) {
           if (!samples.get(s.getIdByRow())) {
             samplesCount++;
@@ -88,7 +88,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         }
       }
     }
-    //System.out.println("Row " + samplesCount + " " + samples.size());
+    // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount > samples.size() / 2) completed = true;
   }
 
@@ -97,14 +97,14 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     List<BigInteger> list = new ArrayList<>();
     if (row > 0) {
       Collections.addAll(
-        list,
+          list,
           currentBlock.getSamplesByRadiusByRow(
               peerId,
               currentBlock.computeRegionRadius(
                   KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
     } else if (column > 0) {
       Collections.addAll(
-        list,
+          list,
           currentBlock.getSamplesByRadiusByColumn(
               peerId,
               currentBlock.computeRegionRadius(
@@ -113,9 +113,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> result = new ArrayList<>();
 
-    for(BigInteger s : samples.keySet()){
-      if(samples.get(s)!=null){
-        if(!samples.get(s)&&list.contains(s))result.add(s);
+    for (BigInteger s : samples.keySet()) {
+      if (samples.get(s) != null) {
+        if (!samples.get(s) && list.contains(s)) result.add(s);
       }
     }
     return result.toArray(new BigInteger[0]);

@@ -153,9 +153,13 @@ public class TrafficGeneratorDoubleSample implements Control {
             && (s.isInRegionByRow(dasProt.getKademliaId(), radius)
                 || s.isInRegionByColumn(dasProt.getKademliaId(), radius))) {
           totalSamples++;
-          if (s.isInRegionByRow(dasProt.getKademliaId(), radius))
+          if (s.isInRegionByRow(dasProt.getKademliaId(), radius)) {
             EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
-          else EDSimulator.add(0, generateNewSampleMessage(s.getIdByColumn()), n, daspid);
+            System.out.println(dasProt.getKademliaId() + " row:" + s.getRow());
+          } else {
+            EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
+            System.out.println(dasProt.getKademliaId() + " column:+" + s.getColumn());
+          }
           if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;
