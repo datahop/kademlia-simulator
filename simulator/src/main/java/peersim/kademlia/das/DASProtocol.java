@@ -76,6 +76,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   private int[] row, column;
   // public LinkedHashMap<Long, OpLogging> opLog;
   private int samplesRequested;
+
+  private BigInteger[] validatorsList;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -229,7 +231,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       // logger.warning("New block " + kv.occupancy());
       samplingStarted = false;
       searchTable.setBlock(currentBlock);
-
+      searchTable.addNodes(validatorsList);
       for (int i = 0; i < row.length; i++) {
         row[i] = 0;
       }
@@ -449,7 +451,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   public void addKnownValidator(BigInteger[] ids) {
-    searchTable.addNodes(ids);
+    validatorsList = ids;
   }
 
   /**

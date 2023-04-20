@@ -79,6 +79,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     }
 
     System.out.println("Validators " + validatorsIds.size() + " " + validators.size());
+
     for (DASProtocol validator : validators) {
       validator.addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }

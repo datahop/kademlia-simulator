@@ -139,6 +139,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     result.put("stop", this.stopTime);
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
+    result.put("row", this.row);
+    result.put("column", this.column);
     return result;
   }
 }
