@@ -70,6 +70,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       if (numValidators >= i) {
         dasProtocol.setValidator(true);
         validatorsIds.add(dasProtocol.getKademliaId());
+        validators.add(dasProtocol);
       }
       if (i == 0) {
         dasProtocol.setBuilder(true);
@@ -77,6 +78,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else dasProtocol.setBuilderAddress(builderAddress);
     }
 
+    System.out.println("Validators " + validatorsIds.size() + " " + validators.size());
     for (DASProtocol validator : validators) {
       validator.addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }
