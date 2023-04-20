@@ -79,7 +79,7 @@ public class TrafficGeneratorDoubleSample implements Control {
    *
    * @return Message
    */
-  private Message generateNewSampleMessage(Sample s) {
+  private Message generateNewSampleMessage(BigInteger s) {
 
     Message m = Message.makeInitGetSample(s);
     m.timestamp = CommonState.getTime();
@@ -153,7 +153,9 @@ public class TrafficGeneratorDoubleSample implements Control {
             && (s.isInRegionByRow(dasProt.getKademliaId(), radius)
                 || s.isInRegionByColumn(dasProt.getKademliaId(), radius))) {
           totalSamples++;
-          EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
+          if (s.isInRegionByRow(dasProt.getKademliaId(), radius))
+            EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
+          else EDSimulator.add(0, generateNewSampleMessage(s.getIdByColumn()), n, daspid);
           if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;

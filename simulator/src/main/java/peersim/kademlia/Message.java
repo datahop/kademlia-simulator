@@ -199,16 +199,10 @@ public class Message extends SimpleEvent {
     return new Message(MSG_INIT_NEW_BLOCK, body);
   }
 
-  // ______________________________________________________________________________________________
-  /**
-   * Encapsulates the creation of a PUT request
-   *
-   * @param body Object
-   * @return Message
-   */
   public static final Message makeInitGetSample(Object body) {
     return new Message(MSG_INIT_GET_SAMPLE, body);
   }
+
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request

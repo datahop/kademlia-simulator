@@ -247,7 +247,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
    */
   private void handleInitGetSample(Message m, int myPid) {
     BigInteger[] sampleId = new BigInteger[1];
-    sampleId[0] = ((Sample) m.body).getIdByRow();
+    sampleId[0] = ((BigInteger) m.body);
 
     if (isBuilder()) return;
 
@@ -298,7 +298,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
-      kv.add((BigInteger) s.getId(), s);
+      kv.add((BigInteger) s.getIdByRow(), s);
+      kv.add((BigInteger) s.getIdByColumn(), s);
       column[s.getColumn() - 1]++;
       row[s.getRow() - 1]++;
     }
@@ -468,8 +469,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
             + " "
             + column[maxColumn()]);
 
-    // for (Object sample : kv.getAll()) {
-    // Sample s = (Sample) sample;
     ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(
             this.getKademliaId(), m.timestamp, currentBlock, searchTable, maxRow() + 1, 0);
@@ -480,52 +479,62 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     Message lookup = Util.generateFindNodeMessage(sampleId);
     kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
 
-    //  break;
-    // }
+    op =
+        new ValidatorSamplingOperation(
+            this.getKademliaId(), m.timestamp, currentBlock, searchTable, 0, maxColumn() + 1);
+    samplingOp.put(op.getId(), op);
 
+    sampleId = currentBlock.getSamplesIdsByRow(maxColumn() + 1)[0];
+    logger.warning("Sending lookup " + sampleId);
+    lookup = Util.generateFindNodeMessage(sampleId);
+    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+  }
+
+  private void doSampling(SamplingOperation sop) {
+    logger.warning("Validator op " + sop);
+
+    if (sop.completed()) kadOps.remove(sop);
+    else {
+
+      BigInteger[] nextNodes = sop.doSampling();
+      for (BigInteger nextNode : nextNodes) {
+        BigInteger[] reqSamples = sop.getSamples(nextNode);
+        logger.warning("sending to node " + nextNode + " " + reqSamples.length);
+
+        Message msg = generateGetSampleMessage(reqSamples);
+        msg.operationId = sop.getId();
+        msg.src = this.kadProtocol.getKademliaNode();
+
+        msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
+        if (nextNode.compareTo(builderAddress) == 0) {
+          logger.warning("Error sending to builder or 0 samples assigned");
+          continue;
+        }
+        sendMessage(msg, nextNode, pid);
+        sop.nrHops++;
+      }
+    }
   }
 
   @Override
   public void operationComplete(Operation op) {
     if (op instanceof FindOperation) {
       logger.warning("Findoperation complete with result " + op.isFinished());
+      FindOperation fop = (FindOperation) op;
+      List<BigInteger> list = fop.getNeighboursList();
+      list.remove(builderAddress);
+      searchTable.addNodes(list.toArray(new BigInteger[0]));
+      logger.warning(
+          "Search table "
+              + searchTable.samplesIndexed().size()
+              + " "
+              + searchTable.nodesIndexed().size()
+              + " "
+              + list.size());
+
       if (kadOps.get(op) != null) {
         logger.info("Samping operation found");
-        if (kadOps.get(op).completed()) kadOps.remove(op);
-        else {
-          FindOperation fop = (FindOperation) op;
-          List<BigInteger> list = fop.getNeighboursList();
-          list.remove(builderAddress);
-          searchTable.addNodes(list.toArray(new BigInteger[0]));
-          logger.warning(
-              "Search table "
-                  + searchTable.samplesIndexed().size()
-                  + " "
-                  + searchTable.nodesIndexed().size()
-                  + " "
-                  + list.size());
-
-          SamplingOperation sop = kadOps.get(op);
-          logger.warning("Validator op " + sop);
-
-          BigInteger[] nextNodes = sop.doSampling();
-          for (BigInteger nextNode : nextNodes) {
-            BigInteger[] reqSamples = sop.getSamples(nextNode);
-            logger.warning("sending to node " + nextNode + " " + reqSamples.length);
-
-            Message msg = generateGetSampleMessage(reqSamples);
-            msg.operationId = sop.getId();
-            msg.src = this.kadProtocol.getKademliaNode();
-
-            msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-            if (nextNode.compareTo(builderAddress) == 0) {
-              logger.warning("Error sending to builder or 0 samples assigned");
-              continue;
-            }
-            sendMessage(msg, nextNode, pid);
-            op.nrHops++;
-          }
-        }
+        doSampling(kadOps.get(op));
       }
     }
   }
@@ -552,38 +561,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     if (kadOps.get(op) != null) {
       logger.info("Samping operation found");
-      if (kadOps.get(op).completed()) kadOps.remove(op);
-      else {
-
-        logger.warning(
-            "Search table "
-                + searchTable.samplesIndexed().size()
-                + " "
-                + searchTable.nodesIndexed().size()
-                + " "
-                + list.size());
-
-        SamplingOperation sop = kadOps.get(op);
-        logger.warning("Validator op " + sop);
-
-        BigInteger[] nextNodes = sop.doSampling();
-        for (BigInteger nextNode : nextNodes) {
-          BigInteger[] reqSamples = sop.getSamples(nextNode);
-          logger.warning("sending to node " + nextNode + " " + reqSamples.length);
-
-          Message msg = generateGetSampleMessage(reqSamples);
-          msg.operationId = sop.getId();
-          msg.src = this.kadProtocol.getKademliaNode();
-
-          msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-          if (nextNode.compareTo(builderAddress) == 0) {
-            logger.warning("Error sending to builder or 0 samples assigned");
-            continue;
-          }
-          sendMessage(msg, nextNode, pid);
-          op.nrHops++;
-        }
-      }
+      doSampling(kadOps.get(op));
     }
   }
 }
