@@ -81,7 +81,7 @@ public class TrafficGeneratorDoubleSample implements Control {
    */
   private Message generateNewSampleMessage(Sample s) {
 
-    Message m = Message.makeInitGetSample(s.getId());
+    Message m = Message.makeInitGetSample(s);
     m.timestamp = CommonState.getTime();
 
     return m;
