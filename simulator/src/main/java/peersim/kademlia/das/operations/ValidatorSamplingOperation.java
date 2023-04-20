@@ -70,35 +70,53 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     this.available_requests++;
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId())) {
-        if (!samples.get(s.getId())) {
-          samplesCount++;
-          samples.remove(s.getId());
-          samples.put(s.getId(), true);
+      if(row>0){
+        if (samples.containsKey(s.getIdByRow())) {
+          if (!samples.get(s.getIdByRow())) {
+            samplesCount++;
+            samples.remove(s.getIdByRow());
+            samples.put(s.getIdByRow(), true);
+          }
+        }
+      } else {
+        if (samples.containsKey(s.getIdByColumn())) {
+          if (!samples.get(s.getIdByColumn())) {
+            samplesCount++;
+            samples.remove(s.getIdByColumn());
+            samples.put(s.getIdByColumn(), true);
+          }
         }
       }
     }
-    System.out.println("Row " + samplesCount + " " + samples.size());
+    //System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount > samples.size() / 2) completed = true;
   }
 
   public BigInteger[] getSamples(BigInteger peerId) {
 
-    List<BigInteger> result = new ArrayList<>();
+    List<BigInteger> list = new ArrayList<>();
     if (row > 0) {
       Collections.addAll(
-          result,
+        list,
           currentBlock.getSamplesByRadiusByRow(
               peerId,
               currentBlock.computeRegionRadius(
                   KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
     } else if (column > 0) {
       Collections.addAll(
-          result,
+        list,
           currentBlock.getSamplesByRadiusByColumn(
               peerId,
               currentBlock.computeRegionRadius(
                   KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    }
+
+    List<BigInteger> result = new ArrayList<>();
+
+    for(BigInteger s : samples.keySet()){
+      if(samples.get(s)!=null){
+        if(!samples.get(s)&&list.contains(s))result.add(s);
+      }
     }
     return result.toArray(new BigInteger[0]);
   }
