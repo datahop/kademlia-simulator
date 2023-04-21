@@ -146,11 +146,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     return new BigInteger[0];
   }
 
-  public int getRow(){
+  public int getRow() {
     return row;
   }
 
-  public int getColumn(){
+  public int getColumn() {
     return column;
   }
 
