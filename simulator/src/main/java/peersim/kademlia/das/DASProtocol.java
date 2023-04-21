@@ -233,7 +233,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       // logger.warning("New block " + kv.occupancy());
       samplingStarted = false;
       searchTable.setBlock(currentBlock);
-      searchTable.addNodes(validatorsList);
+      if (validatorsList != null) searchTable.addNodes(validatorsList);
       for (int i = 0; i < row.length; i++) {
         row[i] = 0;
       }
