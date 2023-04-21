@@ -482,17 +482,18 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
             + " "
             + column[maxColumn()]);
 
-    /*ValidatorSamplingOperation op =
+    ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(
             this.getKademliaId(), m.timestamp, currentBlock, searchTable, maxRow() + 1, 0);
     samplingOp.put(op.getId(), op);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
-    BigInteger sampleId = currentBlock.getSamplesIdsByRow(maxRow() + 1)[0];
+    doSampling(op);
+    /*BigInteger sampleId = currentBlock.getSamplesIdsByRow(maxRow() + 1)[0];
     logger.warning("Sending lookup " + sampleId);
     Message lookup = Util.generateFindNodeMessage(sampleId);
     kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);*/
 
-    ValidatorSamplingOperation op =
+    op =
         new ValidatorSamplingOperation(
             this.getKademliaId(), m.timestamp, currentBlock, searchTable, 0, maxColumn() + 1);
     samplingOp.put(op.getId(), op);
