@@ -488,20 +488,20 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     samplingOp.put(op.getId(), op);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     doSampling(op);
-    /*BigInteger sampleId = currentBlock.getSamplesIdsByRow(maxRow() + 1)[0];
+    BigInteger sampleId = currentBlock.getSamplesIdsByRow(maxRow() + 1)[CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxRow() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
     Message lookup = Util.generateFindNodeMessage(sampleId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);*/
+    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
 
     op =
         new ValidatorSamplingOperation(
             this.getKademliaId(), m.timestamp, currentBlock, searchTable, 0, maxColumn() + 1);
     samplingOp.put(op.getId(), op);
     doSampling(op);
-    /*BigInteger sampleId = currentBlock.getSamplesIdsByRow(maxColumn() + 1)[0];
+    sampleId = currentBlock.getSamplesIdsByRow(maxColumn() + 1)[CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxColumn() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
-    Message lookup = Util.generateFindNodeMessage(sampleId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);*/
+    lookup = Util.generateFindNodeMessage(sampleId);
+    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
   }
 
   private void doSampling(SamplingOperation sop) {
@@ -548,7 +548,19 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
       if (kadOps.get(op) != null) {
         logger.info("Samping operation found");
+        if(!kadOps.get(op).completed() && kadOps.get(op) instanceof ValidatorSamplingOperation){
+          ValidatorSamplingOperation vop = (ValidatorSamplingOperation)kadOps.get(op);
+          BigInteger sampleId;
+          if(vop.getRow()>0)
+            sampleId= currentBlock.getSamplesIdsByRow(vop.getRow())[CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(vop.getRow()).length)];
+          else
+            sampleId= currentBlock.getSamplesIdsByRow(vop.getColumn())[CommonState.r.nextInt(currentBlock.getSamplesIdsByColumn(vop.getColumn()).length)];
+          logger.warning("Sending lookup " + sampleId);
+          Message lookup = Util.generateFindNodeMessage(sampleId);
+          this.kadProtocol.handleInit(lookup, kademliaId);
+        }
         doSampling(kadOps.get(op));
+
       }
     }
   }

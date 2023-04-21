@@ -146,6 +146,14 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     return new BigInteger[0];
   }
 
+  public int getRow(){
+    return row;
+  }
+
+  public int getColumn(){
+    return column;
+  }
+
   public Map<String, Object> toMap() {
     // System.out.println("Mapping");
     Map<String, Object> result = new HashMap<String, Object>();
