@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import peersim.core.CommonState;
+import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.FindOperation;
@@ -41,8 +42,9 @@ public abstract class SamplingOperation extends FindOperation {
         List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
         if (nodesBySample != null) nodes.addAll(nodesBySample);
       }
+      if (nodes.size() >= KademliaCommonConfig.ALPHA) break;
     }
-    // System.out.println("Get neighbour " + nodes.size());
+    System.out.println(srcNode + " Get neighbour " + nodes.size() + " " + samples.size());
     if (nodes.size() > 0) {
       // while (closestSet.get(res) != null)
       res = nodes.get(CommonState.r.nextInt(nodes.size()));

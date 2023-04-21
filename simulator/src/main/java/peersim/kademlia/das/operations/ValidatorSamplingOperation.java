@@ -130,7 +130,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    // System.out.println("continueSampling " + getAvailableRequests() + " " + closestSet.size());
+    System.out.println(
+        srcNode + " continueSampling " + getAvailableRequests() + " " + closestSet.size());
     while (getAvailableRequests() > 0) { // I can send a new find request
 
       // get an available neighbour

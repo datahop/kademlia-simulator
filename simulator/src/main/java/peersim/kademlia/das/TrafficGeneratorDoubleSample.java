@@ -155,10 +155,10 @@ public class TrafficGeneratorDoubleSample implements Control {
             totalSamples++;
             if (s.isInRegionByRow(dasProt.getKademliaId(), radius)) {
               EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
-              System.out.println(dasProt.getKademliaId() + " row:" + s.getRow());
+              // System.out.println(dasProt.getKademliaId() + " row:" + s.getRow());
             } else {
               EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
-              System.out.println(dasProt.getKademliaId() + " column:+" + s.getColumn());
+              // System.out.println(dasProt.getKademliaId() + " column:+" + s.getColumn());
             }
             if (inRegion == false) {
               samplesWithinRegion++;

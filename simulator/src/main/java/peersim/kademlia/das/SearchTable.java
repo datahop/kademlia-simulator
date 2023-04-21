@@ -49,6 +49,7 @@ public class SearchTable {
 
     for (BigInteger id : nodes) {
       BigInteger[] samples = getSamples(id);
+      // System.out.println("Samples add " + samples.length);
       for (BigInteger sample : samples) {
         if (sampleMap.get(sample) == null) {
           List<BigInteger> ids = new ArrayList<>();
@@ -72,9 +73,9 @@ public class SearchTable {
     return samplesIndexed;
   }
 
-  public List<BigInteger> getNodesbySample(BigInteger id) {
+  public List<BigInteger> getNodesbySample(BigInteger sampleId) {
 
-    return sampleMap.get(id);
+    return sampleMap.get(sampleId);
   }
 
   public List<BigInteger> getNodesbySample(Set<BigInteger> samples) {
