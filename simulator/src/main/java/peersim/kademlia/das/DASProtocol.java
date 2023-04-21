@@ -370,7 +370,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling(m, myPid);
-        startRandomSampling(m, myPid);
+        // startRandomSampling(m, myPid);
         samplingStarted = true;
 
       } else {
@@ -492,7 +492,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     Message lookup = Util.generateFindNodeMessage(sampleId);
     kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
 
-    /*op =
+    op =
         new ValidatorSamplingOperation(
             this.getKademliaId(), m.timestamp, currentBlock, searchTable, 0, maxColumn() + 1);
     samplingOp.put(op.getId(), op);
@@ -500,7 +500,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     sampleId = currentBlock.getSamplesIdsByRow(maxColumn() + 1)[0];
     logger.warning("Sending lookup " + sampleId);
     lookup = Util.generateFindNodeMessage(sampleId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);*/
+    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
   }
 
   private void doSampling(SamplingOperation sop) {
