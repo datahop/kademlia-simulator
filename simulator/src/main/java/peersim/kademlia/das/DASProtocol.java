@@ -26,6 +26,7 @@ import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.operations.RandomSamplingOperation;
+import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
 public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
@@ -354,18 +355,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   /**
-   * Callback of the kademlia protocol of the nodes found and contacted
-   *
-   * @param neihbours array with the ids of the nodes found
-   */
-  @Override
-  public void nodesFound(BigInteger[] neighbours) {
-    List<BigInteger> list = new ArrayList<>(Arrays.asList(neighbours));
-    list.remove(builderAddress);
-    searchTable.addNode(list.toArray(new BigInteger[0]));
-  }
-
-  /**
    * Starts the random sampling operation
    *
    * @param m initial message
@@ -409,5 +398,19 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   /** Get the protocol ID for this node. */
   public int getDASProtocolID() {
     return this.dasID;
+  }
+
+  @Override
+  public void nodesFound(Operation op, BigInteger[] neighbours) {
+    // TODO Auto-generated method stub
+    List<BigInteger> list = new ArrayList<>(Arrays.asList(neighbours));
+    list.remove(builderAddress);
+    searchTable.addNode(list.toArray(new BigInteger[0]));
+  }
+
+  @Override
+  public void operationComplete(Operation op) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'operationComplete'");
   }
 }
