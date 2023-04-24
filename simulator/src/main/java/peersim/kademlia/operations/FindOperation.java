@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
@@ -190,5 +191,18 @@ public class FindOperation extends Operation {
     System.setProperty("org.graphstream.ui", "swing");
     Viewer viewer = graph.display();
     viewer.disableAutoLayout();
+  }
+
+  public Map<String, Object> toMap() {
+    Map<String, Object> result = new HashMap<String, Object>();
+
+    result.put("id", this.operationId);
+    result.put("src", this.srcNode);
+    result.put("type", this.getClass().getSimpleName());
+    result.put("messages", this.messages);
+    result.put("start", this.timestamp);
+    result.put("stop", this.stopTime);
+    result.put("hops", this.nrHops);
+    return result;
   }
 }
