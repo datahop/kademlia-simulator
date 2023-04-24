@@ -2,6 +2,7 @@ package peersim.kademlia.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * This class represents a find operation and offer the methods needed to maintain and update the
@@ -37,6 +38,12 @@ public abstract class Operation {
 
   protected ArrayList<BigInteger> returned;
 
+  /** Timestamp stop Operation */
+  public long stopTime;
+
+  /** Messages in the operation */
+  public String messages;
+
   /**
    * defaul constructor
    *
@@ -46,6 +53,7 @@ public abstract class Operation {
     this.timestamp = timestamp;
     this.destNode = dstNode;
     this.srcNode = srcNode;
+    this.messages = "";
 
     // set a new find id
     operationId = OPERATION_ID_GENERATOR++;
@@ -80,4 +88,14 @@ public abstract class Operation {
   public void setFinished(boolean finished) {
     this.finished = finished;
   }
+
+  public void AddMessage(long messageId) {
+    this.messages = this.messages + messageId + "|";
+  }
+
+  public void setStopTime(long time) {
+    this.stopTime = time;
+  }
+
+  public abstract Map<String, Object> toMap();
 }
