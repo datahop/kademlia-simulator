@@ -15,10 +15,12 @@ public abstract class SamplingOperation extends FindOperation {
   protected HashMap<BigInteger, Boolean> samples;
   protected SearchTable searchTable;
   protected int samplesCount = 0;
+  protected boolean completed;
 
   public SamplingOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
+    completed = false;
 
     // TODO Auto-generated constructor stub
   }
@@ -63,15 +65,7 @@ public abstract class SamplingOperation extends FindOperation {
     return res;
   }
 
-  public void elaborateResponse(Sample[] sam) {
-
-    this.available_requests++;
-    for (Sample s : sam) {
-      samples.remove(s.getId());
-      samples.put(s.getId(), true);
-    }
-    System.out.println("Samples received " + samples.size());
-  }
+  public abstract void elaborateResponse(Sample[] sam);
 
   public int samplesCount() {
     return samplesCount;

@@ -2,8 +2,9 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -41,54 +42,30 @@ public class RandomSamplingOperation extends SamplingOperation {
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
       samples.put(rs.getId(), false);
+      samples.put(rs.getIdByColumn(), false);
     }
-
-    // for (BigInteger id : rou.getAllNeighbours()) closestSet.put(id, false);
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
-
-    /*return currentBlock.getSamplesByRadius(
-    peerId,
-    currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));*/
+  public BigInteger[] getSamples() {
     List<BigInteger> result = new ArrayList<>();
-    Collections.addAll(
-        result,
-        currentBlock.getSamplesByRadiusByColumn(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    Collections.addAll(
-        result,
-        currentBlock.getSamplesByRadiusByRow(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample)) result.add(sample);
+    }
 
     return result.toArray(new BigInteger[0]);
   }
 
-  /*public List<BigInteger> getReceivedSamples() {
-    return samples;
-  }*/
-
-  public boolean completed() {
-    // System.out.println("Samples num " + samples.size());
-    if (samples.size() >= KademliaCommonConfigDas.N_SAMPLES) return true;
-    else return false;
+  public BigInteger[] getSamples(BigInteger peerId) {
+    return getSamples();
   }
 
-  /*public BigInteger[] startSampling() {
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
+  public boolean completed() {
 
-    List<BigInteger> nextNodes = new ArrayList<>();
-    // send ALPHA messages
-    for (int i = 0; i < KademliaCommonConfig.ALPHA; i++) {
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      }
-    }
-    return nextNodes.toArray(new BigInteger[0]);
-  }*/
+    for (boolean found : samples.values()) if (!found) return false;
+
+    return true;
+  }
 
   public BigInteger[] doSampling() {
 
@@ -107,5 +84,39 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
     else return new BigInteger[0];
+  }
+
+  public void elaborateResponse(Sample[] sam) {
+
+    this.available_requests++;
+    for (Sample s : sam) {
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        if (!samples.get(s.getId()) || !samples.get(s.getIdByColumn())) {
+          samples.remove(s.getId());
+          samples.remove(s.getIdByColumn());
+          samples.put(s.getIdByColumn(), true);
+          samples.put(s.getId(), true);
+          samplesCount++;
+        }
+      }
+    }
+    System.out.println("Samples received " + samples.size());
+  }
+
+  public Map<String, Object> toMap() {
+    // System.out.println("Mapping");
+    Map<String, Object> result = new HashMap<String, Object>();
+
+    result.put("id", this.operationId);
+    result.put("src", this.srcNode);
+    result.put("type", this.getClass().getSimpleName());
+    result.put("messages", this.messages);
+    result.put("start", this.timestamp);
+    result.put("stop", this.stopTime);
+    result.put("hops", this.nrHops);
+    result.put("samples", this.samplesCount);
+    if (completed) result.put("completed", "yes");
+    else result.put("completed", "no");
+    return result;
   }
 }

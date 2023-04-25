@@ -21,7 +21,6 @@ import peersim.kademlia.das.SearchTable;
  */
 public class ValidatorSamplingOperation extends SamplingOperation {
 
-  private boolean completed;
   // private RoutingTable rou;
   private Block currentBlock;
   private int row, column;
@@ -59,7 +58,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     this.searchTable = searchTable;
     setAvailableRequests(KademliaCommonConfig.ALPHA);
-    completed = false;
   }
 
   public Set<BigInteger> getSamples() {
@@ -168,6 +166,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     result.put("samples", this.samplesCount);
     result.put("row", this.row);
     result.put("column", this.column);
+    if (completed) result.put("completed", "yes");
+    else result.put("completed", "no");
     return result;
   }
 }
