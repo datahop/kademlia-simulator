@@ -200,7 +200,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   /**
-   * Start a topic query opearation.<br>
+   * Generates all samples in the builder node for each new block
    *
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
@@ -234,7 +234,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   /**
-   * Start a topic query operation.<br>
+   * Init process that gets initial sample allocation form builder
    *
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
@@ -364,13 +364,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling(m, myPid);
-        //startRandomSampling(m, myPid);
+        // startRandomSampling(m, myPid);
         samplingStarted = true;
 
       } else {
         logger.warning("Starting non-validator random sampling");
-        // startRowsandColumnsSampling(m, myPid);
-        //startRandomSampling(m, myPid);
+        // startRandomSampling(m, myPid);
         samplingStarted = true;
       }
     }
@@ -469,14 +468,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       Message lookup = Util.generateFindNodeMessage();
       kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
     }
-    /*BigInteger[] pendingSamples = op.getSamples();
-    for (BigInteger sampleId : pendingSamples) {
-      logger.warning("Sending lookup " + sampleId);
-      if (searchTable.getNodesbySample(sampleId) == null) {
-        Message lookup = Util.generateFindNodeMessage(sampleId);
-        kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
-      }
-    }*/
+
   }
 
   /**
@@ -524,6 +516,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
   }
 
+  /**
+   * Perform the sampling process (getting next nodes to query and sending samples requests)
+   *
+   * @param sop SamplingOperation 
+   */
   private boolean doSampling(SamplingOperation sop) {
     logger.warning("Validator op " + sop);
 
@@ -553,6 +550,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     }
   }
 
+  /**
+   * Callback from kademlia that returns find operation result
+   *
+   * @param op find operation 
+   */
   @Override
   public void operationComplete(Operation op) {
     if (op instanceof FindOperation) {
@@ -607,7 +609,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
   }
 
   /**
-   * Callback of the kademlia protocol of the nodes found and contacted
+   * Callback of the kademlia protocol with the nodes found during a lookup operation
    *
    * @param neihbours array with the ids of the nodes found
    */
