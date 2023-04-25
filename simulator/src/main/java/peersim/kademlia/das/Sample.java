@@ -69,8 +69,8 @@ public class Sample {
       this.idByColumn =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
-              .add(BigInteger.valueOf(blockId));
-
+              .add(BigInteger.valueOf(blockId))
+              .add(BigInteger.valueOf(1));
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
       System.exit(1);

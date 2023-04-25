@@ -65,8 +65,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   private KademliaEvents callback;
 
-  public LinkedHashMap<Long, OpLogging> findLog;
-
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -99,8 +97,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     sentMsg = new TreeMap<Long, Long>();
 
     findOp = new LinkedHashMap<Long, FindOperation>();
-
-    findLog = new LinkedHashMap<Long, OpLogging>();
 
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
@@ -516,25 +512,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         }
         break;*/
     }
-    /*if (event instanceof Message) {
-    OpLogging fLog;
-
-    m = (Message) event;
-    if (this.findLog.get(m.operationId) == null) {
-      fLog = new OpLogging(m.operationId, this.node.getId(), CommonState.getTime(), m.getType());
-      findLog.put(m.operationId, fLog);
-    } else {
-      fLog = this.findLog.get(m.operationId);
-    }
-    /*Operation Logging */
-    /*fLog.AddMessage(m.id);
-      fLog.SetStop(CommonState.getTime());
-      findLog.put(m.operationId, fLog);
-    }
-
-    for (Map.Entry<Long, OpLogging> entry : findLog.entrySet()) {
-      KademliaObserver.reportFindOp(entry.getValue());
-    }*/
   }
 
   /** get the current Node */

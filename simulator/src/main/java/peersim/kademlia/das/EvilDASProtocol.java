@@ -1,6 +1,5 @@
 package peersim.kademlia.das;
 
-import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.Message;
 
 public class EvilDASProtocol extends DASProtocol {
@@ -26,14 +25,5 @@ public class EvilDASProtocol extends DASProtocol {
   public Object clone() {
     EvilDASProtocol dolly = new EvilDASProtocol(EvilDASProtocol.prefix);
     return dolly;
-  }
-  /**
-   * sets the kademliaprotocol instance can be used to run kad operations
-   *
-   * @param prot KademliaProtocol
-   */
-  protected void setKademliaProtocol(KademliaProtocol prot) {
-    this.kadProtocol = prot;
-    this.logger = prot.getLogger();
   }
 }

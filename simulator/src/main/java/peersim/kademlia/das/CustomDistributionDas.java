@@ -1,6 +1,8 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -24,6 +26,7 @@ public class CustomDistributionDas implements peersim.core.Control {
   private static final String PAR_PROT_EVIL_KAD = "protocolEvilkad";
   private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
   private static final String PAR_EVIL_RATIO = "evilNodeRatio";
+  private static final String PAR_VALIDATOR_RATE = "validator_rate";
 
   /** Protocol identifiers for Kademlia, DAS, etc. * */
   private int protocolKadID;
@@ -33,6 +36,8 @@ public class CustomDistributionDas implements peersim.core.Control {
   private int protocolEvilDasID;
   /** Ratio of evil nodes to total number of nodes * */
   private double evilRatio;
+
+  private double validatorRate;
 
   private BigInteger builderAddress;
   private UniformRandomGenerator urg;
@@ -44,6 +49,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     protocolEvilDasID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_DAS);
     evilRatio = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO, 0.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
   }
 
   /**
@@ -55,6 +61,10 @@ public class CustomDistributionDas implements peersim.core.Control {
   public boolean execute() {
     int numEvilNodes = (int) (Network.size() * evilRatio);
     System.out.println("Number of malicious nodes: " + numEvilNodes);
+
+    int numValidators = (int) (Network.size() * validatorRate);
+    List<BigInteger> validatorsIds = new ArrayList<>();
+    List<DASProtocol> validators = new ArrayList<>();
 
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
@@ -85,6 +95,12 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setNode(node);
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
+
+      if (numValidators >= i) {
+        dasProt.setValidator(true);
+        validatorsIds.add(dasProt.getKademliaId());
+        validators.add(dasProt);
+      }
 
       if (i == 0) {
         dasProt.setBuilder(true);
