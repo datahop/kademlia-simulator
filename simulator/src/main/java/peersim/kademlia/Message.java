@@ -74,6 +74,12 @@ public class Message extends SimpleEvent {
 
   public static final int MSG_GET_ANY_SAMPLE_RESPONSE = 15;
 
+  /**
+   * Message Type: INIT_FIND_REGION_BASED (command to a node to start looking for node within a
+   * region)
+   */
+  public static final int MSG_INIT_FIND_REGION_BASED = 16;
+
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
   public Object body = null;
@@ -165,6 +171,16 @@ public class Message extends SimpleEvent {
   public static final Message makeInitFindNode(Object body) {
     return new Message(MSG_INIT_FIND, body);
   }
+  // ______________________________________________________________________________________________
+  /**
+   * Encapsulates the creation of a region-based find node request
+   *
+   * @param body Object
+   * @return Message
+   */
+  public static final Message makeInitRegionBasedFindNode(Object body, Object value) {
+    return new Message(MSG_INIT_FIND_REGION_BASED, body, value);
+  }
 
   // ______________________________________________________________________________________________
   /**
@@ -253,6 +269,8 @@ public class Message extends SimpleEvent {
         return "MSG_RESPONSE";
       case MSG_INIT_NEW_BLOCK:
         return "MSG_INIT_NEW_BLOCK";
+      case MSG_INIT_FIND_REGION_BASED:
+        return "MSG_INIT_REGION_BASED_FIND";
       default:
         return "UNKNOW:" + type;
     }

@@ -26,6 +26,7 @@ import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
+import peersim.kademlia.operations.RegionBasedFindOperation;
 import peersim.transport.UnreliableTransport;
 
 // __________________________________________________________________________________________________
@@ -192,7 +193,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       logger.warning(
           "Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
       // save received neighbour in the closest Set of fin operation
-
       BigInteger[] neighbours = (BigInteger[]) m.body;
       if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
@@ -256,6 +256,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           } else if (fop instanceof GetOperation) {
             findOp.remove(fop.getId());
             logger.warning("Getprocess finished not found ");
+            KademliaObserver.reportOperation(fop);
+          } else if (fop instanceof RegionBasedFindOperation) {
+            findOp.remove(fop.getId());
+            logger.warning("Region-based lookup completed ");
             KademliaObserver.reportOperation(fop);
           } else {
             findOp.remove(fop.getId());
@@ -351,6 +355,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     FindOperation fop;
 
     switch (m.type) {
+      case Message.MSG_INIT_FIND_REGION_BASED:
+        fop =
+            new RegionBasedFindOperation(
+                this.node.getId(), (BigInteger) m.body, (int) m.value, m.timestamp);
+        break;
       case Message.MSG_INIT_FIND:
         fop = new FindOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
         break;
@@ -465,6 +474,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         handleResponse(m, myPid);
         break;
 
+      case Message.MSG_INIT_FIND_REGION_BASED:
       case Message.MSG_INIT_FIND:
       case Message.MSG_INIT_GET:
       case Message.MSG_INIT_PUT:
