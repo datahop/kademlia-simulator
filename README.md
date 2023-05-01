@@ -33,7 +33,7 @@ If you want to contribute:
 
 ## Code Documentation
 
-TBC 
+[Kademlia draft documentation](simulator/src/main/java/peersim/kademlia/docs/kademlia_draft_doc.md) 
 
 ## How to create a protocol on top of Kademlia
 
