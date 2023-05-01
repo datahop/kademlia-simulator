@@ -115,6 +115,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("stop", this.stopTime);
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
+    result.put("block_id",this.currentBlock.getBlockId());
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;

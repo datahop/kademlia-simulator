@@ -166,6 +166,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     result.put("samples", this.samplesCount);
     result.put("row", this.row);
     result.put("column", this.column);
+    result.put("block_id",this.currentBlock.getBlockId());
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;
