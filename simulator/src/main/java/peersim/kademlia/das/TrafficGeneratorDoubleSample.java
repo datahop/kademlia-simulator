@@ -136,7 +136,8 @@ public class TrafficGeneratorDoubleSample implements Control {
         }*/
       first = false;
       second = true;
-    } else if (second) {
+    //} else if (second) {
+    } else {::@:
       Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
