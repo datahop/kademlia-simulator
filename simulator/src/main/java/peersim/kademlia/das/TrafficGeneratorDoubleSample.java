@@ -45,7 +45,7 @@ public class TrafficGeneratorDoubleSample implements Control {
   Block b;
   private long ID_GENERATOR = 0;
 
-  private boolean first = true, second = true;
+  private boolean first = true, second = false;
   // ______________________________________________________________________________________________
   public TrafficGeneratorDoubleSample(String prefix) {
     kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
@@ -134,7 +134,9 @@ public class TrafficGeneratorDoubleSample implements Control {
             EDSimulator.add(time, lookup, start, kadpid);
           }
         }*/
-
+      first = false;
+      second = true;
+    } else if (second) {
       Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
       BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
@@ -193,7 +195,7 @@ public class TrafficGeneratorDoubleSample implements Control {
       }
       // }
       ID_GENERATOR++;
-      first = false;
+      second = false;
     }
     return false;
   }

@@ -46,7 +46,7 @@ public abstract class SamplingOperation extends FindOperation {
       }
       if (nodes.size() >= KademliaCommonConfig.ALPHA) break;
     }
-    System.out.println(srcNode + " Get neighbour " + nodes.size() + " " + samples.size());
+    // System.out.println(srcNode + " Get neighbour " + nodes.size() + " " + samples.size());
     if (nodes.size() > 0) {
       // while (closestSet.get(res) != null)
       res = nodes.get(CommonState.r.nextInt(nodes.size()));

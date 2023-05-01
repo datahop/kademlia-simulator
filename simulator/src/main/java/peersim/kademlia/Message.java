@@ -249,6 +249,10 @@ public class Message extends SimpleEvent {
         return "MSG_RESPONSE";
       case MSG_INIT_NEW_BLOCK:
         return "MSG_INIT_NEW_BLOCK";
+      case MSG_GET_SAMPLE:
+        return "MSG_GET_SAMPLE";
+      case MSG_GET_SAMPLE_RESPONSE:
+        return "MSG_GET_SAMPLE_RESPONSE";
       default:
         return "UNKNOW:" + type;
     }

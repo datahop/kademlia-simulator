@@ -64,8 +64,8 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setNode(node);
       kadProt.setProtocolID(protocolID);
       DASProtocol dasProtocol = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
-      dasProtocol.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProtocol);
+      dasProtocol.setKademliaProtocol(kadProt);
 
       if (numValidators >= i) {
         dasProtocol.setValidator(true);

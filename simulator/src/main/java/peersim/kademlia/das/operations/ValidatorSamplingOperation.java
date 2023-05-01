@@ -128,8 +128,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    System.out.println(
-        srcNode + " continueSampling " + getAvailableRequests() + " " + closestSet.size());
+    // System.out.println(
+    //    srcNode + " continueSampling " + getAvailableRequests() + " " + closestSet.size());
     while (getAvailableRequests() > 0) { // I can send a new find request
 
       // get an available neighbour
@@ -161,7 +161,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     result.put("type", this.getClass().getSimpleName());
     result.put("messages", this.messages);
     result.put("start", this.timestamp);
-    result.put("stop", this.stopTime);
+    result.put("completion_time", this.stopTime);
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
     result.put("row", this.row);
