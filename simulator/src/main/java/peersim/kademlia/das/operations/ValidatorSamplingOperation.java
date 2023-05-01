@@ -37,8 +37,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       Block block,
       SearchTable searchTable,
       int row,
-      int column) {
-    super(srcNode, null, timestamp);
+      int column,
+      boolean isValidator) {
+    super(srcNode, null, timestamp, isValidator);
     currentBlock = block;
 
     // System.out.println("Row " + row + " column " + column);
@@ -167,6 +168,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     result.put("row", this.row);
     result.put("column", this.column);
     result.put("block_id", this.currentBlock.getBlockId());
+    if(isValidator) result.put("validator","yes");
+    else result.put("validator","no");
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;

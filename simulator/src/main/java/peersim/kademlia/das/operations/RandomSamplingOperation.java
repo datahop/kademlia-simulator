@@ -33,8 +33,9 @@ public class RandomSamplingOperation extends SamplingOperation {
       BigInteger destNode,
       long timestamp,
       Block currentBlock,
-      SearchTable searchTable) {
-    super(srcNode, destNode, timestamp);
+      SearchTable searchTable,
+      boolean isValidator) {
+    super(srcNode, destNode, timestamp, isValidator);
     setAvailableRequests(KademliaCommonConfig.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
@@ -116,6 +117,8 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
     result.put("block_id", this.currentBlock.getBlockId());
+    if(isValidator) result.put("validator","yes");
+    else result.put("validator","no");
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;

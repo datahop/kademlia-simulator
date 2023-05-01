@@ -465,7 +465,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
     logger.warning("Starting random sampling");
     RandomSamplingOperation op =
         new RandomSamplingOperation(
-            this.getKademliaId(), null, m.timestamp, currentBlock, searchTable);
+            this.getKademliaId(), null, m.timestamp, currentBlock, searchTable, this.isValidator);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     doSampling(op);
@@ -503,7 +503,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(
-            this.getKademliaId(), m.timestamp, currentBlock, searchTable, maxRow() + 1, 0);
+            this.getKademliaId(),
+            m.timestamp,
+            currentBlock,
+            searchTable,
+            maxRow() + 1,
+            0,
+            this.isValidator);
     samplingOp.put(op.getId(), op);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     doSampling(op);
@@ -517,7 +523,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
 
     op =
         new ValidatorSamplingOperation(
-            this.getKademliaId(), m.timestamp, currentBlock, searchTable, 0, maxColumn() + 1);
+            this.getKademliaId(),
+            m.timestamp,
+            currentBlock,
+            searchTable,
+            0,
+            maxColumn() + 1,
+            this.isValidator);
     samplingOp.put(op.getId(), op);
     doSampling(op);
     sampleId =

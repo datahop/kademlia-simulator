@@ -16,12 +16,14 @@ public abstract class SamplingOperation extends FindOperation {
   protected SearchTable searchTable;
   protected int samplesCount = 0;
   protected boolean completed;
+  protected boolean isValidator;
 
-  public SamplingOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
+  public SamplingOperation(
+      BigInteger srcNode, BigInteger destNode, long timestamp, boolean isValidator) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
     completed = false;
-
+    this.isValidator = isValidator;
     // TODO Auto-generated constructor stub
   }
 
