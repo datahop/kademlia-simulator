@@ -117,8 +117,8 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
     result.put("block_id", this.currentBlock.getBlockId());
-    if(isValidator) result.put("validator","yes");
-    else result.put("validator","no");
+    if (isValidator) result.put("validator", "yes");
+    else result.put("validator", "no");
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;

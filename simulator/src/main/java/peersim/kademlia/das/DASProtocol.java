@@ -35,7 +35,7 @@ import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
-public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
+public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
 
   private static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
@@ -656,4 +656,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents {
       }
     }
   }
+
+  @Override
+  public void missing(BigInteger sample) {}
 }
