@@ -65,9 +65,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   public boolean completed() {
 
-    for (boolean found : samples.values()) if (!found) return false;
-
-    return true;
+    return completed;
   }
 
   public BigInteger[] doSampling() {
@@ -100,6 +98,8 @@ public class RandomSamplingOperation extends SamplingOperation {
           samples.put(s.getIdByColumn(), true);
           samples.put(s.getId(), true);
           samplesCount++;
+
+          if (KademliaCommonConfigDas.N_SAMPLES == samplesCount) completed = true;
         }
       }
     }
@@ -121,7 +121,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("block_id", this.currentBlock.getBlockId());
     if (isValidator) result.put("validator", "yes");
     else result.put("validator", "no");
-    if (completed) result.put("completed", "yes");
+    if (completed()) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;
   }
