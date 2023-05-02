@@ -59,7 +59,7 @@ public abstract class SamplingOperation extends FindOperation {
       if (!samples.get(sample)) {
         List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
         if (nodesBySample != null) nodes.addAll(nodesBySample);
-        else if (callback != null) callback.missing(sample);
+        else if (callback != null) callback.missing(sample, this);
       }
       if (nodes.size() >= KademliaCommonConfig.ALPHA) break;
     }

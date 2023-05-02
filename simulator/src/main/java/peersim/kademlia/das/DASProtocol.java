@@ -465,7 +465,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     logger.warning("Starting random sampling");
     RandomSamplingOperation op =
         new RandomSamplingOperation(
-            this.getKademliaId(), null, m.timestamp, currentBlock, searchTable, this.isValidator);
+            this.getKademliaId(),
+            null,
+            m.timestamp,
+            currentBlock,
+            searchTable,
+            this.isValidator,
+            this);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     doSampling(op);
@@ -509,7 +515,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             searchTable,
             maxRow() + 1,
             0,
-            this.isValidator);
+            this.isValidator,
+            this);
     samplingOp.put(op.getId(), op);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     doSampling(op);
@@ -529,7 +536,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             searchTable,
             0,
             maxColumn() + 1,
-            this.isValidator);
+            this.isValidator,
+            this);
     samplingOp.put(op.getId(), op);
     doSampling(op);
     sampleId =
@@ -590,9 +598,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + list.size());
 
       if (kadOps.get(op) != null) {
-        logger.info("Samping operation found");
-        boolean notDone = !doSampling(kadOps.get(op));
-        if (!kadOps.get(op).completed()
+        logger.info("Sampling operation found");
+        /*boolean notDone = !*/ doSampling(kadOps.get(op));
+        /*if (!kadOps.get(op).completed()
             && kadOps.get(op) instanceof ValidatorSamplingOperation
             && notDone
             && op.nrHops < KademliaCommonConfigDas.MAX_HOPS) {
@@ -612,7 +620,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           logger.warning("Sending lookup " + sampleId);
           Message lookup = Util.generateFindNodeMessage(sampleId);
           kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
-        } /*else if (!kadOps.get(op).completed()
+        } else if (!kadOps.get(op).completed()
               && kadOps.get(op) instanceof RandomSamplingOperation
               && notDone) {
             RandomSamplingOperation rop = (RandomSamplingOperation) kadOps.get(op);
@@ -658,8 +666,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   @Override
-  public void missing(BigInteger sample) {
+  public void missing(BigInteger sample, Operation op) {
 
     logger.warning("Missing nodes for sample " + sample);
+    Message lookup = Util.generateFindNodeMessage(sample);
+    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
   }
 }

@@ -10,6 +10,7 @@ import java.util.Set;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
+import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
 
@@ -38,8 +39,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       SearchTable searchTable,
       int row,
       int column,
-      boolean isValidator) {
-    super(srcNode, null, timestamp, isValidator);
+      boolean isValidator,
+      MissingNode callback) {
+    super(srcNode, null, timestamp, isValidator, callback);
     currentBlock = block;
 
     // System.out.println("Row " + row + " column " + column);

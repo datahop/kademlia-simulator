@@ -8,6 +8,7 @@ import java.util.Map;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
+import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 // import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.das.SearchTable;
@@ -34,8 +35,9 @@ public class RandomSamplingOperation extends SamplingOperation {
       long timestamp,
       Block currentBlock,
       SearchTable searchTable,
-      boolean isValidator) {
-    super(srcNode, destNode, timestamp, isValidator);
+      boolean isValidator,
+      MissingNode callback) {
+    super(srcNode, destNode, timestamp, isValidator, callback);
     setAvailableRequests(KademliaCommonConfig.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
