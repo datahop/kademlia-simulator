@@ -3,9 +3,7 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import peersim.core.CommonState;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -19,7 +17,7 @@ public abstract class SamplingOperation extends FindOperation {
   protected boolean completed;
   protected boolean isValidator;
   protected MissingNode callback;
-  //protected HashSet<BigInteger> queried;
+  // protected HashSet<BigInteger> queried;
 
   public SamplingOperation(
       BigInteger srcNode, BigInteger destNode, long timestamp, boolean isValidator) {
@@ -40,7 +38,7 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     this.callback = callback;
-    //queried = new HashSet<>();
+    // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
   // public abstract void elaborateResponse(Sample[] sam);
@@ -63,26 +61,17 @@ public abstract class SamplingOperation extends FindOperation {
         if (nodesBySample != null) nodes.addAll(nodesBySample);
         else if (callback != null) callback.missing(sample, this);
       }
-      // if (nodes.size() >= KademliaCommonConfig.ALPHA) break;
     }
-    // System.out.println(srcNode + " Get neighbour " + nodes.size() + " " + samples.size());
-    if (nodes.size() > 0) {
-      // while (closestSet.get(res) != null)
-      res = nodes.get(CommonState.r.nextInt(nodes.size()));
-      nodes.remove(res);
-      while (closestSet.get(res) != null && nodes.size() > 0) {
-        res = nodes.get(CommonState.r.nextInt(nodes.size()));
-        nodes.remove(res);
+    for (BigInteger node : nodes) {
+      if (closestSet.get(node) == null) {
+        closestSet.put(node, true);
+        this.available_requests--; // decrease available requets
+        res = node;
+        break;
       }
     }
+    System.out.println(srcNode + " Get neighbour " + res + " " + this.available_requests);
 
-    if (res != null) {
-      // closestSet.remove(res);
-      closestSet.put(res, true);
-      // increaseUsed(res);
-      //queried.add(res);
-      this.available_requests--; // decrease available request
-    }
     return res;
   }
 

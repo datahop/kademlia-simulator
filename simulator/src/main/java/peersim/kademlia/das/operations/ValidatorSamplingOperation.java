@@ -60,7 +60,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
+    setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
   }
 
   public Set<BigInteger> getSamples() {

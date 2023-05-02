@@ -38,7 +38,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       boolean isValidator,
       MissingNode callback) {
     super(srcNode, destNode, timestamp, isValidator, callback);
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
+    setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
