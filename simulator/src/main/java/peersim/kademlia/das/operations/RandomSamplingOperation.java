@@ -103,7 +103,7 @@ public class RandomSamplingOperation extends SamplingOperation {
         }
       }
     }
-    System.out.println("Samples received " + samples.size());
+    // System.out.println("Samples received " + samples.size());
   }
 
   public Map<String, Object> toMap() {

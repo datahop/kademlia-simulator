@@ -76,6 +76,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   private int samplesRequested;
 
   private BigInteger[] validatorsList;
+
+  private HashSet<BigInteger> queried;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -109,6 +111,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     row = new int[512];
     column = new int[512];
     samplesRequested = 0;
+    queried = new HashSet<BigInteger>();
   }
 
   /**
@@ -249,6 +252,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         samplingOp.remove(sop.getId());
       }
       kadOps.clear();
+      queried.clear();
     }
   }
 
@@ -535,6 +539,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
     logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
+    queried.add(sampleId);
     op =
         new ValidatorSamplingOperation(
             this.getKademliaId(),
@@ -557,6 +562,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     lop = this.kadProtocol.handleInit(lookup, kademliaId);
     logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
+    queried.add(sampleId);
   }
 
   private boolean doSampling(SamplingOperation sop) {
@@ -642,6 +648,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             Message lookup = Util.generateFindNodeMessage(sampleId);
             kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
           }*/
+        kadOps.remove(op);
       }
     }
     // kadOps.remove(op);
@@ -684,14 +691,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     if (kadOps.size() >= 3) return;
     boolean lookupDone = false;
-    for (Operation fop : kadOps.keySet()) {
-      if (fop.getDestNode().compareTo(sample) == 0) lookupDone = true;
-    }
+    if (queried.contains(sample)) lookupDone = true;
 
     if (!lookupDone) {
       Message lookup = Util.generateFindNodeMessage(sample);
       Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
       kadOps.put(lop, (SamplingOperation) op);
+      queried.add(sample);
       logger.warning("Sent lookup operation " + op);
     }
   }
