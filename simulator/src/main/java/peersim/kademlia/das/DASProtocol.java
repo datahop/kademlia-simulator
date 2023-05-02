@@ -378,7 +378,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     } else if (!samplingStarted && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
-        startRowsandColumnsSampling(m, myPid);
+       // startRowsandColumnsSampling(m, myPid);
         startRandomSampling(m, myPid);
         samplingStarted = true;
 
@@ -657,12 +657,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             + " "
             + neighbours.length);
 
-    if (kadOps.get(op) != null) {
+    /*if (kadOps.get(op) != null) {
       if (!kadOps.get(op).completed()) {
         logger.info("Samping operation found");
         doSampling(kadOps.get(op));
       }
-    }
+    }*/
   }
 
   @Override
