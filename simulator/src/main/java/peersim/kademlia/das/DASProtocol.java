@@ -365,10 +365,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         }
         if (nextNodes.length == 0) {
           logger.warning("No left nodes to ask " + op.getAvailableRequests());
-          if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
+          /*if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
             samplingOp.remove(m.operationId);
             KademliaObserver.reportOperation(op);
-          }
+          }*/
         }
       } else {
         logger.warning("Operation completed");
