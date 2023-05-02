@@ -668,8 +668,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   @Override
   public void missing(BigInteger sample, Operation op) {
 
-    logger.warning("Missing nodes for sample " + sample);
+    logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
 
+    if (kadOps.size() >= 3) return;
     boolean lookupDone = false;
     for (Operation fop : kadOps.keySet()) {
       if (fop.getDestNode().compareTo(sample) == 0) lookupDone = true;
