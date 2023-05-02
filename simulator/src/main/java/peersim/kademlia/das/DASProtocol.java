@@ -588,7 +588,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       list.remove(builderAddress);
       searchTable.addNodes(list.toArray(new BigInteger[0]));
       logger.warning(
-          "Search table "
+          "Search table operation complete"
               + searchTable.samplesIndexed().size()
               + " "
               + searchTable.nodesIndexed().size()
@@ -598,7 +598,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + list.size());
 
       if (kadOps.get(op) != null) {
-        logger.info("Sampling operation found");
+        logger.warning("Sampling operation found");
         /*boolean notDone = !*/ doSampling(kadOps.get(op));
         /*if (!kadOps.get(op).completed()
             && kadOps.get(op) instanceof ValidatorSamplingOperation
@@ -650,7 +650,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     }
     searchTable.addNodes(list.toArray(new BigInteger[0]));
     logger.warning(
-        "Search table "
+        "Search table nodes found "
             + searchTable.samplesIndexed().size()
             + " "
             + searchTable.nodesIndexed().size()
