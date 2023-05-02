@@ -658,5 +658,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   @Override
-  public void missing(BigInteger sample) {}
+  public void missing(BigInteger sample) {
+
+    logger.warning("Missing nodes for sample " + sample);
+  }
 }
