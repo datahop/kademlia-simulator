@@ -244,13 +244,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       this.kadProtocol.handleInit(lookup, kademliaId);
       // kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), null);
 
-      for(SamplingOperation sop: samplingOp.values()){
+      for (SamplingOperation sop : samplingOp.values()) {
         KademliaObserver.reportOperation(sop);
         samplingOp.remove(sop.getId());
       }
-      for(Operation op : kadOps.keySet()){
-        kadOps.remove(op);
-      }
+      kadOps.clear();
     }
   }
 
@@ -646,7 +644,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           }*/
       }
     }
-    //kadOps.remove(op);
+    // kadOps.remove(op);
   }
 
   /**
