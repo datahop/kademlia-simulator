@@ -20,7 +20,6 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaEvents;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.KademliaProtocol;
@@ -378,7 +377,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     } else if (!samplingStarted && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
-       // startRowsandColumnsSampling(m, myPid);
+        // startRowsandColumnsSampling(m, myPid);
         startRandomSampling(m, myPid);
         samplingStarted = true;
 
@@ -526,8 +525,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxRow() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
     Message lookup = Util.generateFindNodeMessage(sampleId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
-
+    // kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
+    logger.warning("Sent lookup " + lop);
+    kadOps.put(lop, op);
     op =
         new ValidatorSamplingOperation(
             this.getKademliaId(),
@@ -546,7 +547,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxColumn() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
     lookup = Util.generateFindNodeMessage(sampleId);
-    kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    // kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
+    lop = this.kadProtocol.handleInit(lookup, kademliaId);
+    logger.warning("Sent lookup " + lop);
+    kadOps.put(lop, op);
   }
 
   private boolean doSampling(SamplingOperation sop) {
@@ -582,7 +586,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   @Override
   public void operationComplete(Operation op) {
     if (op instanceof FindOperation) {
-      logger.warning("Findoperation complete with result " + op.isFinished());
+      logger.warning(
+          "Findoperation complete with result " + op.isFinished() + " " + kadOps.size() + " " + op);
       FindOperation fop = (FindOperation) op;
       List<BigInteger> list = fop.getNeighboursList();
       list.remove(builderAddress);
@@ -678,7 +683,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     if (!lookupDone) {
       Message lookup = Util.generateFindNodeMessage(sample);
-      kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
+      Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
+      kadOps.put(lop, (SamplingOperation) op);
+      logger.warning("Sent lookup operation " + op);
     }
   }
 }
