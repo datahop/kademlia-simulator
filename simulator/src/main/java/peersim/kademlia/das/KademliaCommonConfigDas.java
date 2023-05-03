@@ -26,7 +26,7 @@ public class KademliaCommonConfigDas {
   public static int MAPPING_FN = SAMPLE_MAPPING_REGION_BASED;
 
   /** Number of copies of each sample stored in the network */
-  public static int NUM_SAMPLE_COPIES_PER_PEER = 3;
+  public static int NUM_SAMPLE_COPIES_PER_PEER = 2;
 
   /** Block matrix dimension */
   public static int BLOCK_DIM_SIZE = 10;

@@ -383,20 +383,20 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         logger.warning("Operation completed");
         samplingOp.remove(m.operationId);
         if (op instanceof ValidatorSamplingOperation)
-          logger.warning("Sampling operation finished validator " + op.getId());
-        else logger.warning("Sampling operation finished random " + op.getId());
+          logger.warning("Sampling operation finished validator completed" + op.getId());
+        else logger.warning("Sampling operation finished random completed" + op.getId());
         KademliaObserver.reportOperation(op);
       }
     } else if (!samplingStarted && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling(m, myPid);
-        startRandomSampling(m, myPid);
+        // startRandomSampling(m, myPid);
         samplingStarted = true;
 
       } else {
         logger.warning("Starting non-validator random sampling");
-        startRandomSampling(m, myPid);
+        // startRandomSampling(m, myPid);
         samplingStarted = true;
       }
     }
@@ -567,8 +567,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       KademliaObserver.reportOperation(sop);
       // logger.warning("Sampling operation finished " + sop.getId());
       if (sop instanceof ValidatorSamplingOperation)
-        logger.warning("Sampling operation finished validator " + sop.getId());
-      else logger.warning("Sampling operation finished random " + sop.getId());
+        logger.warning("Sampling operation finished validator dosampling" + sop.getId());
+      else logger.warning("Sampling operation finished random dosampling" + sop.getId());
       return true;
     } else {
       boolean success = false;
@@ -619,11 +619,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           "Sampling operation found " + kadOps.size() + " " + sop.getAvailableRequests());
       kadOps.remove(op);
 
-      if (sop.getAvailableRequests() >= KademliaCommonConfig.ALPHA && kadOps.size() == 0) {
+      if (sop.getAvailableRequests() >= KademliaCommonConfig.ALPHA
+          && kadOps.size() == 0
+          && samplingOp.get(sop.getId()) != null) {
         samplingOp.remove(op.getId());
         if (sop instanceof ValidatorSamplingOperation)
-          logger.warning("Sampling operation finished validator " + sop.getId());
-        else logger.warning("Sampling operation finished random " + sop.getId());
+          logger.warning("Sampling operation finished validator operationcompleted" + sop.getId());
+        else logger.warning("Sampling operation finished random operationcompleted" + sop.getId());
         KademliaObserver.reportOperation(sop);
       }
     }
