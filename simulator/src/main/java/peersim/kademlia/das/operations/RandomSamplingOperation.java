@@ -115,7 +115,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("type", this.getClass().getSimpleName());
     result.put("messages", this.messages);
     result.put("start", this.timestamp);
-    result.put("stop", this.stopTime);
+    result.put("completion_time", this.stopTime);
     result.put("hops", this.nrHops);
     result.put("samples", this.samplesCount);
     result.put("block_id", this.currentBlock.getBlockId());
