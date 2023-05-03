@@ -58,7 +58,7 @@ public abstract class SamplingOperation extends FindOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample)) {
         List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
-        if (nodesBySample != null) nodes.addAll(nodesBySample);
+        if (nodesBySample != null && nodesBySample.size() > 0) nodes.addAll(nodesBySample);
         else if (callback != null) callback.missing(sample, this);
       }
     }
