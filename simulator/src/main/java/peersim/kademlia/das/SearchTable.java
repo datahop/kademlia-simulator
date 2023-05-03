@@ -2,26 +2,26 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class SearchTable {
 
-  private HashMap<BigInteger, List<BigInteger>> sampleMap;
+  // private HashMap<BigInteger, List<BigInteger>> sampleMap;
 
   private Block currentBlock;
 
-  private HashSet<BigInteger> nodesIndexed, samplesIndexed;
+  private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
   public SearchTable(Block currentblock) {
 
     this.currentBlock = currentblock;
-    this.sampleMap = new HashMap<>();
-    this.nodesIndexed = new HashSet<>();
-    this.samplesIndexed = new HashSet<>();
+    // this.sampleMap = new HashMap<>();
+    this.nodesIndexed = new TreeSet<>();
+    // this.samplesIndexed = new HashSet<>();
   }
 
   public void setBlock(Block currentBlock) {
@@ -47,7 +47,7 @@ public class SearchTable {
 
   public void addNodes(BigInteger[] nodes) {
 
-    for (BigInteger id : nodes) {
+    /*for (BigInteger id : nodes) {
       BigInteger[] samples = getSamples(id);
       // System.out.println("Samples add " + samples.length);
       for (BigInteger sample : samples) {
@@ -62,20 +62,32 @@ public class SearchTable {
           nodesIndexed.add(id);
         }
       }
-    }
+    }*/
+    for (BigInteger id : nodes) nodesIndexed.add(id);
   }
 
-  public HashSet<BigInteger> nodesIndexed() {
+  public TreeSet<BigInteger> nodesIndexed() {
     return nodesIndexed;
   }
 
-  public HashSet<BigInteger> samplesIndexed() {
+  /*public HashSet<BigInteger> samplesIndexed() {
     return samplesIndexed;
-  }
+  }*/
 
   public List<BigInteger> getNodesbySample(BigInteger sampleId) {
 
-    return sampleMap.get(sampleId);
+    BigInteger top =
+        sampleId.add(
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
+    BigInteger bottom =
+        sampleId.subtract(
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
+
+    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
+    return new ArrayList<BigInteger>(subSet);
+
+    // return sampleMap.get(sampleId);
+
   }
 
   public List<BigInteger> getNodesbySample(Set<BigInteger> samples) {
@@ -83,7 +95,8 @@ public class SearchTable {
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples) {
-      if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
+      // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
+      result.addAll(getNodesbySample(sample));
     }
     return result;
   }

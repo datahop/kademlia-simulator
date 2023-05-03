@@ -485,19 +485,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
 
     doSampling(op);
-
-    /*for (int i = 0; i < 3; i++) {
-      Message lookup = Util.generateFindNodeMessage();
-      kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
-    }
-    BigInteger[] pendingSamples = op.getSamples();
-    for (BigInteger sampleId : pendingSamples) {
-      logger.warning("Sending lookup " + sampleId);
-      if (searchTable.getNodesbySample(sampleId) == null) {
-        Message lookup = Util.generateFindNodeMessage(sampleId);
-        kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), kadOps.get(op));
-      }
-    }*/
   }
 
   /**
@@ -612,8 +599,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       searchTable.addNodes(list.toArray(new BigInteger[0]));
       logger.warning(
           "Search table operation complete"
-              + searchTable.samplesIndexed().size()
-              + " "
+              // + searchTable.samplesIndexed().size()
+              // + " "
               + searchTable.nodesIndexed().size()
               + " "
               //       + kadOps.get(op).nrHops
@@ -643,8 +630,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     searchTable.addNodes(list.toArray(new BigInteger[0]));
     logger.warning(
         "Search table nodes found "
-            + searchTable.samplesIndexed().size()
-            + " "
+            // + searchTable.samplesIndexed().size()
+            // + " "
             + searchTable.nodesIndexed().size()
             + " "
             + neighbours.length);
