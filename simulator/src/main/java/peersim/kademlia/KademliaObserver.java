@@ -192,6 +192,7 @@ public class KademliaObserver implements Control {
       return;
     }
     find_log.put(String.valueOf(fLog.id), fLog.toMap());*/
+   // System.out.println("Report operation " + op.getId());
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     find_log.put(String.valueOf(op.getId()), op.toMap());
   }
