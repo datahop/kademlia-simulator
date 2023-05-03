@@ -530,7 +530,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxRow() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
     Message lookup = Util.generateFindNodeMessage(sampleId);
-    // kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
     Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
     logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
@@ -553,7 +552,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             CommonState.r.nextInt(currentBlock.getSamplesIdsByRow(maxColumn() + 1).length)];
     logger.warning("Sending lookup " + sampleId);
     lookup = Util.generateFindNodeMessage(sampleId);
-    // kadOps.put(this.kadProtocol.handleInit(lookup, kademliaId), op);
     lop = this.kadProtocol.handleInit(lookup, kademliaId);
     logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
@@ -561,7 +559,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   private boolean doSampling(SamplingOperation sop) {
-    // logger.warning("Validator op " + sop);
 
     if (sop.completed()) {
       samplingOp.remove(sop.getId());
@@ -615,7 +612,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         kadOps.remove(op);
       }
     }
-    // kadOps.remove(op);
   }
 
   /**
@@ -640,12 +636,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             + " "
             + neighbours.length);
 
-    /*if (kadOps.get(op) != null) {
+    if (kadOps.get(op) != null) {
       if (!kadOps.get(op).completed()) {
         logger.info("Samping operation found");
         doSampling(kadOps.get(op));
       }
-    }*/
+    }
   }
 
   @Override
