@@ -648,7 +648,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   public void missing(BigInteger sample, Operation op) {
 
     logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
-    /*if (!queried.contains(sample) && kadOps.size() < 3) {
+    if (!queried.contains(sample) && kadOps.size() < 3) {
       Message lookup = Util.generateFindNodeMessage(sample);
       Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
       kadOps.put(lop, (SamplingOperation) op);
@@ -656,6 +656,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       logger.warning("Sent lookup operation " + op);
     } else {
       logger.warning("All queried " + kadOps.size());
-    }*/
+    }
   }
 }
