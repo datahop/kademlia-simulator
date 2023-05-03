@@ -249,8 +249,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
       for (SamplingOperation sop : samplingOp.values()) {
         KademliaObserver.reportOperation(sop);
-        samplingOp.remove(sop.getId());
+        // samplingOp.remove(sop.getId());
       }
+      samplingOp.clear();
       kadOps.clear();
       queried.clear();
     }
@@ -373,7 +374,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           op.nrHops++;
         }
         if (nextNodes.length == 0) {
-          logger.warning("No left nodes to ask " + op.getAvailableRequests());
+          logger.warning("No left nodes to ask " + op.getAvailableRequests() + " " + kadOps.size());
           /*if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
             samplingOp.remove(m.operationId);
             KademliaObserver.reportOperation(op);
@@ -387,7 +388,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     } else if (!samplingStarted && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
-        // startRowsandColumnsSampling(m, myPid);
+        startRowsandColumnsSampling(m, myPid);
         startRandomSampling(m, myPid);
         samplingStarted = true;
 
@@ -688,17 +689,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   public void missing(BigInteger sample, Operation op) {
 
     logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
-
-    if (kadOps.size() >= 3) return;
-    boolean lookupDone = false;
-    if (queried.contains(sample)) lookupDone = true;
-
-    if (!lookupDone) {
+    if (!queried.contains(sample) && kadOps.size() < 3) {
       Message lookup = Util.generateFindNodeMessage(sample);
       Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
       kadOps.put(lop, (SamplingOperation) op);
       queried.add(sample);
       logger.warning("Sent lookup operation " + op);
+    } else {
+      logger.warning("All queried " + kadOps.size());
     }
   }
 }
