@@ -38,7 +38,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       boolean isValidator,
       MissingNode callback) {
     super(srcNode, destNode, timestamp, isValidator, callback);
-    setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
+    setAvailableRequests(KademliaCommonConfig.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
@@ -67,7 +67,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     return completed;
   }
 
-  /*public BigInteger[] doSampling() {
+  public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
@@ -84,7 +84,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
     else return new BigInteger[0];
-  }*/
+  }
 
   public void elaborateResponse(Sample[] sam) {
 

@@ -188,7 +188,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   public void setBuilder(boolean isBuilder) {
-    logger.warning("Set builder " + isBuilder);
+    logger.warning("Set builder " + isBuilder + " " + this.kademliaId);
     this.isBuilder = isBuilder;
   }
 
@@ -289,11 +289,17 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     List<Sample> s = new ArrayList<>();
 
+    List<BigInteger> nodes = new ArrayList<>();
     for (BigInteger id : samples) {
       Sample sample = (Sample) kv.get(id);
       if (sample != null) {
         s.add(sample);
       }
+      nodes.addAll(
+          Arrays.asList(
+              this.getKademliaProtocol()
+                  .getRoutingTable()
+                  .getNeighbours(Util.logDistance(id, this.getKademliaId()))));
     }
 
     Collections.shuffle(s);
@@ -311,6 +317,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
+    response.value = nodes.toArray(new BigInteger[0]);
     sendMessage(response, m.src.getId(), myPid);
   }
 
@@ -319,6 +326,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     if (m.body == null) return;
 
     Sample[] samples = (Sample[]) m.body;
+    searchTable.addNodes((BigInteger[]) m.value);
     for (Sample s : samples) {
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
@@ -365,11 +373,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         }
         if (nextNodes.length == 0) {
           logger.warning("No left nodes to ask " + op.getAvailableRequests() + " " + kadOps.size());
-          /*if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
+          if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
             samplingOp.remove(m.operationId);
             logger.warning("Sampling operation finished");
             KademliaObserver.reportOperation(op);
-          }*/
+          }
         }
       } else {
         logger.warning("Operation completed");
@@ -605,19 +613,26 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + kadOps.get(op).getAvailableRequests());
       kadOps.remove(op);
 
-      List<Long> toRemove = new ArrayList<>();
+      /*List<Long> toRemove = new ArrayList<>();
       for (SamplingOperation sop : samplingOp.values()) {
         if (sop.getAvailableRequests() >= KademliaCommonConfig.ALPHA && kadOps.size() == 0) {
           toRemove.add(sop.getId());
           if (sop instanceof ValidatorSamplingOperation)
             logger.warning(
-                "Sampling operation finished validator operationcompleted" + sop.getId());
+                "Sampling operation finished validator operationcompleted"
+                    + sop.getId()
+                    + " "
+                    + sop.samplesCount());
           else
-            logger.warning("Sampling operation finished random operationcompleted" + sop.getId());
+            logger.warning(
+                "Sampling operation finished random operationcompleted"
+                    + sop.getId()
+                    + " "
+                    + sop.samplesCount());
           KademliaObserver.reportOperation(sop);
         }
       }
-      for (Long id : toRemove) samplingOp.remove(id);
+      for (Long id : toRemove) samplingOp.remove(id);*/
     }
   }
 
@@ -655,13 +670,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   public void missing(BigInteger sample, Operation op) {
 
     // logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
-    if (!queried.contains(sample) && kadOps.size() < 3) {
+    /*if (!queried.contains(sample) && kadOps.size() < 3) {
       Message lookup = Util.generateFindNodeMessage(sample);
       Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
       kadOps.put(lop, (SamplingOperation) op);
       queried.add(sample);
       logger.warning("Sent lookup operation " + op);
-    } /*else {
+    } else {
           logger.warning("All queried " + kadOps.size());
         }
       if (((SamplingOperation) op).getAvailableRequests() >= KademliaCommonConfig.ALPHA

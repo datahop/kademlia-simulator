@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import peersim.kademlia.das.MissingNode;
@@ -73,6 +74,8 @@ public abstract class SamplingOperation extends FindOperation {
         else if (callback != null) callback.missing(sample, this);
       }
     }
+    Collections.shuffle(nodes);
+
     for (BigInteger node : nodes) {
       if (closestSet.get(node) == null) {
         closestSet.put(node, true);

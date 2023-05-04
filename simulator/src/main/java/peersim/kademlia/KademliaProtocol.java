@@ -283,7 +283,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           return;
 
         } else { // no neighbour available but exists oustanding request to wait
-          logger.warning(" no neighbour available but exists oustanding request to wait");
+          logger.info(" no neighbour available but exists oustanding request to wait");
           return;
         }
       }
