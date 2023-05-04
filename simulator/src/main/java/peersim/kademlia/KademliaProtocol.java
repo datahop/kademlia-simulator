@@ -338,6 +338,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             findOp.remove(fop.getId());
             logger.warning("Region-based lookup completed ");
             KademliaObserver.reportOperation(fop);
+
+            for (BigInteger id : fop.getNeighboursList()) {
+              logger.warning("Found node " + id);
+            }
           } else {
             findOp.remove(fop.getId());
             KademliaObserver.reportOperation(fop);
