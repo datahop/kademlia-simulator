@@ -197,7 +197,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
-      if (!fop.isFinished() && Arrays.asList(neighbours).contains(fop.getDestNode())) {
+      if (!fop.isFinished()
+          && Arrays.asList(neighbours).contains(fop.getDestNode())
+          && !(fop instanceof RegionBasedFindOperation)) {
         logger.warning("Found node " + fop.getDestNode());
         if (callback != null) callback.operationComplete(fop);
         KademliaObserver.find_ok.add(1);
@@ -261,6 +263,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             findOp.remove(fop.getId());
             logger.warning("Region-based lookup completed ");
             KademliaObserver.reportOperation(fop);
+
+            for (BigInteger id : fop.getNeighboursList()) {
+              logger.warning("Found node " + id);
+            }
           } else {
             findOp.remove(fop.getId());
             KademliaObserver.reportOperation(fop);
@@ -346,7 +352,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   public Operation handleInit(Message m, int myPid) {
 
-    logger.info("handleInitFind " + (BigInteger) m.body);
+    logger.warning("handleInitFind " + (BigInteger) m.body);
     KademliaObserver.find_op.add(1);
 
     // create find operation and add to operations array
