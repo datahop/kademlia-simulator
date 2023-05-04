@@ -127,25 +127,21 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     return completed;
   }
 
-  public BigInteger[] doSampling() {
+  /*public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
     // System.out.println(
     //    srcNode + " continueSampling " + getAvailableRequests() + " " + closestSet.size());
-    while (getAvailableRequests() > 0) { // I can send a new find request
 
-      // get an available neighbour
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      } else {
-        break;
-      }
-    }
+    BigInteger nextNode;
+    do{
+      nextNode = getNeighbour();
+      nextNodes.add(nextNode);
+    } while(nextNode!=null);
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
     return new BigInteger[0];
-  }
+  }*/
 
   public int getRow() {
     return row;

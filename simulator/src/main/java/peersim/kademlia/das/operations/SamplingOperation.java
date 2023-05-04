@@ -49,7 +49,18 @@ public abstract class SamplingOperation extends FindOperation {
 
   // public abstract BigInteger[] startSampling();
 
-  public abstract BigInteger[] doSampling();
+  public BigInteger[] doSampling() {
+
+    List<BigInteger> nextNodes = new ArrayList<>();
+
+    BigInteger nextNode;
+    do {
+      nextNode = getNeighbour();
+      if (nextNode != null) nextNodes.add(nextNode);
+    } while (nextNode != null);
+    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
+    return new BigInteger[0];
+  }
 
   public BigInteger getNeighbour() {
 
@@ -70,7 +81,7 @@ public abstract class SamplingOperation extends FindOperation {
         break;
       }
     }
-    System.out.println(srcNode + " Get neighbour " + res + " " + this.available_requests);
+    // System.out.println(srcNode + " Get neighbour " + res + " " + this.available_requests);
 
     return res;
   }

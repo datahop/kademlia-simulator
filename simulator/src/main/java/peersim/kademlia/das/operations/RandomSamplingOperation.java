@@ -64,11 +64,10 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   public boolean completed() {
-
     return completed;
   }
 
-  public BigInteger[] doSampling() {
+  /*public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
@@ -85,7 +84,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
     else return new BigInteger[0];
-  }
+  }*/
 
   public void elaborateResponse(Sample[] sam) {
 
