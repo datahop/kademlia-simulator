@@ -22,7 +22,6 @@ import peersim.kademlia.das.SearchTable;
 public class ValidatorSamplingOperation extends SamplingOperation {
 
   // private RoutingTable rou;
-  private Block currentBlock;
   private int row, column;
   /**
    * default constructor
@@ -40,8 +39,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int column,
       boolean isValidator,
       MissingNode callback) {
-    super(srcNode, null, timestamp, isValidator, callback);
-    currentBlock = block;
+    super(srcNode, null, timestamp, block, isValidator, callback);
 
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";

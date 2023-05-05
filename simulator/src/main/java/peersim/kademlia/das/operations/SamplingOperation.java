@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import peersim.kademlia.das.Block;
+import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -18,20 +20,26 @@ public abstract class SamplingOperation extends FindOperation {
   protected boolean completed;
   protected boolean isValidator;
   protected MissingNode callback;
+  protected Block currentBlock;
   // protected HashSet<BigInteger> queried;
 
+  protected BigInteger radius;
+
   public SamplingOperation(
-      BigInteger srcNode, BigInteger destNode, long timestamp, boolean isValidator) {
+      BigInteger srcNode, BigInteger destNode, long timestamp, Block block, boolean isValidator) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
     completed = false;
     this.isValidator = isValidator;
+    currentBlock = block;
+    radius = currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
   }
 
   public SamplingOperation(
       BigInteger srcNode,
       BigInteger destNode,
       long timestamp,
+      Block block,
       boolean isValidator,
       MissingNode callback) {
     super(srcNode, destNode, timestamp);
@@ -39,6 +47,10 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     this.callback = callback;
+    currentBlock = block;
+
+    radius = currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
@@ -77,8 +89,11 @@ public abstract class SamplingOperation extends FindOperation {
     BigInteger res = null;
     List<BigInteger> nodes = new ArrayList<>();
     for (BigInteger sample : samples.keySet()) {
+
       if (!samples.get(sample)) {
-        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample);
+        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radius);
+        // for (BigInteger id : nodesBySample)
+        //  System.out.println("[" + srcNode + "] " + sample + " " + id);
         if (nodesBySample != null && nodesBySample.size() > 0) nodes.addAll(nodesBySample);
         else if (callback != null) callback.missing(sample, this);
       }
@@ -96,6 +111,10 @@ public abstract class SamplingOperation extends FindOperation {
     // System.out.println(srcNode + " Get neighbour " + res + " " + this.available_requests);
 
     return res;
+  }
+
+  public void increaseRadius(int multiplier) {
+    radius = radius.multiply(BigInteger.valueOf(multiplier));
   }
 
   public abstract void elaborateResponse(Sample[] sam);

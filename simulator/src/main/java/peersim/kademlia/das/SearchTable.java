@@ -74,14 +74,10 @@ public class SearchTable {
     return samplesIndexed;
   }*/
 
-  public List<BigInteger> getNodesbySample(BigInteger sampleId) {
+  public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
 
-    BigInteger top =
-        sampleId.add(
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
-    BigInteger bottom =
-        sampleId.subtract(
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
+    BigInteger top = sampleId.add(radius);
+    BigInteger bottom = sampleId.subtract(radius);
 
     Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
@@ -90,13 +86,13 @@ public class SearchTable {
 
   }
 
-  public List<BigInteger> getNodesbySample(Set<BigInteger> samples) {
+  public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples) {
       // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
-      result.addAll(getNodesbySample(sample));
+      result.addAll(getNodesbySample(sample, radius));
     }
     return result;
   }

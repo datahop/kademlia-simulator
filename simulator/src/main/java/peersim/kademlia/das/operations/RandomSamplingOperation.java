@@ -38,7 +38,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       SearchTable searchTable,
       boolean isValidator,
       MissingNode callback) {
-    super(srcNode, destNode, timestamp, isValidator, callback);
+    super(srcNode, destNode, timestamp, currentBlock, isValidator, callback);
     setAvailableRequests(KademliaCommonConfig.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
@@ -67,6 +67,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   public boolean completed() {
+
+    /*boolean completed = true;
+    for (BigInteger id : samples.keySet()) {
+      if (!samples.get(id)) {
+        completed = false;
+        break;
+      }
+    }*/
     return completed;
   }
 
@@ -93,15 +101,15 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     this.available_requests++;
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
-        if (!samples.get(s.getId()) || !samples.get(s.getIdByColumn())) {
+      if (samples.containsKey(s.getId()) && samples.containsKey(s.getIdByColumn())) {
+        if (!samples.get(s.getId()) && !samples.get(s.getIdByColumn())) {
           samples.remove(s.getId());
           samples.remove(s.getIdByColumn());
           samples.put(s.getIdByColumn(), true);
           samples.put(s.getId(), true);
           samplesCount++;
 
-          if (KademliaCommonConfigDas.N_SAMPLES == samplesCount) completed = true;
+          if (samplesCount == KademliaCommonConfigDas.N_SAMPLES) completed = true;
         }
       }
     }

@@ -15,7 +15,6 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
-import peersim.kademlia.Util;
 
 /**
  * This control generates samples every 5 min that are stored in a single node (builder) and starts
@@ -170,48 +169,59 @@ public class TrafficGeneratorDoubleSample implements Control {
       // } else if (second) {
     } else {
       Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-      BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
       while (b.hasNext()) {
         Sample s = b.next();
         boolean inRegion = false;
         // System.out.println("New sample " + s.getColumn() + " " + s.getRow());
-        for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
-          Node n = nodeMap.get(nodeId);
-          DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
-          if (n.isUp() && !dasProt.isBuilder()) {
-            totalSamples++;
-            // System.out.println("Assigned row " + s.getIdByRow());
-            EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
+        int count = 0;
+        BigInteger radius =
+            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
-            if (inRegion == false) {
-              samplesWithinRegion++;
-              inRegion = true;
+        while (!inRegion) {
+          for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
+            Node n = nodeMap.get(nodeId);
+            DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+            if (n.isUp() && !dasProt.isBuilder()) {
+              totalSamples++;
+              // System.out.println("Assigned row " + s.getIdByRow());
+              EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
+
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
             }
           }
-        }
-        for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
-          Node n = nodeMap.get(nodeId);
-          DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
-          if (n.isUp() && !dasProt.isBuilder()) {
-            totalSamples++;
-            EDSimulator.add(0, generateNewSampleMessage(s.getIdByColumn()), n, daspid);
+          for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
+            Node n = nodeMap.get(nodeId);
+            DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+            if (n.isUp() && !dasProt.isBuilder()) {
+              totalSamples++;
+              EDSimulator.add(0, generateNewSampleMessage(s.getIdByColumn()), n, daspid);
 
-            if (inRegion == false) {
-              samplesWithinRegion++;
-              inRegion = true;
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
             }
           }
+          if (!inRegion) {
+            radius = radius.multiply(BigInteger.valueOf(2));
+            count++;
+            System.out.println("Sample assigned after " + count + " increase " + s.getIdByRow());
+          }
         }
-        if (!inRegion) {
+        /*if (!inRegion) {
+          System.out.println("Error sample not assgined " + s.getId());
           BigInteger closestByRow = BigInteger.valueOf(0);
           BigInteger closestByColumn = BigInteger.valueOf(0);
           int minDistByRow = KademliaCommonConfig.BITS, minDistByColumn = KademliaCommonConfig.BITS;
           for (BigInteger node : nodeMap.keySet()) {
             int dist = Util.logDistance(node, s.getIdByRow());
             if (dist < minDistByRow) closestByRow = node;
-            if (dist == minDistByColumn) closestByColumn = node;
+            if (dist < minDistByColumn) closestByColumn = node;
           }
           if (closestByRow.compareTo(BigInteger.valueOf(0)) != 0)
             EDSimulator.add(
@@ -224,7 +234,7 @@ public class TrafficGeneratorDoubleSample implements Control {
                 daspid);
           samplesWithinRegion++;
         }
-        /*for (int i = 0; i < Network.size(); i++) {
+        for (int i = 0; i < Network.size(); i++) {
           Node n = Network.get(i);
           DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
           // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);

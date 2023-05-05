@@ -382,10 +382,16 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         if (nextNodes.length == 0) {
           logger.warning("No left nodes to ask " + op.getAvailableRequests() + " " + kadOps.size());
           if (op.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
-            samplingOp.remove(m.operationId);
+            for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
+            op.increaseRadius(2);
+            doSampling(op);
+            /*samplingOp.remove(m.operationId);
             logger.warning("Sampling operation finished");
-            KademliaObserver.reportOperation(op);
+            KademliaObserver.reportOperation(op);*/
+
           }
+          // op.getClosest().clear();
+          // doSampling(op);
         }
       } else {
         logger.warning("Operation completed");
