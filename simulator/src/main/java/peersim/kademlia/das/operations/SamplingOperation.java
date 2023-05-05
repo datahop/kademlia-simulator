@@ -48,6 +48,15 @@ public abstract class SamplingOperation extends FindOperation {
 
   public abstract BigInteger[] getSamples(BigInteger peerId);
 
+  public BigInteger[] getSamples() {
+    List<BigInteger> result = new ArrayList<>();
+
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample)) result.add(sample);
+    }
+
+    return result.toArray(new BigInteger[0]);
+  }
   // public abstract BigInteger[] startSampling();
 
   public BigInteger[] doSampling() {

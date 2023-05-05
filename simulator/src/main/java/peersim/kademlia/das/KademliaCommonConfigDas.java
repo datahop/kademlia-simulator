@@ -35,7 +35,9 @@ public class KademliaCommonConfigDas {
   public static int N_SAMPLES = 75;
 
   /** Number of samples returned by a single node */
-  public static int MAX_SAMPLES_RETURNED = 1000;
+  public static int MAX_SAMPLES_RETURNED = 100;
+
+  public static int MAX_NODES_RETURNED = 15;
 
   /** Number of samples returned by a single node */
   public static int MAX_HOPS = 1000;

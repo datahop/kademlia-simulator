@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,18 +50,20 @@ public class RandomSamplingOperation extends SamplingOperation {
     }
   }
 
-  public BigInteger[] getSamples() {
-    List<BigInteger> result = new ArrayList<>();
-
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample)) result.add(sample);
-    }
-
-    return result.toArray(new BigInteger[0]);
-  }
-
   public BigInteger[] getSamples(BigInteger peerId) {
-    return getSamples();
+
+    List<BigInteger> list = new ArrayList<>();
+    Collections.addAll(
+        list,
+        currentBlock.getSamplesByRadiusByRow(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    Collections.addAll(
+        list,
+        currentBlock.getSamplesByRadiusByColumn(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    return list.toArray(new BigInteger[0]);
   }
 
   public boolean completed() {

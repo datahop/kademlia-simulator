@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -61,10 +60,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     this.searchTable = searchTable;
     setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
-  }
-
-  public Set<BigInteger> getSamples() {
-    return samples.keySet();
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -127,21 +122,24 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     return completed;
   }
 
-  /*public BigInteger[] doSampling() {
+  public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    // System.out.println(
-    //    srcNode + " continueSampling " + getAvailableRequests() + " " + closestSet.size());
+    while ((getAvailableRequests() > 0)) { // I can send a new find request
 
-    BigInteger nextNode;
-    do{
-      nextNode = getNeighbour();
-      nextNodes.add(nextNode);
-    } while(nextNode!=null);
+      // get an available neighbour
+      BigInteger nextNode = getNeighbour();
+      if (nextNode != null) {
+        nextNodes.add(nextNode);
+      } else {
+        break;
+      }
+    }
+
     if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    return new BigInteger[0];
-  }*/
+    else return new BigInteger[0];
+  }
 
   public int getRow() {
     return row;
