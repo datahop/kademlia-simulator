@@ -9,21 +9,28 @@ package peersim.kademlia;
  */
 public class KademliaCommonConfig {
 
-  public static int BITS = 256; // length of Id
+  /** Length of Id */
+  public static int BITS = 256;
 
-  public static int K = 16; // dimension of k-buckets
-  public static int ALPHA = 3; // number of simultaneous lookup messages
+  /** Dimension of k-buckets */
+  public static int K = 16;
 
-  public static int NBUCKETS = 256; // number of buckets in the routing table
+  /** Number of simultaneous lookup messages */
+  public static int ALPHA = 3;
 
-  public static int MAXREPLACEMENT = 10; // number of items in the replacement list for each bucket
+  /** Number of buckets in the routing table */
+  public static int NBUCKETS = 256;
 
-  public static int FINDMODE = 1; // find mode: 0 find by node id / 1 find by distance to node
+  /** Number of items in the replacement list for each bucket */
+  public static int MAXREPLACEMENT = 10;
+
+  /** Find mode: 0 find by node id / 1 find by distance to node */
+  public static int FINDMODE = 1;
 
   /**
-   * short information about current mspastry configuration
+   * Provides short information about current Kademlia configuration
    *
-   * @return String
+   * @return a string containing the current configuration
    */
   public static String info() {
     return String.format("[K=%d][ALPHA=%d][BITS=%d]", K, ALPHA, BITS);

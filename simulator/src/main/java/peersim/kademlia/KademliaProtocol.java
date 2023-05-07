@@ -1,8 +1,8 @@
 package peersim.kademlia;
 
 /**
- * A Kademlia implementation for PeerSim extending the EDProtocol class.<br>
- * See the Kademlia bibliografy for more information about the protocol.
+ * A Kademlia implementation for PeerSim extending the EDProtocol class. See the Kademlia
+ * bibliografy for more information about the protocol.
  *
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
@@ -31,7 +31,7 @@ import peersim.transport.UnreliableTransport;
 
 /**
  * KademliaProtocol is a class that builds ontop of the EDProtocol interface to implement the
- * Kademlia protocoll.
+ * Kademlia protocol.
  *
  * @see Cloneable
  * @see EDProtocol
@@ -91,10 +91,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   public LinkedHashMap<Long, OpLogging> findLog;
 
   /**
-   * Replicate this object by returning an identical copy. It is called by the initializer and does
+   * Replicate this object by returning an identical copy. It is called by the initializer and do
    * not fill any particular field.
    *
-   * @return a new KademliaProtocol object that is an identical copy of this object
+   * @return Object
    */
   public Object clone() {
     KademliaProtocol dolly = new KademliaProtocol(KademliaProtocol.prefix);
@@ -213,13 +213,14 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   }
 
   /**
-   * Perform the required operation upon receiving a message in response to a ROUTE message. Update
-   * the find operation record with the closest set of neighbors received. Then, send as many ROUTE
-   * requests as possible (according to the ALPHA parameter). If there are no closest neighbors
-   * available and no outstanding messages, stop the find operation.
+   * Perform the required operation upon receiving a message in response to a ROUTE (FIND would be
+   * more appropriate here) message. Update the find operation record with the closest set of
+   * neighbors received. Then, send as many ROUTE requests as possible (according to the ALPHA
+   * parameter). If there are no closest neighbors available and no outstanding messages, stop the
+   * find operation.
    *
-   * @param m The message received.
-   * @param myPid The sender PID.
+   * @param m the message received.
+   * @param myPid the sender PID.
    */
   private void handleResponse(Message m, int myPid) {
     // Add the message source to my routing table
@@ -379,7 +380,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * with teh node
    *
    * @param m The message containing the put request.
-   * @param myPid the PID of the sender node. Todo: why isn't the second parameter being utilized?
    */
   private void handlePut(Message m) {
     logger.warning("Handle put sample:" + m.body);
@@ -391,7 +391,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * k-buckets and returning them to the sender.
    *
    * @param m Message object containing the request
-   * @param myPid The ID of the sender node
+   * @param myPid the ID of the sender node
    */
   private void handleFind(Message m, int myPid) {
     // Retrieve the ALPHA closest node to the destination node
@@ -436,8 +436,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * provided node ID and sends a find request to them.
    *
    * @param m Message object containing the node ID to find
-   * @param myPid The ID of the sender node
-   * @return A reference to the created operation object
+   * @param myPid the ID of the sender node
+   * @return a reference to the created operation object
    */
   public Operation handleInit(Message m, int myPid) {
     logger.info("handleInitFind " + (BigInteger) m.body);
@@ -564,9 +564,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /**
    * Handles the receiving of events by the peersim framework.
    *
-   * @param myNode The current node receiving the event.
-   * @param myPid The process ID of the current node. (TODO: verify!!!)
-   * @param event The event being received by the current node.
+   * @param myNode the current node receiving the event.
+   * @param myPid the process ID of the current node. (TODO: verify!!!)
+   * @param event the event being received by the current node.
    */
   public void processEvent(Node myNode, int myPid, Object event) {
     // Set the Kademlia ID as the current process ID - assuming Pid stands for process ID.

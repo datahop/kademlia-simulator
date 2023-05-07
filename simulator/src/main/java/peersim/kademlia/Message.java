@@ -27,7 +27,7 @@ import java.util.Map;
 // ______________________________________________________________________________________
 public class Message extends SimpleEvent {
 
-  /** internal generator for unique message IDs */
+  /** Internal generator for unique message IDs */
   private static long ID_GENERATOR = 0;
 
   /** Message Type: PING (used to verify that a node is still alive) */

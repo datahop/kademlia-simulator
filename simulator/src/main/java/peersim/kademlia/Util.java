@@ -48,27 +48,27 @@ public class Util {
     }
     return s;
   }
+
   /**
    * Measures the log-distance between two BigInteger values using the length of the differing
    * suffix in bits
    *
-   * @param BigInteger a
-   * @param BigInteger b
-   * @return int result
+   * @param a the first BigInteger value
+   * @param b the second BigInteger value
+   * @return the log-distance between the two values
    */
   public static int logDistance(BigInteger a, BigInteger b) {
-
     BigInteger x = a.xor(b);
 
     return x.bitLength();
   }
 
   /**
-   * return the distance between two number wich is defined as (a XOR b)
+   * Returns the XOR distance between two BigInteger values
    *
-   * @param a BigInteger
-   * @param b BigInteger
-   * @return BigInteger
+   * @param a the first BigInteger value
+   * @param b the second BigInteger value
+   * @return the XOR distance between a and b as a BigInteger
    */
   public static BigInteger xorDistance(BigInteger a, BigInteger b) {
     return a.xor(b);
