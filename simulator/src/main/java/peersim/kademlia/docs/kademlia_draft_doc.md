@@ -15,8 +15,7 @@ Apart from the KademliaProtocol class many other classes are used, but two are i
 
 ### **3. Class and Method Description**
 
-Before adopting Javadoc, the following descriptions were written for the classes and methods in the **`KademliaProtocol`** Class. The javadoc generated documentation can be found [here](../docs/apidocs/index.html). 
-
+Before adopting Javadoc, the following descriptions were written for the classes and methods in the **`KademliaProtocol`** Class. The javadoc generated documentation can be found in the apidocs subfolder within the docs folder [here](../docs/apidocs/) (or following ../docs/apidocs/). 
 
 The primary/main class is the **`KademliaProtocol`** class, which implements the **`EDProtocol`** interface. It has several instance variables, including `nodeId`, which represents the ID of the node running the protocol; `routingTable`, which is the routing table for the node; and `sentMsg` and `findOp`, which are data structures used to keep track of messages sent and find operations, respectively.
 
