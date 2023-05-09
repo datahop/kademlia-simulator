@@ -347,11 +347,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
           if (fop.getBody().equals("Automatically Generated Traffic")
               && fop.getClosest().containsKey(fop.getDestNode())) {
-            // // Update statistics
-            // long timeInterval = (CommonState.getTime()) - (fop.getTimestamp());
-            // KademliaObserver.timeStore.add(timeInterval);
-            // KademliaObserver.hopStore.add(fop.nrHops);
-            // KademliaObserver.msg_deliv.add(1);
+            // Update statistics
+            long timeInterval = (CommonState.getTime()) - (fop.getTimestamp());
+            KademliaObserver.timeStore.add(timeInterval);
+            KademliaObserver.hopStore.add(fop.nrHops);
+            KademliaObserver.msg_deliv.add(1);
           }
 
           return;
@@ -367,10 +367,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         KademliaObserver.reportOperation(fop);
         findOp.remove(fop.getId());
         // Update statistics
-        long timeInterval = (CommonState.getTime()) - (fop.getTimestamp());
-        KademliaObserver.timeStore.add(timeInterval);
-        KademliaObserver.hopStore.add(fop.nrHops);
-        KademliaObserver.msg_deliv.add(1);
+        // long timeInterval = (CommonState.getTime()) - (fop.getTimestamp());
+        // KademliaObserver.timeStore.add(timeInterval);
+        // KademliaObserver.hopStore.add(fop.nrHops);
+        // KademliaObserver.msg_deliv.add(1);
       }
     }
   }

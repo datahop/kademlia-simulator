@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -75,29 +76,20 @@ public class KademliaObserver implements Control {
    */
   private static void writeMap(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
-      // Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
-      // Define the expected order of keys in the header
-      String[] keys = {"src", "dst", "id", "type", "status"};
+      // Get the key set of the first entry in the map and use it to create the header
+      Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
 
       // Write the comma seperated keys as the header of the file
-      String header = String.join(",", keys) + "\n";
+      String header = String.join(",", keySet) + "\n";
       writer.write(header);
 
-      // String header = "";
-      // for (Object key : keySet) {
-      //   header += key + ",";
-      // }
-
-      // // Remove the last comma
-      // header = header.substring(0, header.length() - 1);
-      // header += "\n";
-      // writer.write(header);
-
-      // Iterate through each message and writes its content to a file
+      // Iterate through each message and write its content to a file
       for (Map<String, Object> entry : messages.values()) {
         String line = "";
-        for (Object key : keys) {
-          line += entry.get(key).toString() + ",";
+        for (Object key : keySet) {
+          line +=
+              entry.get(key).toString()
+                  + ","; // Append the string representation of the value to line
         }
         // Remove the last comma
         line = line.substring(0, line.length() - 1);
@@ -118,30 +110,17 @@ public class KademliaObserver implements Control {
    */
   private static void writeMapFind(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
-      // Define the expected order of keys in the header
-      String[] keys = {"src", "start", "stop", "messages", "hops", "id", "type"};
-
       // Get the key set of the first entry in the map and use it to create the header
-      // Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
+      Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
 
       // Write the comma seperated keys as the header of the file
-      String header = String.join(",", keys) + "\n";
+      String header = String.join(",", keySet) + "\n";
       writer.write(header);
-
-      // String header = "";
-      // for (Object key : keySet) {
-      //   header += key + ",";
-      // }
-
-      // Remove the last comma and add a newline character
-      // header = header.substring(0, header.length() - 1);
-      // header += "\n";
-      // writer.write(header);
 
       // Iterate through each find operation and write its data to the file
       for (Map<String, Object> entry : find_log.values()) {
         String line = "";
-        for (Object key : keys) {
+        for (Object key : keySet) {
           line +=
               entry.get(key).toString()
                   + ","; // Append the string representation of the value to line
