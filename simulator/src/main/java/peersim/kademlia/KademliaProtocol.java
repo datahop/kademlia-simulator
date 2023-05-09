@@ -47,7 +47,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private static boolean _ALREADY_INSTALLED = false;
 
   /** routing table of this pastry node */
-  private RoutingTable routingTable;
+  protected RoutingTable routingTable;
 
   /** trace message sent for timeout purpose */
   private TreeMap<Long, Long> sentMsg;
@@ -545,6 +545,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** get the kademlia node routing table */
   public RoutingTable getRoutingTable() {
     return this.routingTable;
+  }
+
+  public void refreshBuckets() {
+    // logger.warning("Calling refreshbuckets");
+    routingTable.refreshBuckets();
   }
 
   /** Set the protocol ID for this node. */
