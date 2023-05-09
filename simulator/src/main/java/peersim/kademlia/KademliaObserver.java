@@ -10,6 +10,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
+import peersim.kademlia.operations.Operation;
 import peersim.util.IncrementalStats;
 
 /**
@@ -178,12 +179,14 @@ public class KademliaObserver implements Control {
     messages.put(String.valueOf(m.id), m.toMap(sent));
   }
 
-  public static void reportFindOp(OpLogging fLog) {
+  public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
     // we don't want to log them
-    if (fLog.src == null) {
+    /*if (fLog.src == null) {
       return;
     }
-    find_log.put(String.valueOf(fLog.id), fLog.toMap());
+    find_log.put(String.valueOf(fLog.id), fLog.toMap());*/
+    op.setStopTime(CommonState.getTime() - op.getTimestamp());
+    find_log.put(String.valueOf(op.getId()), op.toMap());
   }
 }
