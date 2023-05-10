@@ -4,8 +4,7 @@ import java.math.BigInteger;
 
 /**
  * This class represents a find operation and offer the methods needed to maintain and update the
- * closest set.<br>
- * It also maintains the number of parallel requsts that can has a maximum of ALPHA.
+ * closest set. It also maintains the number of parallel requsts that can has a maximum of ALPHA.
  *
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
@@ -13,9 +12,11 @@ import java.math.BigInteger;
 public class PutOperation extends GetOperation {
 
   /**
-   * defaul constructor
+   * Default constructor
    *
-   * @param destNode Id of the node to find
+   * @param srcNode ID of the node that stores the value
+   * @param value the value to store
+   * @param timestamp the timestamp of the operation
    */
   public PutOperation(BigInteger srcNode, BigInteger value, long timestamp) {
     super(srcNode, value, timestamp);

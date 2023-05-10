@@ -50,8 +50,8 @@ public class KeyValueStore {
   /**
    * Add an object into the memory store
    *
+   * @param id The key of the object to store
    * @param obj The object to store
-   * @return The key stored
    */
   public void add(BigInteger id, Object obj) {
     add(id, obj, 0);
@@ -61,7 +61,6 @@ public class KeyValueStore {
    *
    * @param obj The object to store
    * @param timeout The delay in ms
-   * @return The key store
    */
   public void add(BigInteger id, Object obj, long timeout) {
     // If the system is not functionnal
