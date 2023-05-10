@@ -188,7 +188,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   public void setBuilder(boolean isBuilder) {
-    // logger.warning("Set builder " + isBuilder + " " + this.kademliaId);
+    logger.warning("Set builder " + isBuilder + " " + this.kademliaId);
     this.isBuilder = isBuilder;
   }
 

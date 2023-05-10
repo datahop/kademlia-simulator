@@ -210,7 +210,7 @@ public class TrafficGeneratorDoubleSample implements Control {
           if (!inRegion) {
             radius = radius.multiply(BigInteger.valueOf(2));
             count++;
-            System.out.println("Sample assigned after " + count + " increase " + s.getIdByRow());
+            // System.out.println("Sample assigned after " + count + " increase " + s.getIdByRow());
           }
         }
         /*if (!inRegion) {

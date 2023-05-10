@@ -88,7 +88,7 @@ public abstract class Operation {
   }
 
   public void AddMessage(long messageId) {
-    this.messages = this.messages + messageId + "-";
+    this.messages = this.messages + messageId + "|";
   }
 
   public void setStopTime(long time) {

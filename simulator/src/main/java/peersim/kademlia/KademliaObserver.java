@@ -26,6 +26,8 @@ public class KademliaObserver implements Control {
   /** Configuration strings to read */
   private static final String PAR_STEP = "step";
 
+  private static final String PAR_FOLDER = "logfolder";
+
   /** keep statistics of the number of hops of every message delivered. */
   public static IncrementalStats hopStore = new IncrementalStats();
 
@@ -47,7 +49,7 @@ public class KademliaObserver implements Control {
   private static HashMap<String, Map<String, Object>> messages =
       new HashMap<String, Map<String, Object>>();
 
-  private static HashMap<String, Map<String, Object>> find_log =
+  private static HashMap<String, Map<String, Object>> operations =
       new HashMap<String, Map<String, Object>>();
 
   /** Name of the folder where experiment logs are written */
@@ -59,11 +61,12 @@ public class KademliaObserver implements Control {
   public KademliaObserver(String prefix) {
     observerStep = Configuration.getInt(prefix + "." + PAR_STEP);
 
-    logFolderName = "./logs";
-  }
+    logFolderName = Configuration.getString(prefix + "." + PAR_FOLDER, "./logs");
 
+    System.out.println("Logfolder: " + logFolderName);
+  }
   /** Message writeMap */
-  private static void writeMap(Map<String, Map<String, Object>> map, String filename) {
+  private static void writeMapMessages(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
       Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
 
@@ -94,7 +97,7 @@ public class KademliaObserver implements Control {
   }
 
   /** Write map find operation */
-  private static void writeMapFind(Map<String, Map<String, Object>> map, String filename) {
+  private static void writeMapOperation(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
       Set<String> keySet = new HashSet<String>();
       for (Map<String, Object> m : map.values())
@@ -111,7 +114,7 @@ public class KademliaObserver implements Control {
       header += "\n";
       writer.write(header);
 
-      for (Map<String, Object> entry : find_log.values()) {
+      for (Map<String, Object> entry : operations.values()) {
         String line = "";
         for (Object key : keySet) {
           if (entry.get(key) != null) line += entry.get(key).toString() + ",";
@@ -134,10 +137,10 @@ public class KademliaObserver implements Control {
       directory.mkdir();
     }
     if (!messages.isEmpty()) {
-      writeMap(messages, logFolderName + "/" + "messages.csv");
+      writeMapMessages(messages, logFolderName + "/" + "messages.csv");
     }
-    if (!find_log.isEmpty()) {
-      writeMapFind(find_log, logFolderName + "/" + "operation.csv");
+    if (!operations.isEmpty()) {
+      writeMapOperation(operations, logFolderName + "/" + "operation.csv");
     }
   }
 
@@ -187,13 +190,8 @@ public class KademliaObserver implements Control {
 
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
-    // we don't want to log them
-    /*if (fLog.src == null) {
-      return;
-    }
-    find_log.put(String.valueOf(fLog.id), fLog.toMap());*/
-    // System.out.println("Report operation " + op.getId());
+
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
-    find_log.put(String.valueOf(op.getId()), op.toMap());
+    operations.put(String.valueOf(op.getId()), op.toMap());
   }
 }
