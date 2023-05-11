@@ -151,7 +151,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     // System.out.println("Mapping");
     Map<String, Object> result = new HashMap<String, Object>();
 
-    
     result.put("id", this.operationId);
     result.put("src", this.srcNode);
     result.put("type", this.getClass().getSimpleName());
