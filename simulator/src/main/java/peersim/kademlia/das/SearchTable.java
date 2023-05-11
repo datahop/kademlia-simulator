@@ -2,47 +2,98 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-// import java.util.Random;
-import peersim.core.CommonState;
+import java.util.Set;
+import java.util.TreeSet;
 
-/** Structure used to store discovered nodes in the network and feed the random sampling process */
 public class SearchTable {
 
-  /** List of ids discovered */
-  private List<BigInteger> nodes;
+  // private HashMap<BigInteger, List<BigInteger>> sampleMap;
 
-  public SearchTable() {
+  private Block currentBlock;
 
-    nodes = new ArrayList<>();
+  private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
+
+  public SearchTable(Block currentblock) {
+
+    this.currentBlock = currentblock;
+    // this.sampleMap = new HashMap<>();
+    this.nodesIndexed = new TreeSet<>();
+    // this.samplesIndexed = new HashSet<>();
   }
 
-  // add a neighbour to the correct k-bucket
-  public void addNode(BigInteger[] neighbours) {
-    // if (samples == null)
-    nodes.addAll(Arrays.asList(neighbours));
+  public void setBlock(Block currentBlock) {
+    this.currentBlock = currentBlock;
   }
 
-  /** Get any randomn node from the list */
-  public BigInteger getNode() {
-    if (nodes.isEmpty()) return null;
-    BigInteger node = nodes.get(CommonState.r.nextInt(nodes.size()));
-    // nodes.remove(node);
-    return node;
+  public BigInteger[] getSamples(BigInteger peerId) {
+
+    List<BigInteger> result = new ArrayList<>();
+    Collections.addAll(
+        result,
+        currentBlock.getSamplesByRadiusByColumn(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+    Collections.addAll(
+        result,
+        currentBlock.getSamplesByRadiusByRow(
+            peerId,
+            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+
+    return result.toArray(new BigInteger[0]);
   }
 
-  // remove the node from the list
-  public void removeNeighbour(BigInteger node) {
-    nodes.remove(node);
+  public void addNodes(BigInteger[] nodes) {
+
+    /*for (BigInteger id : nodes) {
+      BigInteger[] samples = getSamples(id);
+      // System.out.println("Samples add " + samples.length);
+      for (BigInteger sample : samples) {
+        if (sampleMap.get(sample) == null) {
+          List<BigInteger> ids = new ArrayList<>();
+          ids.add(id);
+          sampleMap.put(sample, ids);
+          samplesIndexed.add(sample);
+          nodesIndexed.add(id);
+        } else {
+          sampleMap.get(sample).add(id);
+          nodesIndexed.add(id);
+        }
+      }
+    }*/
+    for (BigInteger id : nodes) nodesIndexed.add(id);
   }
 
-  public int size() {
-    return nodes.size();
+  public TreeSet<BigInteger> nodesIndexed() {
+    return nodesIndexed;
   }
 
-  /** Returns all nodes in the list */
-  public BigInteger[] getAllNeighbours() {
-    return (BigInteger[]) nodes.toArray(new BigInteger[0]);
+  /*public HashSet<BigInteger> samplesIndexed() {
+    return samplesIndexed;
+  }*/
+
+  public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
+
+    BigInteger top = sampleId.add(radius);
+    BigInteger bottom = sampleId.subtract(radius);
+
+    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
+    return new ArrayList<BigInteger>(subSet);
+
+    // return sampleMap.get(sampleId);
+
+  }
+
+  public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
+
+    List<BigInteger> result = new ArrayList<>();
+
+    for (BigInteger sample : samples) {
+      // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
+      result.addAll(getNodesbySample(sample, radius));
+    }
+    return result;
   }
 }

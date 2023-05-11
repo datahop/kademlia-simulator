@@ -124,8 +124,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     findOp = new LinkedHashMap<Long, FindOperation>();
 
-    findLog = new LinkedHashMap<Long, OpLogging>();
-
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();

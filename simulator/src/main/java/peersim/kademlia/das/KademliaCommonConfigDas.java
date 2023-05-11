@@ -26,7 +26,7 @@ public class KademliaCommonConfigDas {
   public static int MAPPING_FN = SAMPLE_MAPPING_REGION_BASED;
 
   /** Number of copies of each sample stored in the network */
-  public static int NUM_SAMPLE_COPIES_PER_PEER = 3;
+  public static int NUM_SAMPLE_COPIES_PER_PEER = 2;
 
   /** Block matrix dimension */
   public static int BLOCK_DIM_SIZE = 10;
@@ -35,7 +35,12 @@ public class KademliaCommonConfigDas {
   public static int N_SAMPLES = 75;
 
   /** Number of samples returned by a single node */
-  public static int MAX_SAMPLES_RETURNED = 3;
+  public static int MAX_SAMPLES_RETURNED = 100;
+
+  public static int MAX_NODES_RETURNED = 15;
+
+  /** Number of samples returned by a single node */
+  public static int MAX_HOPS = 1000;
 
   /**
    * short information about current mspastry configuration
