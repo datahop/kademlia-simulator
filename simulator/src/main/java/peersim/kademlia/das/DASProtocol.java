@@ -50,7 +50,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   /** allow to call the service initializer only once */
   private static boolean _ALREADY_INSTALLED = false;
 
-  private Logger logger;
+  protected Logger logger;
 
   private BigInteger builderAddress;
 
@@ -217,7 +217,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInitNewBlock(Message m, int myPid) {
+  protected void handleInitNewBlock(Message m, int myPid) {
     currentBlock = (Block) m.body;
     kv.erase();
     //    samplesRequested = 0;
@@ -266,7 +266,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
    */
-  private void handleInitGetSample(Message m, int myPid) {
+  protected void handleInitGetSample(Message m, int myPid) {
     BigInteger[] sampleId = new BigInteger[1];
     sampleId[0] = ((BigInteger) m.body);
 
@@ -332,7 +332,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     sendMessage(response, m.src.getId(), myPid);
   }
 
-  private void handleGetSampleResponse(Message m, int myPid) {
+  protected void handleGetSampleResponse(Message m, int myPid) {
 
     if (m.body == null) return;
 

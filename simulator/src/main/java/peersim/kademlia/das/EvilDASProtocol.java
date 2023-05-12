@@ -14,6 +14,23 @@ public class EvilDASProtocol extends DASProtocol {
   @Override
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
+    logger.warning("Handle get sample - return nothing");
+  }
+
+  @Override
+  protected void handleInitNewBlock(Message m, int myPid) {
+    logger.warning("Init block evil node - do nothing");
+  }
+
+  @Override
+  protected void handleInitGetSample(Message m, int myPid) {
+    logger.warning("Init block evil node - getting samples");
+    super.handleInitGetSample(m, myPid);
+  }
+
+  @Override
+  protected void handleGetSampleResponse(Message m, int myPid) {
+    logger.warning("Received sample evil node: do nothing");
   }
 
   /**
