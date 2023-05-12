@@ -251,8 +251,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       for (SamplingOperation sop : samplingOp.values()) {
         KademliaObserver.reportOperation(sop);
         if (sop instanceof ValidatorSamplingOperation)
-          logger.warning("Sampling operation finished validator" + sop.getId());
-        else logger.warning("Sampling operation finished random" + sop.getId());
+          logger.warning("Sampling operation finished validator " + sop.getId());
+        else logger.warning("Sampling operation finished random " + sop.getId());
       }
       samplingOp.clear();
       kadOps.clear();
@@ -400,8 +400,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         logger.warning("Operation completed");
         samplingOp.remove(m.operationId);
         if (op instanceof ValidatorSamplingOperation)
-          logger.warning("Sampling operation finished validator completed" + op.getId());
-        else logger.warning("Sampling operation finished random completed" + op.getId());
+          logger.warning("Sampling operation finished validator completed " + op.getId());
+        else logger.warning("Sampling operation finished random completed " + op.getId());
         KademliaObserver.reportOperation(op);
       }
     } else if (!samplingStarted && samplesRequested == 0) {
@@ -541,8 +541,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       KademliaObserver.reportOperation(sop);
       // logger.warning("Sampling operation finished " + sop.getId());
       if (sop instanceof ValidatorSamplingOperation)
-        logger.warning("Sampling operation finished validator dosampling" + sop.getId());
-      else logger.warning("Sampling operation finished random dosampling" + sop.getId());
+        logger.warning("Sampling operation finished validator dosampling " + sop.getId());
+      else logger.warning("Sampling operation finished random dosampling " + sop.getId());
       return true;
     } else {
       boolean success = false;
@@ -600,19 +600,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     logger.warning("Sending lookup " + sampleId);
     Message lookup = Util.generateFindNodeMessage(sampleId);
     Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
-    logger.warning("Sent lookup " + lop);
+    // logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
     queried.add(sampleId);
-  }
-
-  /** Set the protocol ID for this node. */
-  public void setDASProtocolID(int protocolID) {
-    this.dasID = protocolID;
-  }
-
-  /** Get the protocol ID for this node. */
-  public int getDASProtocolID() {
-    return this.dasID;
   }
 
   @Override

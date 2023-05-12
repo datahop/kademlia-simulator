@@ -137,7 +137,8 @@ public class KademliaObserver implements Control {
 
   /** Writes log data to files. */
   public static void writeOut() {
-    // Create log directory if it does not exist
+    System.out.println("Writing out");
+
     File directory = new File(logFolderName);
     if (!directory.exists()) {
       directory.mkdir();
