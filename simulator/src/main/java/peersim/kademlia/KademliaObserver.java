@@ -46,12 +46,11 @@ public class KademliaObserver implements Control {
   /** Successfull find operations */
   public static IncrementalStats find_ok = new IncrementalStats();
 
-  /** Messages exchanged in the Kademlia network */
-  private static HashMap<String, Map<String, Object>> messages =
-      new HashMap<String, Map<String, Object>>();
+  private static HashMap<Long, Map<String, Object>> messages =
+      new HashMap<Long, Map<String, Object>>();
 
-  private static HashMap<String, Map<String, Object>> operations =
-      new HashMap<String, Map<String, Object>>();
+  private static HashMap<Long, Map<String, Object>> operations =
+      new HashMap<Long, Map<String, Object>>();
 
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
@@ -71,37 +70,8 @@ public class KademliaObserver implements Control {
 
     System.out.println("Logfolder: " + logFolderName);
   }
-  /** Message writeMap */
-  private static void writeMapMessages(Map<String, Map<String, Object>> map, String filename) {
-    try (FileWriter writer = new FileWriter(filename)) {
-      // Get the key set of the first entry in the map and use it to create the header
-      Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
 
-      // Write the comma seperated keys as the header of the file
-      String header = String.join(",", keySet) + "\n";
-      writer.write(header);
-
-      // Iterate through each message and write its content to a file
-      for (Map<String, Object> entry : messages.values()) {
-        String line = "";
-        for (Object key : keySet) {
-          line +=
-              entry.get(key).toString()
-                  + ","; // Append the string representation of the value to line
-        }
-        // Remove the last comma
-        line = line.substring(0, line.length() - 1);
-        line += "\n";
-        writer.write(line);
-      }
-      writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Write map find operation */
-  private static void writeMapOperation(Map<String, Map<String, Object>> map, String filename) {
+  private static void writeLogs(Map<Long, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
       Set<String> keySet = new HashSet<String>();
       for (Map<String, Object> m : map.values())
@@ -117,7 +87,7 @@ public class KademliaObserver implements Control {
       String header = String.join(",", keySet) + "\n";
       writer.write(header);
 
-      for (Map<String, Object> entry : operations.values()) {
+      for (Map<String, Object> entry : map.values()) {
         String line = "";
         for (Object key : keySet) {
           if (entry.get(key) != null) line += entry.get(key).toString() + ",";
@@ -133,11 +103,12 @@ public class KademliaObserver implements Control {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    map.clear();
   }
 
   /** Writes log data to files. */
   public static void writeOut() {
-    System.out.println("Writing out");
+    // System.out.println("Writing out");
 
     File directory = new File(logFolderName);
     if (!directory.exists()) {
@@ -145,10 +116,10 @@ public class KademliaObserver implements Control {
     }
     // Write messages log to file if not empty
     if (!messages.isEmpty()) {
-      writeMapMessages(messages, logFolderName + "/" + "messages.csv");
+      writeLogs(messages, logFolderName + "/" + "messages.csv");
     }
     if (!operations.isEmpty()) {
-      writeMapOperation(operations, logFolderName + "/" + "operation.csv");
+      writeLogs(operations, logFolderName + "/" + "operation.csv");
     }
   }
 
@@ -202,9 +173,8 @@ public class KademliaObserver implements Control {
     // so we don't want to log them.
     if (m.src == null) return;
 
-    // Add the message to the message log, but first check if it hasn't already been added
-    assert (!messages.keySet().contains(String.valueOf(m.id)));
-    messages.put(String.valueOf(m.id), m.toMap(sent));
+    assert (!messages.keySet().contains(m.id));
+    messages.put(m.id, m.toMap(sent));
   }
 
   /**
@@ -215,7 +185,8 @@ public class KademliaObserver implements Control {
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
 
+    assert (!operations.keySet().contains(op.getId()));
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
-    operations.put(String.valueOf(op.getId()), op.toMap());
+    operations.put(op.getId(), op.toMap());
   }
 }
