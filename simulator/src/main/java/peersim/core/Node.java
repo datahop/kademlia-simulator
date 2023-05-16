@@ -19,6 +19,7 @@
 package peersim.core;
 
 import peersim.kademlia.KademliaProtocol;
+import peersim.kademlia.das.DASProtocol;
 
 /**
  * Class that represents one node with a network address. An {@link Network} is made of a set of
@@ -99,11 +100,11 @@ public interface Node extends Fallible, Cloneable {
    * Returns the DAS Protocol used by the node. This is useful when nodes use different types of DAS
    * Protocols and saves the caller from determining which protocol ID to use for each node.
    */
-  // public DASProtocol getDASProtocol();
+  public DASProtocol getDASProtocol();
 
   /**
    * Sets the DAS Protocol used by the node. This is useful when nodes use different types of DAS
    * Protocols.
    */
-  // public void setDASProtocol(DASProtocol proto);
+  public void setDASProtocol(DASProtocol proto);
 }

@@ -35,7 +35,7 @@ public class TrafficGeneratorSample implements Control {
   private static final String PAR_DASPROT = "dasprotocol";
 
   /** MSPastry Protocol ID to act */
-  private final int kadpid, daspid;
+  //  private final int kadpid, daspid;
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -55,8 +55,8 @@ public class TrafficGeneratorSample implements Control {
   private HashMap<BigInteger, Node> nodeMap;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
-    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
-    daspid = Configuration.getPid(prefix + "." + PAR_DASPROT);
+    //    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
+    //    daspid = Configuration.getPid(prefix + "." + PAR_DASPROT);
 
     KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
@@ -161,7 +161,9 @@ public class TrafficGeneratorSample implements Control {
         }*/
 
       for (int i = 0; i < Network.size(); i++) {
-        DASProtocol dasProt = ((DASProtocol) (Network.get(i).getProtocol(daspid)));
+        DASProtocol dasProt =
+            (DASProtocol) Network.get(i).getDASProtocol(); // (Network.get(i).getProtocol(daspid)));
+        // System.out.println("DASProtocol " + dasProt);
         nodeMap.put(dasProt.getKademliaId(), Network.get(i));
       }
       first = false;
@@ -175,18 +177,22 @@ public class TrafficGeneratorSample implements Control {
         Sample s = b.next();
         boolean inRegion = false;
         // System.out.println("New sample " + s.getColumn() + " " + s.getRow());
-        int count = 0;
+        // int count = 0;
         BigInteger radius =
             b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
         while (!inRegion) {
           for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
             Node n = nodeMap.get(nodeId);
-            DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+            DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
             if (n.isUp() && !dasProt.isBuilder()) {
               totalSamples++;
               // System.out.println("Assigned row " + s.getIdByRow());
-              EDSimulator.add(0, generateNewSampleMessage(s.getIdByRow()), n, daspid);
+              EDSimulator.add(
+                  0,
+                  generateNewSampleMessage(s.getIdByRow()),
+                  n,
+                  n.getDASProtocol().getDASProtocolID());
 
               if (inRegion == false) {
                 samplesWithinRegion++;
@@ -196,10 +202,11 @@ public class TrafficGeneratorSample implements Control {
           }
           for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
             Node n = nodeMap.get(nodeId);
-            DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
+            DASProtocol dasProt = ((DASProtocol) n.getDASProtocol());
             if (n.isUp() && !dasProt.isBuilder()) {
               totalSamples++;
-              EDSimulator.add(0, generateNewSampleMessage(s.getIdByColumn()), n, daspid);
+              EDSimulator.add(
+                  0, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
 
               if (inRegion == false) {
                 samplesWithinRegion++;
@@ -209,7 +216,7 @@ public class TrafficGeneratorSample implements Control {
           }
           if (!inRegion) {
             radius = radius.multiply(BigInteger.valueOf(2));
-            count++;
+            // count++;
             // System.out.println("Sample assigned after " + count + " increase " + s.getIdByRow());
           }
         }
@@ -261,7 +268,7 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         b.initIterator();
-        EDSimulator.add(0, generateNewBlockMessage(b), n, daspid);
+        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
 
       System.out.println(

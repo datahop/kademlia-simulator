@@ -68,8 +68,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
   private boolean samplingStarted;
 
-  private int pid;
-
   private SearchTable searchTable;
 
   private int[] row, column;
@@ -139,10 +137,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   public void processEvent(Node myNode, int myPid, Object event) {
 
     Message m;
-    pid = myPid;
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
       m = (Message) event;
+
+      // System.out.println(
+      //    CommonState.getTime() + " " + this + " " + this.kadProtocol + " " + m.getType());
+      // System.out.println(CommonState.getTime() + " " +
+      // this.kadProtocol.getKademliaNode().getId());
       m.dst = this.getKademliaProtocol().getKademliaNode();
       KademliaObserver.reportMsg(m, false);
     }
@@ -461,6 +463,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @return Message
    */
   public BigInteger getKademliaId() {
+    // logger.warning("getKademliaId " + this);
+    //            + " "
+    //            + this.getKademliaProtocol().getKademliaNode()
+    //            + " "
+    //            + this.getKademliaProtocol().getKademliaNode().getId());
     return this.getKademliaProtocol().getKademliaNode().getId();
   }
 
@@ -568,7 +575,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           continue;
         }
         sop.AddMessage(msg.id);
-        sendMessage(msg, nextNode, pid);
+        logger.warning("Send message " + dasID + " " + this);
+        sendMessage(msg, nextNode, dasID);
         sop.nrHops++;
       }
       return success;
@@ -603,6 +611,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     // logger.warning("Sent lookup " + lop);
     kadOps.put(lop, op);
     queried.add(sampleId);
+  }
+
+  public void setDASProtocolID(int dasId) {
+    this.dasID = dasId;
+  }
+
+  public int getDASProtocolID() {
+    return this.dasID;
   }
 
   @Override

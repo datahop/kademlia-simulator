@@ -79,18 +79,34 @@ public class CustomDistributionDas implements peersim.core.Control {
         kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolEvilKadID)));
         dasProt = ((EvilDASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
         kadProt.setProtocolID(protocolEvilKadID);
+        dasProt.setDASProtocolID(protocolEvilDasID);
         node.setEvil(true);
-        // dasProt.setDASProtocolID(protocolEvilDasID);
+        /*System.out.println(
+        "DAS protocol "
+            + dasProt
+            + " "
+            + kadProt
+            + " "
+            + protocolEvilKadID
+            + " "
+            + protocolEvilDasID);*/
       } else {
         kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
-        // dasProt.setDASProtocolID(protocolDasID);
         kadProt.setProtocolID(protocolKadID);
+        dasProt.setDASProtocolID(protocolDasID);
+        // System.out.println(
+        //     "DAS protocol " + dasProt + " " + kadProt + " " + protocolKadID + " " +
+        // protocolDasID);
       }
 
       generalNode.setKademliaProtocol(kadProt);
-      // generalNode.setDASProtocol(dasProt);
+      generalNode.setDASProtocol(dasProt);
+      generalNode.setProtocol(protocolDasID, dasProt);
+      generalNode.setProtocol(protocolEvilDasID, dasProt);
       kadProt.setNode(node);
+      // System.out.println(
+      //    "DAS set kadprotocol " + kadProt + " " + kadProt.getKademliaNode().getId());
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 
