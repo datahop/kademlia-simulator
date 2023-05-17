@@ -197,7 +197,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
-      if (!fop.isFinished() && Arrays.asList(neighbours).contains(fop.getDestNode())) {
+      if (!fop.isFinished()
+          && Arrays.asList(neighbours).contains(fop.getDestNode())
+          && !(fop instanceof RegionBasedFindOperation)) {
         logger.warning("Found node " + fop.getDestNode());
         if (callback != null) callback.operationComplete(fop);
         KademliaObserver.find_ok.add(1);
