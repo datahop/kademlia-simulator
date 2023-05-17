@@ -110,7 +110,8 @@ public class CustomDistributionDas implements peersim.core.Control {
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 
-      if (numValidators >= i) {
+      if (i >= (numEvilNodes + 1) && i < numValidators + (numEvilNodes + 1)) {
+        assert (!node.isEvil());
         dasProt.setValidator(true);
         validatorsIds.add(dasProt.getKademliaId());
         validators.add(dasProt);
@@ -122,6 +123,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else dasProt.setBuilderAddress(builderAddress);
     }
 
+    System.out.println("Validators " + validators.size());
     for (DASProtocol validator : validators) {
       validator.addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }

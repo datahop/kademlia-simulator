@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -57,7 +56,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
+    setAvailableRequests(KademliaCommonConfigDas.ALPHA - 1);
   }
 
   public void elaborateResponse(Sample[] sam) {
