@@ -181,10 +181,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           // remove form sentMsg
           sentMsg.remove(t.msgID);
           this.searchTable.removeNode(t.node);
-          if (samplingOp.get(t.opID) != null) {
-            if (!samplingOp.get(t.opID).completed()) {
+          SamplingOperation sop = samplingOp.get(t.opID);
+          if (sop != null) {
+            if (!sop.completed()) {
               logger.info("Samping operation found");
-              doSampling(samplingOp.get(t.opID));
+              int req = sop.getAvailableRequests() + 1;
+              sop.setAvailableRequests(req);
+              doSampling(sop);
             }
           }
         }
