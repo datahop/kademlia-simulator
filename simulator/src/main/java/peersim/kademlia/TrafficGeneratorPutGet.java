@@ -36,13 +36,13 @@ public class TrafficGeneratorPutGet implements Control {
 
   // ______________________________________________________________________________________________
   /**
-   * generates a PUT message for t1 key and string message
+   * Generates a PUT message for t1 key and string message
    *
    * @return Message
    */
   private Message generatePutMessage() {
 
-    // existing active destination node
+    // Existing active destination node
     MessageDigest digest;
     BigInteger id;
     String value = "hello";
@@ -63,7 +63,7 @@ public class TrafficGeneratorPutGet implements Control {
 
   // ______________________________________________________________________________________________
   /**
-   * generates a GET message for t1 key.
+   * Generates a GET message for t1 key.
    *
    * @return Message
    */
@@ -88,7 +88,7 @@ public class TrafficGeneratorPutGet implements Control {
 
   // ______________________________________________________________________________________________
   /**
-   * every call of this control generates and send a random find node message
+   * Every call of this control generates and send a random find node message
    *
    * @return boolean
    */

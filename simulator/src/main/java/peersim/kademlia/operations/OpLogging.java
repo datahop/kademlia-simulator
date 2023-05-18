@@ -1,8 +1,9 @@
-package peersim.kademlia;
+package peersim.kademlia.operations;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import peersim.kademlia.SimpleEvent;
 
 /**
  * FindLogging class provide all functionalities to magage a find operation and report it to the

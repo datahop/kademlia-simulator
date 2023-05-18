@@ -13,13 +13,13 @@ public class Timeout extends SimpleEvent {
   /** Message Type: PING (used to verify that a node is still alive) */
   public static final int TIMEOUT = 100;
 
-  /** The node wich failed to response */
+  /** The node which failed to response */
   public BigInteger node;
 
-  /** The id of the message sent to the node */
+  /** The ID of the message sent to the node */
   public long msgID;
 
-  /** The id of the operation in wich the message has been sent */
+  /** The ID of the operation in which the message has been sent */
   public long opID;
 
   // ______________________________________________________________________________________________

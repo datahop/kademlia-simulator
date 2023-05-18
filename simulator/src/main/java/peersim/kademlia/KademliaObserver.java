@@ -43,9 +43,11 @@ public class KademliaObserver implements Control {
   /** Successfull find operations */
   public static IncrementalStats find_ok = new IncrementalStats();
 
+  /** Messages exchanged in the Kademlia network */
   private static HashMap<String, Map<String, Object>> messages =
       new HashMap<String, Map<String, Object>>();
 
+  /** Log of the "FIND" operations of the Kademlia network */
   private static HashMap<String, Map<String, Object>> find_log =
       new HashMap<String, Map<String, Object>>();
 
@@ -55,33 +57,41 @@ public class KademliaObserver implements Control {
   /** The time granularity of reporting metrics */
   private static int observerStep;
 
+  /**
+   * Constructor to initialize the observer.
+   *
+   * @param prefix the configuration prefix
+   */
   public KademliaObserver(String prefix) {
     observerStep = Configuration.getInt(prefix + "." + PAR_STEP);
 
     logFolderName = "./logs";
   }
 
-  /** Message writeMap */
+  /**
+   * Writes a map of messages to a file.
+   *
+   * @param map the map to write
+   * @param filename the name of the file to write to
+   */
   private static void writeMap(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
+      // Get the key set of the first entry in the map and use it to create the header
       Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
 
-      String header = "";
-      for (Object key : keySet) {
-        header += key + ",";
-      }
-
-      // remove the last comma
-      header = header.substring(0, header.length() - 1);
-      header += "\n";
+      // Write the comma seperated keys as the header of the file
+      String header = String.join(",", keySet) + "\n";
       writer.write(header);
 
+      // Iterate through each message and write its content to a file
       for (Map<String, Object> entry : messages.values()) {
         String line = "";
         for (Object key : keySet) {
-          line += entry.get(key).toString() + ",";
+          line +=
+              entry.get(key).toString()
+                  + ","; // Append the string representation of the value to line
         }
-        // remove the last comma
+        // Remove the last comma
         line = line.substring(0, line.length() - 1);
         line += "\n";
         writer.write(line);
@@ -92,27 +102,32 @@ public class KademliaObserver implements Control {
     }
   }
 
-  /** Write map find operation */
+  /**
+   * Writes a map of find operations to a file.
+   *
+   * @param map the map to write
+   * @param filename the name of the file to write to
+   */
   private static void writeMapFind(Map<String, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
+      // Get the key set of the first entry in the map and use it to create the header
       Set<String> keySet = map.entrySet().iterator().next().getValue().keySet();
-      String header = "";
-      for (Object key : keySet) {
-        header += key + ",";
-      }
 
-      // remove the last comma
-      header = header.substring(0, header.length() - 1);
-      header += "\n";
+      // Write the comma seperated keys as the header of the file
+      String header = String.join(",", keySet) + "\n";
       writer.write(header);
 
+      // Iterate through each find operation and write its data to the file
       for (Map<String, Object> entry : find_log.values()) {
         String line = "";
         for (Object key : keySet) {
-          line += entry.get(key).toString() + ",";
+          line +=
+              entry.get(key).toString()
+                  + ","; // Append the string representation of the value to line
         }
-        // remove the last comma
-        line = line.substring(0, line.length());
+
+        // Remove the last comma and add a newline character
+        line = line.substring(0, line.length() - 1);
         line += "\n";
         writer.write(line);
       }
@@ -122,28 +137,39 @@ public class KademliaObserver implements Control {
     }
   }
 
+  /** Writes log data to files. */
   public static void writeOut() {
+    // Create log directory if it does not exist
     File directory = new File(logFolderName);
     if (!directory.exists()) {
       directory.mkdir();
     }
+    // Write messages log to file if not empty
     if (!messages.isEmpty()) {
       writeMap(messages, logFolderName + "/" + "messages.csv");
     }
+    // Write find operations log to file if not empty
     if (!find_log.isEmpty()) {
       writeMapFind(find_log, logFolderName + "/" + "operation.csv");
+      // System.out.println(
+      //     "The average hope and latency " + hopStore.getAverage() + ", " +
+      // timeStore.getAverage());
     }
   }
 
   /**
-   * print the statistical snapshot of the current situation
+   * Print the statistical snapshot of the current situation.
    *
-   * @return boolean always false
+   * @return always false
    */
   public boolean execute() {
-    // get the real network size
+    // Get the real network size
     int sz = Network.size();
-    for (int i = 0; i < Network.size(); i++) if (!Network.get(i).isUp()) sz--;
+    for (int i = 0; i < Network.size(); i++) {
+      if (!Network.get(i).isUp()) {
+        sz--;
+      }
+    }
 
     System.gc();
     String s =
@@ -160,32 +186,46 @@ public class KademliaObserver implements Control {
             (int) timeStore.getMax(),
             (int) find_op.getSum());
 
+    // Check if this is the last execution cycle of the experiment
     if (CommonState.getEndTime() <= (observerStep + CommonState.getTime())) {
-      // Last execute cycle of the experiment
+      // Write out the logs to disk/permanent storage
       writeOut();
+      // System.err.println(s);
     }
-
-    System.err.println(s);
 
     return false;
   }
 
+  /**
+   * Reports a message, adding it to the message log if it has a source.
+   *
+   * @param m The message to report
+   * @param sent a boolean indicating whether the message was sent or received.
+   */
   public static void reportMsg(Message m, boolean sent) {
-    // messages without source are control messages sent by the traffic control
-    // we don't want to log them
+    // Messages without a source are control messages sent by the traffic control,
+    // so we don't want to log them.
     if (m.src == null) return;
 
+    // Add the message to the message log, but first check if it hasn't already been added
     assert (!messages.keySet().contains(String.valueOf(m.id)));
     messages.put(String.valueOf(m.id), m.toMap(sent));
   }
 
+  /**
+   * Reports an operation, adding it to the find operation log.
+   *
+   * @param op The operation to report.
+   */
   public static void reportOperation(Operation op) {
-    // messages without source are control messages sent by the traffic control
-    // we don't want to log them
+    // Operations without a source are control messages sent by the traffic control,
+    // so we don't want to log them.
     /*if (fLog.src == null) {
       return;
     }
     find_log.put(String.valueOf(fLog.id), fLog.toMap());*/
+
+    // Calculate the operation stop time and then add the opearation to the find operation log.
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     find_log.put(String.valueOf(op.getId()), op.toMap());
   }
