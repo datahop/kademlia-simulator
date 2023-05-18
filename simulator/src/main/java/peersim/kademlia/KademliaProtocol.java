@@ -27,6 +27,7 @@ import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.OpLogging;
 import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
+import peersim.kademlia.operations.RegionBasedFindOperation;
 import peersim.transport.UnreliableTransport;
 
 /**
@@ -240,18 +241,15 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       logger.warning(
           "Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
 
-      // Save received neighbor(s) in the closest set of the find operation
-      BigInteger[] neighbors = (BigInteger[]) m.body;
+      // save received neighbour in the closest Set of fin operation
+      BigInteger[] neighbours = (BigInteger[]) m.body;
+      if (callback != null) callback.nodesFound(fop, neighbours);
+      for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
 
-      if (callback != null) {
-        callback.nodesFound(fop, neighbors);
-      }
-      for (BigInteger neighbor : neighbors) {
-        routingTable.addNeighbour(neighbor);
-      }
+      if (!fop.isFinished()
+          && Arrays.asList(neighbours).contains(fop.getDestNode())
+          && !(fop instanceof RegionBasedFindOperation)) {
 
-      // Check if the destination node has been found.
-      if (!fop.isFinished() && Arrays.asList(neighbors).contains(fop.getDestNode())) {
         logger.warning("Found node " + fop.getDestNode());
 
         // Complete the operation and log the result.
@@ -335,6 +333,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             // Remove the find operation record
             findOp.remove(fop.getId());
             logger.warning("Getprocess finished not found ");
+            KademliaObserver.reportOperation(fop);
+          } else if (fop instanceof RegionBasedFindOperation) {
+            findOp.remove(fop.getId());
+            logger.warning("Region-based lookup completed ");
             KademliaObserver.reportOperation(fop);
           } else {
             findOp.remove(fop.getId());
@@ -450,6 +452,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     FindOperation fop;
     // Determine the type of the received message and create a corresponding operation object
     switch (m.type) {
+      case Message.MSG_INIT_FIND_REGION_BASED:
+        fop =
+            new RegionBasedFindOperation(
+                this.node.getId(), (BigInteger) m.body, (int) m.value, m.timestamp);
+        break;
       case Message.MSG_INIT_FIND:
         fop = new FindOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
         break;
@@ -590,6 +597,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         handleResponse(m, myPid);
         break;
 
+      case Message.MSG_INIT_FIND_REGION_BASED:
       case Message.MSG_INIT_FIND:
       case Message.MSG_INIT_GET:
       case Message.MSG_INIT_PUT:

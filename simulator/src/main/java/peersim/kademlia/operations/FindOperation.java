@@ -73,7 +73,6 @@ public class FindOperation extends Operation {
    * @param neighbours
    */
   public void elaborateResponse(BigInteger[] neighbours) {
-
     // add to closestSet
     for (BigInteger n : neighbours) {
 
