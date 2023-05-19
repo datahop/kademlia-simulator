@@ -81,23 +81,13 @@ public class CustomDistributionDas implements peersim.core.Control {
         kadProt.setProtocolID(protocolEvilKadID);
         dasProt.setDASProtocolID(protocolEvilDasID);
         node.setEvil(true);
-        /*System.out.println(
-        "DAS protocol "
-            + dasProt
-            + " "
-            + kadProt
-            + " "
-            + protocolEvilKadID
-            + " "
-            + protocolEvilDasID);*/
+
       } else {
         kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
         kadProt.setProtocolID(protocolKadID);
         dasProt.setDASProtocolID(protocolDasID);
-        // System.out.println(
-        //     "DAS protocol " + dasProt + " " + kadProt + " " + protocolKadID + " " +
-        // protocolDasID);
+
       }
 
       generalNode.setKademliaProtocol(kadProt);
@@ -105,8 +95,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       generalNode.setProtocol(protocolDasID, dasProt);
       generalNode.setProtocol(protocolEvilDasID, dasProt);
       kadProt.setNode(node);
-      // System.out.println(
-      //    "DAS set kadprotocol " + kadProt + " " + kadProt.getKademliaNode().getId());
+
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 

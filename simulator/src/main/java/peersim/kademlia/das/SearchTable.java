@@ -50,22 +50,6 @@ public class SearchTable {
 
   public void addNodes(BigInteger[] nodes) {
 
-    /*for (BigInteger id : nodes) {
-      BigInteger[] samples = getSamples(id);
-      // System.out.println("Samples add " + samples.length);
-      for (BigInteger sample : samples) {
-        if (sampleMap.get(sample) == null) {
-          List<BigInteger> ids = new ArrayList<>();
-          ids.add(id);
-          sampleMap.put(sample, ids);
-          samplesIndexed.add(sample);
-          nodesIndexed.add(id);
-        } else {
-          sampleMap.get(sample).add(id);
-          nodesIndexed.add(id);
-        }
-      }
-    }*/
     for (BigInteger id : nodes) {
       if (!blackList.contains(id)) nodesIndexed.add(id);
     }
