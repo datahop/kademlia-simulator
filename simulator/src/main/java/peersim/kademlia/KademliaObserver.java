@@ -84,7 +84,8 @@ public class KademliaObserver implements Control {
       }
 
       // Write the comma seperated keys as the header of the file
-      String header = String.join(",", keySet) + "\n";
+      header = header.substring(0, header.length() - 1);
+      header += "\n";
       writer.write(header);
 
       for (Map<String, Object> entry : map.values()) {

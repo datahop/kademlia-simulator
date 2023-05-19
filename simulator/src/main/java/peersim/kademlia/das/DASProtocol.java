@@ -417,7 +417,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             KademliaObserver.reportOperation(op);*/
 
           }
-
         }
       } else {
         logger.warning("Operation completed");
@@ -678,7 +677,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + " "
               + kadOps.get(op).getAvailableRequests());
       kadOps.remove(op);
-
     }
   }
 
