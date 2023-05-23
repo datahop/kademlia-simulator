@@ -67,13 +67,13 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   public boolean completed() {
 
-    /*boolean completed = true;
+    boolean completed = true;
     for (BigInteger id : samples.keySet()) {
       if (!samples.get(id)) {
         completed = false;
         break;
       }
-    }*/
+    }
     return completed;
   }
 
@@ -108,7 +108,6 @@ public class RandomSamplingOperation extends SamplingOperation {
           samples.put(s.getId(), true);
           samplesCount++;
 
-          if (samplesCount == KademliaCommonConfigDas.N_SAMPLES) completed = true;
         }
       }
     }
