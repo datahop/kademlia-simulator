@@ -321,7 +321,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
   protected void handleGetSample(Message m, int myPid) {
 
-    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId());
+    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
 
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     List<Sample> s = new ArrayList<>();
@@ -422,10 +422,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           msg.src = this.kadProtocol.getKademliaNode();
 
           msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-          if (nextNode.compareTo(builderAddress) == 0) {
+          /*if (nextNode.compareTo(builderAddress) == 0) {
             logger.warning("Error sending to builder or 0 samples assigned");
             continue;
-          }
+          }*/
           op.AddMessage(msg.id);
           sendMessage(msg, nextNode, myPid);
           op.nrHops++;
@@ -494,11 +494,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      // logger.warning("Send message added " + m.id + " " + 4 * latency);
+      logger.warning("Send message added " + m.id + " " + latency);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(10 * latency, t, src, myPid); // set delay = 2*RTT
+      EDSimulator.add(4 * latency, t, src, myPid); // set delay = 2*RTT
     }
   }
 
@@ -626,10 +626,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         msg.src = this.kadProtocol.getKademliaNode();
         success = true;
         msg.dst = kadProtocol.nodeIdtoNode(nextNode).getKademliaProtocol().getKademliaNode();
-        if (nextNode.compareTo(builderAddress) == 0) {
+        /*if (nextNode.compareTo(builderAddress) == 0) {
           logger.warning("Error sending to builder or 0 samples assigned");
           continue;
-        }
+        }*/
         sop.AddMessage(msg.id);
         // logger.warning("Send message " + dasID + " " + this);
         sendMessage(msg, nextNode, dasID);
@@ -744,7 +744,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   @Override
   public void missing(BigInteger sample, Operation op) {
 
-    // logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
+    logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
     /*if (!queried.contains(sample) && kadOps.size() < 3) {
       Message lookup = Util.generateFindNodeMessage(sample);
       Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
