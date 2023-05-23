@@ -82,7 +82,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     // System.out.println("Row " + samplesCount + " " + samples.size());
-    if (samplesCount > samples.size() / 2) completed = true;
+    if (samplesCount >= samples.size() / 2) completed = true;
   }
 
   public BigInteger[] getSamples(BigInteger peerId) {

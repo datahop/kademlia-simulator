@@ -53,8 +53,8 @@ public class Block implements Iterator<Sample>, Cloneable {
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
 
-    for (int i = 0; i < blockSamples.length; i++) {
-      for (int j = 0; j < blockSamples[0].length; j++) {
+    for (int i = 1; i <= blockSamples.length; i++) {
+      for (int j = 1; j <= blockSamples[0].length; j++) {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
@@ -101,7 +101,7 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {
-        blockSamples[i][j] = new Sample(blockId, i, j, this);
+        blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
         // sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
