@@ -71,12 +71,9 @@ public class SearchTable {
   public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
 
     BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.valueOf(0);
-
-    BigInteger maxValue = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
 
     BigInteger top = sampleId.add(radius);
-    if (top.compareTo(maxValue) == 1) top = maxValue;
 
     Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);

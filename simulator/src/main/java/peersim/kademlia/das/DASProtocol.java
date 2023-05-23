@@ -440,8 +440,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
                   + op.getSamples().length);
           if (op.getAvailableRequests() == KademliaCommonConfigDas.ALPHA) {
             for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
-            op.increaseRadius(2);
-            doSampling(op);
+            while (!doSampling(op)) {
+              op.increaseRadius(2);
+              logger.warning("Increasing radius " + op.getId());
+            }
             /*samplingOp.remove(m.operationId);
             logger.warning("Sampling operation finished");
             KademliaObserver.reportOperation(op);*/
@@ -619,7 +621,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
                 + " "
                 + reqSamples.length
                 + " "
-                + sop.getAvailableRequests());
+                + sop.getAvailableRequests()
+                + " "
+                + sop.getId());
 
         Message msg = generateGetSampleMessage(reqSamples);
         msg.operationId = sop.getId();
@@ -655,7 +659,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    while (!doSampling(op)) {
+      op.increaseRadius(2);
+    }
     /*BigInteger sampleId =
         currentBlock
             .getSamplesIdsByRow(row)[

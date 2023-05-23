@@ -107,7 +107,6 @@ public class RandomSamplingOperation extends SamplingOperation {
           samples.put(s.getIdByColumn(), true);
           samples.put(s.getId(), true);
           samplesCount++;
-
         }
       }
     }
