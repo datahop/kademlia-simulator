@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -57,7 +56,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfig.ALPHA - 1);
+    setAvailableRequests(KademliaCommonConfigDas.ALPHA - 1);
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -83,7 +82,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     // System.out.println("Row " + samplesCount + " " + samples.size());
-    if (samplesCount > samples.size() / 2) completed = true;
+    if (samplesCount >= samples.size() / 2) completed = true;
   }
 
   public BigInteger[] getSamples(BigInteger peerId) {
@@ -151,7 +150,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     // System.out.println("Mapping");
     Map<String, Object> result = new HashMap<String, Object>();
 
-    
     result.put("id", this.operationId);
     result.put("src", this.srcNode);
     result.put("type", this.getClass().getSimpleName());

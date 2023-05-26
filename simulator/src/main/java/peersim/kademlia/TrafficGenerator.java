@@ -23,7 +23,7 @@ public class TrafficGenerator implements Control {
   private static final String PAR_PROT = "protocol";
 
   /** MSPastry Protocol ID to act */
-  private final int pid;
+  protected final int pid;
 
   private boolean first = true;
   // ______________________________________________________________________________________________
@@ -51,6 +51,29 @@ public class TrafficGenerator implements Control {
     return m;
   }
 
+  /**
+   * generates a random region-based find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateRegionBasedFindNodeMessage() {
+    // existing active destination node
+    // UniformRandomGenerator urg =
+    //    new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    // BigInteger id = urg.generate();
+    Node n = Network.get(CommonState.r.nextInt(Network.size()));
+    while (!n.isUp()) {
+      n = Network.get(CommonState.r.nextInt(Network.size()));
+    }
+    BigInteger id = ((KademliaProtocol) (n.getProtocol(pid))).getKademliaNode().getId();
+
+    int numHonest = 16;
+    Message m = Message.makeInitRegionBasedFindNode(id, numHonest);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
   // ______________________________________________________________________________________________
   /**
    * every call of this control generates and send a random find node message
@@ -65,7 +88,8 @@ public class TrafficGenerator implements Control {
     } while ((start == null) || (!start.isUp()));
 
     // send message
-    EDSimulator.add(0, generateFindNodeMessage(), start, pid);
+    // EDSimulator.add(0, generateFindNodeMessage(), start, pid);
+    EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
 
     return false;
   }

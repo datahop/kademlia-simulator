@@ -1,0 +1,10 @@
+dst,src,id,type,status
+2,1,1,MSG_FIND,received
+20,1,2,MSG_FIND,received
+100,1,3,MSG_FIND,received
+256000,1,4,MSG_FIND,received
+6,1,5,MSG_FIND,received
+2,2,6,MSG_FIND,received
+3,2,7,MSG_FIND,received
+4,2,8,MSG_FIND,received
+5,2,9,MSG_FIND,received

@@ -92,8 +92,7 @@ public abstract class SamplingOperation extends FindOperation {
 
       if (!samples.get(sample)) {
         List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radius);
-        // for (BigInteger id : nodesBySample)
-        //  System.out.println("[" + srcNode + "] " + sample + " " + id);
+
         if (nodesBySample != null && nodesBySample.size() > 0) nodes.addAll(nodesBySample);
         else if (callback != null) callback.missing(sample, this);
       }
@@ -108,7 +107,6 @@ public abstract class SamplingOperation extends FindOperation {
         break;
       }
     }
-    // System.out.println(srcNode + " Get neighbour " + res + " " + this.available_requests);
 
     return res;
   }
@@ -123,5 +121,4 @@ public abstract class SamplingOperation extends FindOperation {
     return samplesCount;
   }
 
-  // public abstract void addNodes(List<BigInteger> nodes);
 }

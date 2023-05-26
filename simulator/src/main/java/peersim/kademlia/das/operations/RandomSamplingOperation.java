@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -39,7 +38,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       boolean isValidator,
       MissingNode callback) {
     super(srcNode, destNode, timestamp, currentBlock, isValidator, callback);
-    setAvailableRequests(KademliaCommonConfig.ALPHA);
+    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
@@ -68,13 +67,13 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   public boolean completed() {
 
-    /*boolean completed = true;
+    boolean completed = true;
     for (BigInteger id : samples.keySet()) {
       if (!samples.get(id)) {
         completed = false;
         break;
       }
-    }*/
+    }
     return completed;
   }
 
@@ -108,8 +107,6 @@ public class RandomSamplingOperation extends SamplingOperation {
           samples.put(s.getIdByColumn(), true);
           samples.put(s.getId(), true);
           samplesCount++;
-
-          if (samplesCount == KademliaCommonConfigDas.N_SAMPLES) completed = true;
         }
       }
     }

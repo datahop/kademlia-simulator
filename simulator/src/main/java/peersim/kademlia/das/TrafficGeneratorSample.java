@@ -1,6 +1,12 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.TreeSet;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -30,7 +36,7 @@ public class TrafficGeneratorSample implements Control {
   private static final String PAR_DASPROT = "dasprotocol";
 
   /** MSPastry Protocol ID to act */
-  private final int kadpid, daspid;
+  //  private final int kadpid, daspid;
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -45,11 +51,12 @@ public class TrafficGeneratorSample implements Control {
   Block b;
   private long ID_GENERATOR = 0;
 
-  private boolean first = true, second = true;
+  private boolean first = true, second = false;
+
+  private HashMap<BigInteger, Node> nodeMap;
+  private HashSet<BigInteger> nodesMissing;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
-    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
-    daspid = Configuration.getPid(prefix + "." + PAR_DASPROT);
 
     KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
@@ -57,6 +64,8 @@ public class TrafficGeneratorSample implements Control {
     KademliaCommonConfigDas.BLOCK_DIM_SIZE =
         Configuration.getInt(
             prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfigDas.BLOCK_DIM_SIZE);
+    nodeMap = new HashMap<>();
+    nodesMissing = new HashSet<>();
   }
 
   // ______________________________________________________________________________________________
@@ -79,9 +88,9 @@ public class TrafficGeneratorSample implements Control {
    *
    * @return Message
    */
-  private Message generateNewSampleMessage(Sample s) {
+  private Message generateNewSampleMessage(BigInteger s) {
 
-    Message m = Message.makeInitGetSample(s.getId());
+    Message m = Message.makeInitGetSample(s);
     m.timestamp = CommonState.getTime();
 
     return m;
@@ -105,6 +114,27 @@ public class TrafficGeneratorSample implements Control {
     return m;
   }
 
+  private List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
+
+    BigInteger top = sampleId.add(radius);
+    // BigInteger max = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
+
+    /*if (sampleId.add(radius).compareTo(max) == 1) {
+      top = max;
+      System.out.println("Max value " + top);
+    }*/
+
+    BigInteger bottom;
+    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.valueOf(0);
+    else bottom = sampleId.subtract(radius);
+
+    System.out.println("Nodes by sample " + top + " " + bottom);
+    TreeSet<BigInteger> nodesIndexed = new TreeSet<BigInteger>(nodeMap.keySet());
+    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
+
+    return new ArrayList<BigInteger>(subSet);
+  }
+
   // ______________________________________________________________________________________________
   /**
    * every call of this control generates and send a random find node message
@@ -112,78 +142,139 @@ public class TrafficGeneratorSample implements Control {
    * @return boolean
    */
   public boolean execute() {
-    /*if (first) {
+    if (first) {
+
       for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        if (n.isUp()) {
-          for (int j = 0; j < 3; j++) {
-            int time = CommonState.r.nextInt(300000);
-            Node start = Network.get(i);
-            Message lookup = generateFindNodeMessage();
-            EDSimulator.add(time, lookup, start, kadpid);
-          }
-        }
+        DASProtocol dasProt =
+            (DASProtocol) Network.get(i).getDASProtocol(); // (Network.get(i).getProtocol(daspid)));
+        nodeMap.put(dasProt.getKademliaId(), Network.get(i));
+        nodesMissing.add(dasProt.getKademliaId());
       }
+      first = false;
+      second = true;
     } else {
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        if (n.isUp()) {
-          int time = CommonState.r.nextInt(300000);
-          Node start = Network.get(i);
-          Message lookup = generateFindNodeMessage();
-          EDSimulator.add(time, lookup, start, kadpid);
+      /*Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
+      int samplesWithinRegion = 0; // samples that are within at least one node's region
+      int totalSamples = 0;
+      while (b.hasNext()) {
+        Sample s = b.next();
+        boolean inRegion = false;
+
+        BigInteger radius =
+            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+
+        while (!inRegion) {
+          for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
+            Node n = nodeMap.get(nodeId);
+            DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+            if (n.isUp() && !dasProt.isBuilder()) {
+              totalSamples++;
+              System.out.println("Assigned row " + s.getIdByRow() + " to:" + nodeId);
+              EDSimulator.add(
+                  0,
+                  generateNewSampleMessage(s.getIdByRow()),
+                  n,
+                  n.getDASProtocol().getDASProtocolID());
+              nodesMissing.remove(nodeId);
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
+            }
+          }
+          for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
+            Node n = nodeMap.get(nodeId);
+            DASProtocol dasProt = ((DASProtocol) n.getDASProtocol());
+            if (n.isUp() && !dasProt.isBuilder()) {
+              totalSamples++;
+              EDSimulator.add(
+                  0, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
+              System.out.println("Assigned column " + s.getIdByColumn() + " to:" + nodeId);
+              nodesMissing.remove(nodeId);
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
+            }
+          }
+          if (!inRegion) {
+            radius = radius.multiply(BigInteger.valueOf(2));
+          }
         }
       }*/
+      Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
+      int samplesWithinRegion = 0; // samples that are within at least one node's region
+      int totalSamples = 0;
 
-    Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-    BigInteger radius = b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-    int samplesWithinRegion = 0; // samples that are within at least one node's region
-    int totalSamples = 0;
-    while (b.hasNext()) {
-      Sample s = b.next();
-      boolean inRegion = false;
+      while (b.hasNext()) {
+        Sample s = b.next();
+        boolean inRegion = false;
+        BigInteger radius =
+            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+        System.out.println(
+            "New sample "
+                + s.getRow()
+                + " "
+                + s.getColumn()
+                + " "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " "
+                + radius);
 
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        DASProtocol dasProt = ((DASProtocol) (n.getProtocol(daspid)));
-
-        // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
-        // else
-        if (n.isUp() && s.isInRegion(dasProt.getKademliaId(), radius)) {
-          totalSamples++;
-          EDSimulator.add(0, generateNewSampleMessage(s), n, daspid);
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
+        while (!inRegion) {
+          for (int i = 0; i < Network.size(); i++) {
+            Node n = Network.get(i);
+            DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+            // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
+            // else
+            if (n.isUp()
+                && (s.isInRegionByRow(dasProt.getKademliaId(), radius)
+                    || s.isInRegionByColumn(dasProt.getKademliaId(), radius))) {
+              totalSamples++;
+              EDSimulator.add(
+                  1, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
+              nodesMissing.remove(dasProt.getKademliaId());
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
+            }
+          }
+          if (!inRegion) {
+            radius = radius.multiply(BigInteger.valueOf(2));
           }
         }
       }
-    }
 
-    for (int i = 0; i < Network.size(); i++) {
-      Node n = Network.get(i);
-      Block bis = (Block) b.clone();
-      EDSimulator.add(0, generateNewBlockMessage(bis), n, daspid);
-    }
-
-    System.out.println(
-        ""
-            + samplesWithinRegion
-            + " samples out of "
-            + b.getNumSamples()
-            + " samples are within a node's region");
-
-    System.out.println("" + totalSamples + " total samples distributed");
-    if (samplesWithinRegion != b.getNumSamples()) {
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        b.initIterator();
+        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+      }
       System.out.println(
-          "Error: there are "
-              + (b.getNumSamples() - samplesWithinRegion)
-              + " samples that are not within a region of a peer ");
-      // System.exit(1);
+          ""
+              + samplesWithinRegion
+              + " samples out of "
+              + b.getNumSamples()
+              + " samples are within a node's region");
+
+      System.out.println("" + totalSamples + " total samples distributed");
+      for (BigInteger id : nodesMissing) {
+        System.out.println("Node without samples assinged " + id);
+      }
+      if (samplesWithinRegion != b.getNumSamples()) {
+        System.out.println(
+            "Error: there are "
+                + (b.getNumSamples() - samplesWithinRegion)
+                + " samples that are not within a region of a peer ");
+        // System.exit(1);
+      }
+      // }
+      ID_GENERATOR++;
+      second = false;
     }
-    // }
-    ID_GENERATOR++;
-    first = false;
     return false;
   }
 

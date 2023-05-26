@@ -46,14 +46,14 @@ public abstract class Operation {
   /**
    * defaul constructor
    *
-   * @param destNode Id of the node to find
+   * @param destNode ID of the node to find
    */
   public Operation(BigInteger srcNode, BigInteger dstNode, long timestamp) {
     this.timestamp = timestamp;
     this.destNode = dstNode;
     this.srcNode = srcNode;
 
-    // set a new find id
+    // set a new find ID
     operationId = OPERATION_ID_GENERATOR++;
     this.messages = "";
     returned = new ArrayList<BigInteger>();
