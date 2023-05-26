@@ -24,7 +24,6 @@ import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
-import peersim.kademlia.operations.OpLogging;
 import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
 import peersim.kademlia.operations.RegionBasedFindOperation;
@@ -87,9 +86,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   /** Callback for Kademlia events. */
   private KademliaEvents callback;
-
-  /** LinkedHashMap containing logging information for find operations. */
-  public LinkedHashMap<Long, OpLogging> findLog;
 
   /**
    * Replicate this object by returning an identical copy. It is called by the initializer and do
@@ -229,6 +225,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // Get the corresponding find operation record
     FindOperation fop = this.findOp.get(m.operationId);
+
     if (fop != null) {
       // Update the find operation record with the closest set of neighbors received
       fop.elaborateResponse((BigInteger[]) m.body);
@@ -251,8 +248,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         }
         KademliaObserver.find_ok.add(1);
         fop.setFinished(true);
-        // KademliaObserver.reportOperation(fop);
-        // findOp.remove(fop.getId());
       }
 
       // Check if it's a GetOperation and the value has been found
@@ -266,8 +261,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         ((GetOperation) fop).setValue(m.value);
         logger.info(
             "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
-        // KademliaObserver.reportOperation(fop);
-        // findOp.remove(fop.getId());
       }
 
       // Send as many ROUTE requests as possible (according to the ALPHA parameter)
@@ -325,7 +318,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               // Todo: verify
               sendMessage(request, id, myPid);
             }
-            logger.info("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
+            logger.warning("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
           } else if (fop instanceof GetOperation) {
             // Remove the find operation record
             findOp.remove(fop.getId());
@@ -340,8 +333,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               logger.info("Found node " + id);
             }
           } else {
-            logger.warning("Find operation finished not found ");
-            KademliaObserver.reportOperation(fop);
             findOp.remove(fop.getId());
             KademliaObserver.reportOperation(fop);
           }
@@ -349,7 +340,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           if (callback != null) {
             callback.operationComplete(fop);
           }
-          if (callback != null) callback.operationComplete(fop);
 
           if (fop.getBody().equals("Automatically Generated Traffic")
               && fop.getClosest().containsKey(fop.getDestNode())) {
@@ -663,10 +653,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     /*fLog.AddMessage(m.id);
       fLog.SetStop(CommonState.getTime());
       findLog.put(m.operationId, fLog);
+    }
 
-      KademliaObserver.reportFindOp(fLog);
-    }*/
-    /*for (Map.Entry<Long, OpLogging> entry : findLog.entrySet()) {
+    for (Map.Entry<Long, OpLogging> entry : findLog.entrySet()) {
       KademliaObserver.reportFindOp(entry.getValue());
     }*/
   }

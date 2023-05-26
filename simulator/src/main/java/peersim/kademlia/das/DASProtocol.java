@@ -85,21 +85,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   /** trace message sent for timeout purpose */
   private TreeMap<Long, Long> sentMsg;
 
-  private LinkedHashMap<Operation, SamplingOperation> kadOps;
-
-  private boolean samplingStarted;
-
-  private int pid;
-
-  private SearchTable searchTable;
-
-  private int[] row, column;
-
-  private int samplesRequested;
-
-  private BigInteger[] validatorsList;
-
-  private HashSet<BigInteger> queried;
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -398,7 +383,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + " "
               + s.getColumn()
               + " "
- 
               + samplesRequested);
       if (!samplingStarted) samplesRequested--;
 
@@ -407,8 +391,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       column[s.getColumn()]++;
       row[s.getRow()]++;
     }
-    logger.warning(
-        "Received sample:" + samples.length + " " + kv.occupancy() + " " + samplesRequested);
 
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     if (op != null) {
@@ -676,7 +658,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     while (!doSampling(op)) {
       op.increaseRadius(2);
     }
-
   }
 
   public void setDASProtocolID(int dasId) {
