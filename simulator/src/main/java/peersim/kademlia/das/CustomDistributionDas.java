@@ -45,7 +45,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
     protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
     protocolDasID = Configuration.getPid(prefix + "." + PAR_PROT_DAS);
-    protocolEvilDasID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_DAS);
+    protocolEvilDasID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_DAS, 0);
     evilRatio = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO, 0.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
     validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
@@ -92,7 +92,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       generalNode.setKademliaProtocol(kadProt);
       generalNode.setDASProtocol(dasProt);
       generalNode.setProtocol(protocolDasID, dasProt);
-      generalNode.setProtocol(protocolEvilDasID, dasProt);
+      if (protocolEvilDasID > 0) generalNode.setProtocol(protocolEvilDasID, dasProt);
       kadProt.setNode(node);
 
       dasProt.setKademliaProtocol(kadProt);

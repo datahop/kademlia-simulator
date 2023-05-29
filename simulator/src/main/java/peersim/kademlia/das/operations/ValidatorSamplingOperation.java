@@ -2,7 +2,6 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +84,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
     List<BigInteger> list = new ArrayList<>();
     if (row > 0) {
@@ -112,7 +111,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     return result.toArray(new BigInteger[0]);
-  }
+  }*/
 
   public boolean completed() {
 

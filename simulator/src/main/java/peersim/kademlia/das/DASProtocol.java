@@ -39,51 +39,51 @@ import peersim.transport.UnreliableTransport;
 
 public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
 
-  private static final String PAR_TRANSPORT = "transport";
+  protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
-  private static final String PAR_KADEMLIA = "kademlia";
+  protected static final String PAR_KADEMLIA = "kademlia";
 
-  private static String prefix = null;
-  private UnreliableTransport transport;
-  private int tid;
-  private int kademliaId;
+  protected static String prefix = null;
+  protected UnreliableTransport transport;
+  protected int tid;
+  protected int kademliaId;
 
-  private KademliaProtocol kadProtocol;
+  protected KademliaProtocol kadProtocol;
   /** allow to call the service initializer only once */
-  private static boolean _ALREADY_INSTALLED = false;
+  protected static boolean _ALREADY_INSTALLED = false;
 
   protected Logger logger;
 
-  private BigInteger builderAddress;
+  protected BigInteger builderAddress;
 
-  private boolean isBuilder;
+  protected boolean isBuilder;
 
-  private boolean isValidator;
+  protected boolean isValidator;
 
-  private KeyValueStore kv;
+  protected KeyValueStore kv;
 
-  private Block currentBlock;
+  protected Block currentBlock;
 
-  private LinkedHashMap<Long, SamplingOperation> samplingOp;
+  protected LinkedHashMap<Long, SamplingOperation> samplingOp;
 
-  private LinkedHashMap<Operation, SamplingOperation> kadOps;
+  protected LinkedHashMap<Operation, SamplingOperation> kadOps;
 
-  private boolean samplingStarted;
+  protected boolean samplingStarted;
 
-  private SearchTable searchTable;
+  protected SearchTable searchTable;
 
-  private int[] row, column;
+  protected int[] row, column;
 
-  private int samplesRequested;
+  protected int samplesRequested;
 
-  private BigInteger[] validatorsList;
+  protected BigInteger[] validatorsList;
 
-  private HashSet<BigInteger> queried;
+  protected HashSet<BigInteger> queried;
 
   protected int dasID;
 
   /** trace message sent for timeout purpose */
-  private TreeMap<Long, Long> sentMsg;
+  protected TreeMap<Long, Long> sentMsg;
 
   /**
    * Replicate this object by returning an identical copy.<br>
@@ -321,7 +321,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
   protected void handleGetSample(Message m, int myPid) {
 
-    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
 
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     List<Sample> s = new ArrayList<>();
@@ -458,14 +458,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling(m, myPid);
-        startRandomSampling(m, myPid);
-        samplingStarted = true;
+        startRandomSampling();
 
       } else {
         logger.warning("Starting non-validator random sampling");
-        startRandomSampling(m, myPid);
-        samplingStarted = true;
+        startRandomSampling();
       }
+      samplingStarted = true;
     }
   }
 
@@ -477,7 +476,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param destId the Id of the destination node
    * @param myPid the sender Pid
    */
-  private void sendMessage(Message m, BigInteger destId, int myPid) {
+  protected void sendMessage(Message m, BigInteger destId, int myPid) {
 
     // int destpid;
     assert m.src != null;
@@ -506,7 +505,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    *
    * @return Message
    */
-  private Message generateGetSampleMessage(BigInteger[] sampleId) {
+  protected Message generateGetSampleMessage(BigInteger[] sampleId) {
 
     Message m = new Message(Message.MSG_GET_SAMPLE, sampleId);
     m.timestamp = CommonState.getTime();
@@ -549,14 +548,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param m initial message
    * @param myPid protocol pid
    */
-  private void startRandomSampling(Message m, int myPid) {
+  protected void startRandomSampling() {
 
     logger.warning("Starting random sampling");
     RandomSamplingOperation op =
         new RandomSamplingOperation(
             this.getKademliaId(),
             null,
-            m.timestamp,
+            CommonState.getTime(),
             currentBlock,
             searchTable,
             this.isValidator,
@@ -565,7 +564,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    while (!doSampling(op)) {
+      op.increaseRadius(2);
+    }
   }
 
   /**
@@ -574,7 +575,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param m initial message
    * @param myPid protocol pid
    */
-  private void startRowsandColumnsSampling(Message m, int myPid) {
+  protected void startRowsandColumnsSampling(Message m, int myPid) {
     logger.warning(
         "Starting rows and columns fetch "
             + rowWithHighestNumSamples()
@@ -595,7 +596,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
         0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, m.timestamp);
   }
 
-  private boolean doSampling(SamplingOperation sop) {
+  protected boolean doSampling(SamplingOperation sop) {
 
     if (sop.completed()) {
       samplingOp.remove(sop.getId());
@@ -667,6 +668,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   public int getDASProtocolID() {
     return this.dasID;
   }
+
+  @Override
+  public void putValueReceived(Object o) {}
 
   @Override
   public void operationComplete(Operation op) {

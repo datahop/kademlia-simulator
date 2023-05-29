@@ -254,13 +254,15 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (fop instanceof GetOperation && m.value != null && !fop.isFinished()) {
         fop.setFinished(true);
 
+        ((GetOperation) fop).setValue(m.value);
+        logger.warning(
+            "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
+
         // Complete the operation and log the result
+
         if (callback != null) {
           callback.operationComplete(fop);
         }
-        ((GetOperation) fop).setValue(m.value);
-        logger.info(
-            "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
       }
 
       // Send as many ROUTE requests as possible (according to the ALPHA parameter)
@@ -322,7 +324,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           } else if (fop instanceof GetOperation) {
             // Remove the find operation record
             findOp.remove(fop.getId());
-            logger.info("Getprocess finished not found ");
+            logger.warning("Getprocess finished not found ");
             KademliaObserver.reportOperation(fop);
           } else if (fop instanceof RegionBasedFindOperation) {
             findOp.remove(fop.getId());
@@ -377,8 +379,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param m The message containing the put request.
    */
   private void handlePut(Message m) {
-    logger.info("Handle put sample:" + m.body);
+    logger.warning("Handle put sample:" + m.body);
     kv.add((BigInteger) m.body, m.value);
+    callback.putValueReceived(m.value);
   }
 
   /**
@@ -455,6 +458,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         break;
       case Message.MSG_INIT_GET:
         fop = new GetOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
+        logger.warning("New Get operation " + fop.getId());
+
         break;
       case Message.MSG_INIT_PUT:
         fop = new PutOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
