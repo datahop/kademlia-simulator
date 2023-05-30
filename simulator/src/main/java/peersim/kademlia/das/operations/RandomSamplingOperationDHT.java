@@ -20,8 +20,24 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
     super(srcNode, destNode, timestamp, currentBlock, searchTable, isValidator, callback);
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
+    samples.clear();
     for (Sample rs : randomSamples) {
       samples.put(rs.getId(), false);
     }
+  }
+
+  public void elaborateResponse(Sample[] sam) {
+
+    this.available_requests++;
+    for (Sample s : sam) {
+      if (samples.containsKey(s.getId())) {
+        if (!samples.get(s.getId())) {
+          samples.remove(s.getId());
+          samples.put(s.getId(), true);
+          samplesCount++;
+        }
+      }
+    }
+    // System.out.println("Samples received " + samples.size());
   }
 }

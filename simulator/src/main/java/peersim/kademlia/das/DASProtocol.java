@@ -85,6 +85,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   /** trace message sent for timeout purpose */
   protected TreeMap<Long, Long> sentMsg;
 
+  protected long time;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -244,6 +246,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param myPid the sender Pid
    */
   protected void handleInitNewBlock(Message m, int myPid) {
+    time = CommonState.getTime();
     currentBlock = (Block) m.body;
     kv.erase();
     samplesRequested = 0;
@@ -457,7 +460,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     } else if (!samplingStarted && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
-        startRowsandColumnsSampling(m, myPid);
+        startRowsandColumnsSampling();
         startRandomSampling();
 
       } else {
@@ -524,14 +527,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     return this.getKademliaProtocol().getKademliaNode().getId();
   }
 
-  private int rowWithHighestNumSamples() {
+  protected int rowWithHighestNumSamples() {
     int max = 1;
     for (int i = 0; i < row.length; i++) if (row[max] < row[i]) max = i;
 
     return max;
   }
 
-  private int columnWithHighestNumSamples() {
+  protected int columnWithHighestNumSamples() {
     int max = 1;
     for (int i = 0; i < column.length; i++) if (column[max] < column[i]) max = i;
 
@@ -553,13 +556,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     logger.warning("Starting random sampling");
     RandomSamplingOperation op =
         new RandomSamplingOperation(
-            this.getKademliaId(),
-            null,
-            CommonState.getTime(),
-            currentBlock,
-            searchTable,
-            this.isValidator,
-            this);
+            this.getKademliaId(), null, time, currentBlock, searchTable, this.isValidator, this);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
@@ -575,7 +572,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param m initial message
    * @param myPid protocol pid
    */
-  protected void startRowsandColumnsSampling(Message m, int myPid) {
+  protected void startRowsandColumnsSampling() {
     logger.warning(
         "Starting rows and columns fetch "
             + rowWithHighestNumSamples()
@@ -588,12 +585,12 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     // start 2 row 2 column Validator operation (1 row/column with the highest number of samples
     // already downloaded and another random)
-    createValidatorSamplingOperation(rowWithHighestNumSamples(), 0, m.timestamp);
-    createValidatorSamplingOperation(0, rowWithHighestNumSamples(), m.timestamp);
+    createValidatorSamplingOperation(rowWithHighestNumSamples(), 0, time);
+    createValidatorSamplingOperation(0, rowWithHighestNumSamples(), time);
     createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, m.timestamp);
+        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
     createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, m.timestamp);
+        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
   }
 
   protected boolean doSampling(SamplingOperation sop) {

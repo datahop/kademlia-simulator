@@ -20,7 +20,7 @@ import peersim.kademlia.das.SearchTable;
 public class ValidatorSamplingOperation extends SamplingOperation {
 
   // private RoutingTable rou;
-  private int row, column;
+  protected int row, column;
   /**
    * default constructor
    *
@@ -55,7 +55,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA - 1);
+    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
   }
 
   public void elaborateResponse(Sample[] sam) {
