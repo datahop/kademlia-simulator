@@ -298,7 +298,7 @@ public class Message extends SimpleEvent {
     } else {
       result.put("status", "received");
     }
-
+    result.put("time",this.timestamp);
     return result;
   }
 }
