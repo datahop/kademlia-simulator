@@ -229,7 +229,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     if (fop != null) {
       // Update the find operation record with the closest set of neighbors received
       fop.elaborateResponse((BigInteger[]) m.body);
-      fop.AddMessage(m.id);
+      fop.addMessage(m.id);
       logger.info("Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
       // save received neighbour in the closest Set of fin operation
       BigInteger[] neighbours = (BigInteger[]) m.body;
@@ -256,7 +256,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
         ((GetOperation) fop).setValue(m.value);
         logger.warning(
-            "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
+            "Getprocess finished found "
+                + ((GetOperation) fop).getValue()
+                + " hops "
+                + fop.getHops());
 
         // Complete the operation and log the result
 
@@ -293,9 +296,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           }
 
           // Increment hop count
-          fop.nrHops++;
+          fop.increaseHops();
           // Add message to operation Todo: verify
-          fop.AddMessage(m.id);
+          fop.addMessage(m.id);
           // Send find request to neighbor
           sendMessage(request, neighbour, myPid);
 
@@ -314,9 +317,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               request.value = ((PutOperation) fop).getValue();
 
               // Increment hop count
-              fop.nrHops++;
+              fop.increaseHops();
               // Add message to operation
-              fop.AddMessage(m.id);
+              fop.addMessage(m.id);
               // Todo: verify
               sendMessage(request, id, myPid);
             }
@@ -348,7 +351,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             // Update statistics
             long timeInterval = (CommonState.getTime()) - (fop.getTimestamp());
             KademliaObserver.timeStore.add(timeInterval);
-            KademliaObserver.hopStore.add(fop.nrHops);
+            KademliaObserver.hopStore.add(fop.getHops());
             KademliaObserver.msg_deliv.add(1);
           }
 
@@ -509,11 +512,12 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         // Send the message to the next closest node and add it to the operation's message list
         logger.info("sendMessage to " + nextNode);
         Message mbis = m.copy();
-        fop.AddMessage(mbis.id);
+        fop.addMessage(mbis.id);
         sendMessage(mbis, nextNode, myPid);
         // Increment the hop count of the operation if it's a distance-based find
         if (m.getType() == Message.MSG_FIND_DIST) {
-          fop.nrHops++;
+          fop.increaseHops();
+          ;
         }
       }
     }

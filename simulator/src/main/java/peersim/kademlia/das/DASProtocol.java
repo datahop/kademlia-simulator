@@ -404,13 +404,13 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
               + " "
               + op.getAvailableRequests()
               + " "
-              + op.nrHops
+              + op.getHops()
               + " "
               + searchTable.nodesIndexed().size()
               + " "
               + ((SamplingOperation) op).samplesCount());
 
-      if (!op.completed() && op.nrHops < KademliaCommonConfigDas.MAX_HOPS) {
+      if (!op.completed() && op.getHops() < KademliaCommonConfigDas.MAX_HOPS) {
         BigInteger[] nextNodes = op.doSampling();
 
         for (BigInteger nextNode : nextNodes) {
@@ -425,9 +425,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
             logger.warning("Error sending to builder or 0 samples assigned");
             continue;
           }*/
-          op.AddMessage(msg.id);
+          op.addMessage(msg.id);
           sendMessage(msg, nextNode, myPid);
-          op.nrHops++;
+          op.increaseHops();
         }
         if (nextNodes.length == 0) {
           logger.warning(
@@ -628,10 +628,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           logger.warning("Error sending to builder or 0 samples assigned");
           continue;
         }*/
-        sop.AddMessage(msg.id);
+        sop.addMessage(msg.id);
         // logger.warning("Send message " + dasID + " " + this);
         sendMessage(msg, nextNode, dasID);
-        sop.nrHops++;
+        sop.getMessages();
       }
       return success;
     }

@@ -197,7 +197,10 @@ public class DASDHTProtocol extends DASProtocol {
       if (sop != null && s != null && !sop.completed()) {
         Sample[] samples = {s};
         sop.elaborateResponse(samples);
-
+        sop.setHops(get.getHops());
+        for(Long msg : get.getMessages()){
+          sop.addMessage(msg);
+        }
         logger.warning(
             "Get operation completed "
                 + s.getId()
@@ -224,7 +227,7 @@ public class DASDHTProtocol extends DASProtocol {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling();
-        // startRandomSampling();
+        startRandomSampling();
 
       } else {
         logger.warning("Starting non-validator random sampling");
