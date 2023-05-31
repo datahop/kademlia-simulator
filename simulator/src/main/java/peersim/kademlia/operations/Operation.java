@@ -34,15 +34,15 @@ public abstract class Operation {
   protected long timestamp = 0;
 
   /** Number of hops the message did */
-  public int nrHops = 0;
+  private int nrHops = 0;
 
   protected ArrayList<BigInteger> returned;
 
   /** Timestamp stop Operation */
-  public long stopTime;
+  private long stopTime;
 
   /** Messages in the operation */
-  public String messages;
+  //public String messages;
   /**
    * defaul constructor
    *
