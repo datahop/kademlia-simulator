@@ -267,6 +267,21 @@ public class Message extends SimpleEvent {
         return "MSG_INIT_NEW_BLOCK";
       case MSG_INIT_FIND_REGION_BASED:
         return "MSG_INIT_REGION_BASED_FIND";
+      case MSG_GET:
+        return "MSG_GET";
+      case MSG_PUT:
+        return "MSG_PUT";
+      case MSG_INIT_GET_SAMPLE:
+        return "MSG_INIT_GET_SAMPLE";
+      case MSG_GET_SAMPLE:
+        return "MSG_GET_SAMPLE";
+      case MSG_GET_SAMPLE_RESPONSE:
+        return "MSG_GET_SAMPLE_RESPONSE";
+      case MSG_GET_ANY_SAMPLE:
+        return "MSG_GET_ANY_SAMPLE";
+      case MSG_GET_ANY_SAMPLE_RESPONSE:
+        return "MSG_GET_ANY_SAMPLE_RESPONSE";
+
       default:
         return "UNKNOW:" + type;
     }
