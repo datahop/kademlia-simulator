@@ -42,6 +42,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
   protected static final String PAR_KADEMLIA = "kademlia";
+  protected static final String PAR_ALPHA = "alpha";
 
   protected static String prefix = null;
   protected UnreliableTransport transport;
@@ -111,6 +112,10 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
     // samplesRequested = 0;
     kademliaId = Configuration.getPid(prefix + "." + PAR_KADEMLIA);
+
+    KademliaCommonConfigDas.ALPHA =
+        Configuration.getInt(prefix + "." + PAR_ALPHA, KademliaCommonConfigDas.ALPHA);
+
     kv = new KeyValueStore();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();

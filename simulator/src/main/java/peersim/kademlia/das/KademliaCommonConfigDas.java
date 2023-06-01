@@ -8,7 +8,7 @@ package peersim.kademlia.das;
  */
 public class KademliaCommonConfigDas {
 
-  public static int ALPHA = 100; // number of simultaneous lookup messages
+  public static int ALPHA = 3; // number of simultaneous lookup messages
 
   /** Different ways of mapping samples to DHT keyspace */
   public static int SAMPLE_MAPPING_RANDOM = 1;
@@ -30,6 +30,6 @@ public class KademliaCommonConfigDas {
 
   public static int MAX_NODES_RETURNED = 15;
 
-  /** Number of samples returned by a single node */
+  /** Number of max hops during a sampling operation */
   public static int MAX_HOPS = 5000;
 }
