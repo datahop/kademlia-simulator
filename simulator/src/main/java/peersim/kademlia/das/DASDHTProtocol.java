@@ -198,7 +198,7 @@ public class DASDHTProtocol extends DASProtocol {
         Sample[] samples = {s};
         sop.elaborateResponse(samples);
         sop.setHops(get.getHops());
-        for(Long msg : get.getMessages()){
+        for (Long msg : get.getMessages()) {
           sop.addMessage(msg);
         }
         logger.warning(

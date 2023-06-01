@@ -197,7 +197,7 @@ public class FindOperation extends Operation {
     result.put("id", this.operationId);
     result.put("src", this.srcNode);
     result.put("type", this.getClass().getSimpleName());
-    result.put("messages", this.messages);
+    result.put("messages", getMessagesString());
     result.put("start", this.timestamp);
     result.put("stop", this.stopTime);
     result.put("hops", this.nrHops);
