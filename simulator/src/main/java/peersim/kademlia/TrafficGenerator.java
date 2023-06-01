@@ -23,7 +23,7 @@ public class TrafficGenerator implements Control {
   private static final String PAR_PROT = "protocol";
 
   /** MSPastry Protocol ID to act */
-  private final int pid;
+  protected final int pid;
 
   private boolean first = true;
   // ______________________________________________________________________________________________
@@ -43,9 +43,32 @@ public class TrafficGenerator implements Control {
     while (!n.isUp()) {
       n = Network.get(CommonState.r.nextInt(Network.size()));
     }
-    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getNode().getId();
+    BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getKademliaNode().getId();
 
     Message m = Message.makeInitFindNode(dst);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  /**
+   * generates a random region-based find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateRegionBasedFindNodeMessage() {
+    // existing active destination node
+    // UniformRandomGenerator urg =
+    //    new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    // BigInteger id = urg.generate();
+    Node n = Network.get(CommonState.r.nextInt(Network.size()));
+    while (!n.isUp()) {
+      n = Network.get(CommonState.r.nextInt(Network.size()));
+    }
+    BigInteger id = ((KademliaProtocol) (n.getProtocol(pid))).getKademliaNode().getId();
+
+    int numHonest = 16;
+    Message m = Message.makeInitRegionBasedFindNode(id, numHonest);
     m.timestamp = CommonState.getTime();
 
     return m;
@@ -59,16 +82,15 @@ public class TrafficGenerator implements Control {
    */
   public boolean execute() {
 
-    // if (first) {
     Node start;
     do {
       start = Network.get(CommonState.r.nextInt(Network.size()));
     } while ((start == null) || (!start.isUp()));
 
     // send message
-    EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-    first = false;
-    // }
+    // EDSimulator.add(0, generateFindNodeMessage(), start, pid);
+    EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
+
     return false;
   }
 

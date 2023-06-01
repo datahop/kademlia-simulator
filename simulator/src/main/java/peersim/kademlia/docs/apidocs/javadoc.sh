@@ -1,0 +1,1 @@
+/usr/local/Cellar/openjdk/20/libexec/openjdk.jdk/Contents/Home/bin/javadoc @options

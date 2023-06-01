@@ -35,26 +35,26 @@ public class Turbulence implements Control {
   private static final String PAR_TRANSPORT = "transport";
   private static final String PAR_INIT = "init";
 
-  /** specify a minimum size for the network. by default there is no limit */
+  /** Specify a minimum size for the network. by default there is no limit */
   private static final String PAR_MINSIZE = "minsize";
 
-  /** specify a maximum size for the network.by default there is limit of 1 */
+  /** Specify a maximum size for the network.by default there is limit of 1 */
   private static final String PAR_MAXSIZE = "maxsize";
 
-  /** idle probability */
+  /** Idle probability */
   private static final String PAR_IDLE = "p_idle";
 
-  /** probability to add a node (in non-idle execution) */
+  /** Probability to add a node (in non-idle execution) */
   private static final String PAR_ADD = "p_add";
 
   /**
-   * probability to fail a node (in non-idle execution). Note: nodes will NOT be removed from the
+   * Probability to fail a node (in non-idle execution). Note: nodes will NOT be removed from the
    * network, but will be set as "DOWN", in order to let peersim exclude automatically the
    * delivering of events destinates to them
    */
   private static final String PAR_REM = "p_rem";
 
-  /** node initializers to apply on the newly added nodes */
+  /** Node initializers to apply on the newly added nodes */
   protected NodeInitializer[] inits;
 
   private String prefix;
@@ -79,12 +79,12 @@ public class Turbulence implements Control {
     inits = new NodeInitializer[tmp.length];
     for (int i = 0; i < tmp.length; ++i) inits[i] = (NodeInitializer) tmp[i];
 
-    // load probability from configuration file
+    // Load probability from configuration file
     p_idle = Configuration.getDouble(this.prefix + "." + PAR_IDLE, 0); // idle default 0
     p_add = Configuration.getDouble(this.prefix + "." + PAR_ADD, 0.5); // add default 0.5
     p_rem = Configuration.getDouble(this.prefix + "." + PAR_REM, 0.5); // add default 0.5
 
-    // check probability values
+    // Check probability values
     if (p_idle < 0 || p_idle > 1) {
       System.err.println(
           "Wrong event probabilty in Turbulence class: the probability PAR_IDLE must be between 0 and 1");
@@ -115,7 +115,8 @@ public class Turbulence implements Control {
             Node n2 = (Node) o2;
             KademliaProtocol p1 = (KademliaProtocol) (n1.getProtocol(kademliaid));
             KademliaProtocol p2 = (KademliaProtocol) (n2.getProtocol(kademliaid));
-            return Util.put0(p1.getNode().getId()).compareTo(Util.put0(p2.getNode().getId()));
+            return Util.put0(p1.getKademliaNode().getId())
+                .compareTo(Util.put0(p2.getKademliaNode().getId()));
           }
 
           // ______________________________________________________________________________________
@@ -186,39 +187,40 @@ public class Turbulence implements Control {
 
     System.out.println("Adding node " + count);
 
-    // get kademlia protocol of new node
+    // Get kademlia protocol of new node
     KademliaProtocol newKad = (KademliaProtocol) (newNode.getProtocol(kademliaid));
     newNode.setKademliaProtocol(newKad);
     newKad.setProtocolID(kademliaid);
     // newNode.setProtocol(kademliaid, newKad);
-    // set node Id
+    // Set node ID
     UniformRandomGenerator urg =
         new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
     KademliaNode node = new KademliaNode(urg.generate(), "127.0.0.1", 0);
     ((KademliaProtocol) (newNode.getProtocol(kademliaid))).setNode(node);
 
-    // sort network
+    // Sort the network
     sortNet();
 
-    // select one random bootstrap node
+    // Select one random bootstrap node
     Node start;
     do {
       start = Network.get(CommonState.r.nextInt(Network.size()));
     } while ((start == null) || (!start.isUp()));
 
-    // create auto-search message (search message with destination my own Id)
-    Message m = Message.makeInitFindNode(newKad.getNode().getId());
+    // Create auto-search message (search message with destination my own Id)
+    Message m = Message.makeInitFindNode(newKad.getKademliaNode().getId());
     m.timestamp = CommonState.getTime();
 
-    // perform initialization
+    // Perform initialization
     newKad
         .getRoutingTable()
-        .addNeighbour(((KademliaProtocol) (start.getProtocol(kademliaid))).getNode().getId());
+        .addNeighbour(
+            ((KademliaProtocol) (start.getProtocol(kademliaid))).getKademliaNode().getId());
 
-    // start auto-search
+    // Start auto-search
     EDSimulator.add(0, m, newNode, kademliaid);
 
-    // find another random node (this is to enrich the k-buckets)
+    // Find another random node (this is to enrich the k-buckets)
     Message m1 = Message.makeInitFindNode(urg.generate());
     m1.timestamp = CommonState.getTime();
 
@@ -227,13 +229,13 @@ public class Turbulence implements Control {
 
   // ______________________________________________________________________________________________
   public boolean rem() {
-    // select one random node to remove
+    // Select one random node to remove
     Node remove;
     do {
       remove = Network.get(CommonState.r.nextInt(Network.size()));
     } while ((remove == null) || (!remove.isUp()));
 
-    // remove node (set its state to DOWN)
+    // Remove node (set its state to DOWN)
     remove.setFailState(Node.DOWN);
 
     return false;
@@ -241,15 +243,15 @@ public class Turbulence implements Control {
 
   // ______________________________________________________________________________________________
   public boolean execute() {
-    // throw the dice
+    // Throw the dice
     double dice = CommonState.r.nextDouble();
     if (dice < p_idle) return false;
 
-    // get network size
+    // Get network size
     int sz = Network.size();
     for (int i = 0; i < Network.size(); i++) if (!Network.get(i).isUp()) sz--;
 
-    // perform the correct operation basing on the probability
+    // Perform the correct operation basing on the probability
     if (dice < p_idle) {
       return false; // do nothing
     } else if (dice < (p_idle + p_add) && sz < maxsize) {

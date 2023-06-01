@@ -32,7 +32,7 @@ public class RoutingTable implements Cloneable {
   protected int bucketMinDistance;
 
   // ______________________________________________________________________________________________
-  /** instanciates a new empty routing table with the specified size */
+  /** Instanciates a new empty routing table with the specified size */
   // public RoutingTable() {
   public RoutingTable(int nBuckets, int k, int maxReplacements) {
 
@@ -52,20 +52,20 @@ public class RoutingTable implements Cloneable {
     }
   }
 
-  // add a neighbour to the correct k-bucket
+  // Add a neighbour to the correct k-bucket
   public boolean addNeighbour(BigInteger node) {
     // add the node to the k-bucket
-    return bucketAtDistance(Util.distance(nodeId, node)).addNeighbour(node);
+    return bucketAtDistance(Util.logDistance(nodeId, node)).addNeighbour(node);
   }
 
-  // remove a neighbour from the correct k-bucket
+  // Remove a neighbour from the correct k-bucket
   public void removeNeighbour(BigInteger node) {
 
-    // remove the node from the k-bucket
-    bucketAtDistance(Util.distance(nodeId, node)).removeNeighbour(node);
+    // Remove the node from the k-bucket
+    bucketAtDistance(Util.logDistance(nodeId, node)).removeNeighbour(node);
   }
 
-  // return the neighbours with a specific common prefix len
+  // Return the neighbours with a specific common prefix len
   public BigInteger[] getNeighbours(final int dist) {
     BigInteger[] result = new BigInteger[0];
     ArrayList<BigInteger> resultList = new ArrayList<BigInteger>();
@@ -82,16 +82,16 @@ public class RoutingTable implements Cloneable {
     return resultList.toArray(result);
   }
 
-  // return the closest neighbour to a key from the correct k-bucket
+  // Return the closest neighbour to a key from the correct k-bucket
   public BigInteger[] getNeighbours(final BigInteger key, final BigInteger src) {
-    // resulting neighbours
+    // Resulting neighbours
     BigInteger[] result = new BigInteger[KademliaCommonConfig.K];
 
-    // neighbour candidates
+    // Neighbour candidates
     ArrayList<BigInteger> neighbour_candidates = new ArrayList<BigInteger>();
 
-    // get the lenght of the longest common prefix
-    int prefix_len = Util.distance(nodeId, key);
+    // Get the lenght of the longest common prefix
+    int prefix_len = Util.logDistance(nodeId, key);
 
     if (prefix_len < 0) return new BigInteger[] {nodeId};
     // return the k-bucket if is full
@@ -99,26 +99,26 @@ public class RoutingTable implements Cloneable {
       return bucketAtDistance(prefix_len).neighbours.keySet().toArray(result);
     }
 
-    // else get k closest node from all k-buckets
+    // Else get k closest node from all k-buckets
     prefix_len = 0;
     while (prefix_len < KademliaCommonConfig.BITS) {
       neighbour_candidates.addAll(bucketAtDistance(prefix_len).neighbours.keySet());
-      // remove source id
+      // Remove source id
       neighbour_candidates.remove(src);
       prefix_len++;
     }
 
-    // create a map (distance, node)
+    // Create a map (distance, node)
     TreeMap<Integer, List<BigInteger>> distance_map = new TreeMap<Integer, List<BigInteger>>();
 
     for (BigInteger node : neighbour_candidates) {
-      if (distance_map.get(Util.distance(node, key)) == null) {
+      if (distance_map.get(Util.logDistance(node, key)) == null) {
         List<BigInteger> l = new ArrayList<BigInteger>();
         l.add(node);
-        distance_map.put(Util.distance(node, key), l);
+        distance_map.put(Util.logDistance(node, key), l);
 
       } else {
-        distance_map.get(Util.distance(node, key)).add(node);
+        distance_map.get(Util.logDistance(node, key)).add(node);
       }
     }
 
@@ -146,7 +146,7 @@ public class RoutingTable implements Cloneable {
 
   // ______________________________________________________________________________________________
   /**
-   * print a string representation of the table
+   * Print a string representation of the table
    *
    * @return String
    */
@@ -155,11 +155,11 @@ public class RoutingTable implements Cloneable {
   }
 
   public KBucket getBucket(BigInteger node) {
-    return bucketAtDistance(Util.distance(nodeId, node));
+    return bucketAtDistance(Util.logDistance(nodeId, node));
   }
 
   public int getBucketNum(BigInteger node) {
-    int dist = Util.distance(nodeId, node);
+    int dist = Util.logDistance(nodeId, node);
     if (dist <= bucketMinDistance) {
       return 0;
     }

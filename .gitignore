@@ -1,0 +1,5 @@
+.DS_Store
+target/
+logs/
+.vscode/
+*.code-workspace
