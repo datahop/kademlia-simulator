@@ -23,4 +23,7 @@ public interface KademliaEvents {
    * @param op the operation that triggered the event
    */
   public void operationComplete(Operation op);
+
+  public void putValueReceived(Object o);
+
 }
