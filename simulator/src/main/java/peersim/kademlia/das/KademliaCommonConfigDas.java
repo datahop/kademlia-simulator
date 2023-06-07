@@ -39,7 +39,7 @@ public class KademliaCommonConfigDas {
 
   public static int MAX_NODES_RETURNED = 15;
 
-  /** Number of samples returned by a single node */
+  /** Number of max hops during a sampling operation */
   public static int MAX_HOPS = 5000;
 
   /** Default upload bandwith of a validator in Mbits/sec */
