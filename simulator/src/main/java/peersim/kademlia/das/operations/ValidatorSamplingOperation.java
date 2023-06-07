@@ -2,7 +2,6 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,7 @@ import peersim.kademlia.das.SearchTable;
 public class ValidatorSamplingOperation extends SamplingOperation {
 
   // private RoutingTable rou;
-  private int row, column;
+  protected int row, column;
   /**
    * default constructor
    *
@@ -56,7 +55,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA - 1);
+    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -85,7 +84,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
     List<BigInteger> list = new ArrayList<>();
     if (row > 0) {
@@ -112,7 +111,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     return result.toArray(new BigInteger[0]);
-  }
+  }*/
 
   public boolean completed() {
 
@@ -152,8 +151,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     result.put("id", this.operationId);
     result.put("src", this.srcNode);
-    result.put("type", this.getClass().getSimpleName());
-    result.put("messages", this.messages);
+    result.put("type", "ValidatorSamplingOperation");
+    result.put("messages", getMessagesString());
     result.put("start", this.timestamp);
     result.put("completion_time", this.stopTime);
     result.put("hops", this.nrHops);
