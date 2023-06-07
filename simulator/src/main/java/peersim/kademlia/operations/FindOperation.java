@@ -44,10 +44,8 @@ public class FindOperation extends Operation {
    */
   public FindOperation(BigInteger srcNode, BigInteger destNode, long timestamp) {
     super(srcNode, destNode, timestamp);
-
     // initialize closestSet
     closestSet = new HashMap<BigInteger, Boolean>();
-
     returned = new ArrayList<BigInteger>();
   }
 
@@ -73,6 +71,7 @@ public class FindOperation extends Operation {
    * @param neighbours
    */
   public void elaborateResponse(BigInteger[] neighbours) {
+
     // add to closestSet
     for (BigInteger n : neighbours) {
 

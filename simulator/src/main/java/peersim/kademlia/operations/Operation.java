@@ -43,7 +43,6 @@ public abstract class Operation {
 
   /** Messages in the operation */
   public String messages;
-
   /**
    * defaul constructor
    *
@@ -53,11 +52,10 @@ public abstract class Operation {
     this.timestamp = timestamp;
     this.destNode = dstNode;
     this.srcNode = srcNode;
-    this.messages = "";
 
     // set a new find ID
     operationId = OPERATION_ID_GENERATOR++;
-
+    this.messages = "";
     returned = new ArrayList<BigInteger>();
   }
 

@@ -124,8 +124,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     findOp = new LinkedHashMap<Long, FindOperation>();
 
-    findLog = new LinkedHashMap<Long, OpLogging>();
-
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();
@@ -236,11 +234,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       // Update the find operation record with the closest set of neighbors received
       fop.elaborateResponse((BigInteger[]) m.body);
       fop.AddMessage(m.id);
-
-      // Log the number of available requests.
-      logger.warning(
-          "Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
-
+      logger.info("Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
       // save received neighbour in the closest Set of fin operation
       BigInteger[] neighbours = (BigInteger[]) m.body;
       if (callback != null) callback.nodesFound(fop, neighbours);
@@ -269,7 +263,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           callback.operationComplete(fop);
         }
         ((GetOperation) fop).setValue(m.value);
-        logger.warning(
+        logger.info(
             "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
       }
 
@@ -332,12 +326,16 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           } else if (fop instanceof GetOperation) {
             // Remove the find operation record
             findOp.remove(fop.getId());
-            logger.warning("Getprocess finished not found ");
+            logger.info("Getprocess finished not found ");
             KademliaObserver.reportOperation(fop);
           } else if (fop instanceof RegionBasedFindOperation) {
             findOp.remove(fop.getId());
-            logger.warning("Region-based lookup completed ");
+            logger.info("Region-based lookup completed ");
             KademliaObserver.reportOperation(fop);
+
+            for (BigInteger id : fop.getNeighboursList()) {
+              logger.info("Found node " + id);
+            }
           } else {
             findOp.remove(fop.getId());
             KademliaObserver.reportOperation(fop);
@@ -358,9 +356,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
           return;
 
-        } else {
-          // No neighbour available but exists outstanding request to wait
-          logger.warning("No neighbour available but exists outstanding request to wait");
+        } else { // no neighbour available but exists oustanding request to wait
+          logger.info(" no neighbour available but exists oustanding request to wait");
           return;
         }
       }
@@ -384,7 +381,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param m The message containing the put request.
    */
   private void handlePut(Message m) {
-    logger.warning("Handle put sample:" + m.body);
+    logger.info("Handle put sample:" + m.body);
     kv.add((BigInteger) m.body, m.value);
   }
 
