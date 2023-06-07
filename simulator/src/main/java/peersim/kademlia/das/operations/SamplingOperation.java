@@ -120,5 +120,4 @@ public abstract class SamplingOperation extends FindOperation {
   public int samplesCount() {
     return samplesCount;
   }
-
 }
