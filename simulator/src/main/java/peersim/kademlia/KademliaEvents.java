@@ -25,5 +25,4 @@ public interface KademliaEvents {
   public void operationComplete(Operation op);
 
   public void putValueReceived(Object o);
-
 }

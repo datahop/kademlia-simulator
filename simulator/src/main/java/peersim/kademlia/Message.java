@@ -215,16 +215,10 @@ public class Message extends SimpleEvent {
     return new Message(MSG_INIT_NEW_BLOCK, body);
   }
 
-  // ______________________________________________________________________________________________
-  /**
-   * Encapsulates the creation of a PUT request
-   *
-   * @param body Object
-   * @return Message
-   */
   public static final Message makeInitGetSample(Object body) {
     return new Message(MSG_INIT_GET_SAMPLE, body);
   }
+
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request
@@ -265,12 +259,29 @@ public class Message extends SimpleEvent {
         return "MSG_INIT_FIND";
       case MSG_FIND:
         return "MSG_FIND";
+      case MSG_FIND_DIST:
+        return "MSG_FIND_DIST";
       case MSG_RESPONSE:
         return "MSG_RESPONSE";
       case MSG_INIT_NEW_BLOCK:
         return "MSG_INIT_NEW_BLOCK";
       case MSG_INIT_FIND_REGION_BASED:
         return "MSG_INIT_REGION_BASED_FIND";
+      case MSG_GET:
+        return "MSG_GET";
+      case MSG_PUT:
+        return "MSG_PUT";
+      case MSG_INIT_GET_SAMPLE:
+        return "MSG_INIT_GET_SAMPLE";
+      case MSG_GET_SAMPLE:
+        return "MSG_GET_SAMPLE";
+      case MSG_GET_SAMPLE_RESPONSE:
+        return "MSG_GET_SAMPLE_RESPONSE";
+      case MSG_GET_ANY_SAMPLE:
+        return "MSG_GET_ANY_SAMPLE";
+      case MSG_GET_ANY_SAMPLE_RESPONSE:
+        return "MSG_GET_ANY_SAMPLE_RESPONSE";
+
       default:
         return "UNKNOW:" + type;
     }
@@ -287,7 +298,7 @@ public class Message extends SimpleEvent {
     } else {
       result.put("status", "received");
     }
-
+    result.put("time", this.timestamp);
     return result;
   }
 }
