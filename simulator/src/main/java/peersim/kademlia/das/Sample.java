@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import peersim.kademlia.Util;
 
 public class Sample {
 
@@ -95,22 +96,24 @@ public class Sample {
 
   /** Given the peerID of a node, determine if this sample falls within the region of the node. */
   public boolean isInRegionByColumn(BigInteger peerID, BigInteger radius) {
-    /** (peerID - radius) < this.id < (peerID + radius) */
-    if ((this.idByColumn.compareTo(peerID.subtract(radius)) == 1)
-        && (this.idByColumn.compareTo(peerID.add(radius)) == -1)) {
+    // if radius is larger or equal than the distance between the node and the sample ID, the peerID
+    // is in the region
+    if (radius.compareTo(Util.xorDistance(this.idByColumn, peerID)) > -1) {
       return true;
-    } else {
+    }
+    {
       return false;
     }
   }
 
   /** Given the peerID of a node, determine if this sample falls within the region of the node. */
   public boolean isInRegionByRow(BigInteger peerID, BigInteger radius) {
-    /** (peerID - radius) < this.id < (peerID + radius) */
-    if ((this.idByRow.compareTo(peerID.subtract(radius)) == 1)
-        && (this.idByRow.compareTo(peerID.add(radius)) == -1)) {
+    // if radius is larger or equal than the distance between the node and the sample ID, the peerID
+    // is in the region
+    if (radius.compareTo(Util.xorDistance(this.idByRow, peerID)) > -1) {
       return true;
-    } else {
+    }
+    {
       return false;
     }
   }
