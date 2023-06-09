@@ -2,7 +2,6 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,35 +84,35 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
-    List<BigInteger> list = new ArrayList<>();
-    if (row > 0) {
-      Collections.addAll(
-          list,
-          currentBlock.getSamplesByRadiusByRow(
-              peerId,
-              currentBlock.computeRegionRadius(
-                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    } else if (column > 0) {
-      Collections.addAll(
-          list,
-          currentBlock.getSamplesByRadiusByColumn(
-              peerId,
-              currentBlock.computeRegionRadius(
-                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    }
-
-    List<BigInteger> result = new ArrayList<>();
-
-    for (BigInteger s : samples.keySet()) {
-      if (samples.get(s) != null) {
-        if (!samples.get(s) && list.contains(s)) result.add(s);
+      List<BigInteger> list = new ArrayList<>();
+      if (row > 0) {
+        Collections.addAll(
+            list,
+            currentBlock.getSamplesByRadiusByRow(
+                peerId,
+                currentBlock.computeRegionRadius(
+                    KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
+      } else if (column > 0) {
+        Collections.addAll(
+            list,
+            currentBlock.getSamplesByRadiusByColumn(
+                peerId,
+                currentBlock.computeRegionRadius(
+                    KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
       }
-    }
-    return result.toArray(new BigInteger[0]);
-  }
 
+      List<BigInteger> result = new ArrayList<>();
+
+      for (BigInteger s : samples.keySet()) {
+        if (samples.get(s) != null) {
+          if (!samples.get(s) && list.contains(s)) result.add(s);
+        }
+      }
+      return result.toArray(new BigInteger[0]);
+    }
+  */
   public boolean completed() {
 
     return completed;
