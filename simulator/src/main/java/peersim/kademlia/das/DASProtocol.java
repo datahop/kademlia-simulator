@@ -427,9 +427,7 @@ public class DASProtocol implements EDProtocol, KademliaEvents, MissingNode {
 
       if (!sop.completed() && sop.nrHops < KademliaCommonConfigDas.MAX_HOPS) {
         BigInteger[] missingSamples = sop.getMissingSamples();
-        BigInteger[] nodesToAsk =
-            (BigInteger[])
-                searchTable.getNodesForSamples(missingSamples, sop.getRadius()).toArray();
+        BigInteger[] nodesToAsk = searchTable.getNodesForSamples(missingSamples, sop.getRadius());
 
         for (BigInteger nextNode : nodesToAsk) {
           logger.warning("sending to node " + nextNode);
@@ -632,8 +630,7 @@ public class DASProtocol implements EDProtocol, KademliaEvents, MissingNode {
       return true;
     }
     BigInteger[] missingSamples = sop.getMissingSamples();
-    BigInteger[] nodesToAsk =
-        (BigInteger[]) searchTable.getNodesForSamples(missingSamples, sop.getRadius()).toArray();
+    BigInteger[] nodesToAsk = searchTable.getNodesForSamples(missingSamples, sop.getRadius());
 
     boolean success = false;
     logger.warning("Dosampling " + sop.getAvailableRequests());

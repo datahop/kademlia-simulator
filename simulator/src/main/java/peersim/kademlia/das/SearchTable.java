@@ -66,7 +66,7 @@ public class SearchTable {
     return samplesIndexed;
   }*/
 
-  //Return nodes that should have the indicate sample
+  // Return nodes that should have the indicate sample
   public List<BigInteger> getNodesForSample(BigInteger sampleId, BigInteger radius) {
     ArrayList<BigInteger> result = new ArrayList<BigInteger>();
     // TODO we should make it more efficient (now it's O(n))
@@ -78,7 +78,7 @@ public class SearchTable {
     return result;
   }
 
-  public List<BigInteger> getNodesForSamples(BigInteger[] samples, BigInteger radius) {
+  BigInteger[] getNodesForSamples(BigInteger[] samples, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
 
@@ -86,6 +86,6 @@ public class SearchTable {
       // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
       result.addAll(getNodesForSample(sample, radius));
     }
-    return result;
+    return result.toArray(new BigInteger[0]);
   }
 }
