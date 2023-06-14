@@ -459,13 +459,14 @@ public class DASProtocol implements EDProtocol, KademliaEvents, MissingNode {
             for (BigInteger sample : sop.getMissingSamples())
               logger.warning("Missing sample " + sample);
             while (!doSampling(sop)) {
-              sop.increaseRadius(2);
+              if (sop.increaseRadius(2)) {
+                samplingOp.remove(m.operationId);
+                logger.warning("Sampling operation finished");
+                KademliaObserver.reportOperation(sop);
+                break;
+              }
               logger.warning("Increasing radius " + sop.getId());
             }
-            /*samplingOp.remove(m.operationId);
-            logger.warning("Sampling operation finished");
-            KademliaObserver.reportOperation(op);*/
-
           }
         }
       } else {
@@ -681,7 +682,7 @@ public class DASProtocol implements EDProtocol, KademliaEvents, MissingNode {
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     while (!doSampling(op)) {
-      op.increaseRadius(2);
+      if (op.increaseRadius(2)) break;
     }
   }
 

@@ -2,7 +2,6 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -30,7 +29,7 @@ public class SearchTable {
     this.currentBlock = currentBlock;
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
     List<BigInteger> result = new ArrayList<>();
     Collections.addAll(
@@ -45,7 +44,7 @@ public class SearchTable {
             currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
 
     return result.toArray(new BigInteger[0]);
-  }
+  }*/
 
   public void addNodes(BigInteger[] nodes) {
 
