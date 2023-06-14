@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 import peersim.kademlia.Util;
 
@@ -68,7 +67,8 @@ public class SearchTable {
     return samplesIndexed;
   }*/
 
-  public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
+  //Return nodes that should have the indicate sample
+  public List<BigInteger> getNodesForSample(BigInteger sampleId, BigInteger radius) {
     ArrayList<BigInteger> result = new ArrayList<BigInteger>();
     // TODO we should make it more efficient (now it's O(n))
     for (BigInteger nodeId : nodesIndexed) {
@@ -79,13 +79,13 @@ public class SearchTable {
     return result;
   }
 
-  public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
+  public List<BigInteger> getNodesForSamples(BigInteger[] samples, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples) {
       // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
-      result.addAll(getNodesbySample(sample, radius));
+      result.addAll(getNodesForSample(sample, radius));
     }
     return result;
   }

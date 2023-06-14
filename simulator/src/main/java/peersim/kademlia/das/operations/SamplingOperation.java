@@ -2,7 +2,6 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import peersim.kademlia.das.Block;
@@ -14,6 +13,7 @@ import peersim.kademlia.operations.FindOperation;
 
 public abstract class SamplingOperation extends FindOperation {
 
+  // maps sampleID into status (alrady fetched or not)
   protected HashMap<BigInteger, Boolean> samples;
   protected SearchTable searchTable;
   protected int samplesCount = 0;
@@ -58,9 +58,7 @@ public abstract class SamplingOperation extends FindOperation {
 
   public abstract boolean completed();
 
-  public abstract BigInteger[] getSamples(BigInteger peerId);
-
-  public BigInteger[] getSamples() {
+  public BigInteger[] getMissingSamples() {
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples.keySet()) {
@@ -69,8 +67,7 @@ public abstract class SamplingOperation extends FindOperation {
 
     return result.toArray(new BigInteger[0]);
   }
-  // public abstract BigInteger[] startSampling();
-
+  /*
   public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
@@ -110,6 +107,7 @@ public abstract class SamplingOperation extends FindOperation {
 
     return res;
   }
+   */
 
   public void increaseRadius(int multiplier) {
     radius = radius.multiply(BigInteger.valueOf(multiplier));
@@ -119,5 +117,9 @@ public abstract class SamplingOperation extends FindOperation {
 
   public int samplesCount() {
     return samplesCount;
+  }
+
+  public BigInteger getRadius() {
+    return radius;
   }
 }

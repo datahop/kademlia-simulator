@@ -206,6 +206,7 @@ public class TrafficGeneratorSample implements Control {
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
 
+      // make nodes request their initial samples directly from the builder
       while (b.hasNext()) {
         Sample s = b.next();
         boolean inRegion = false;
