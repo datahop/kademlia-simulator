@@ -124,4 +124,5 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger getRadius() {
     return radius;
   }
+
 }
