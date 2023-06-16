@@ -45,6 +45,15 @@ public class KBucket implements Cloneable {
     neighbours.remove(node);
   }
 
+   /**
+   * Returns the count of the neigbors of the k-bucket object (this k-bucket).
+   *
+   * @return the number of neighbors in the k-bucket.
+   */
+  public int getNeighborCount() {
+    return neighbours.size();
+  }
+
   /**
    * Returns a deep copy of the k-bucket object.
    *

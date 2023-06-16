@@ -58,10 +58,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** UnreliableTransport object used for communication. */
   private UnreliableTransport transport;
 
-  /** Identifier for the tranport protocol (used in teh sendMessage method) - TODO: verify!!!. */
+  /** Identifier for the tranport protocol (used in the sendMessage method) */
   private int tid;
 
-  /** Unique ID for this Kademlia node/network - TODO: verify!!!. */
+  /** Unique ID for this Kademlia node/network */
   private int kademliaid;
 
   /** Indicates if the service initializer has already been called. */
@@ -203,7 +203,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   /**
    * Gets the node associated with this Kademlia protocol instance by calling nodeIdtoNode method
-   * with the ID of this KademliaNode. TODO: verify.
+   * with the ID of this KademliaNod.
    *
    * @return the node associated with this Kademlia protocol instance,
    */
@@ -235,7 +235,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       fop.elaborateResponse((BigInteger[]) m.body);
       fop.AddMessage(m.id);
       logger.info("Handleresponse FindOperation " + fop.getId() + " " + fop.getAvailableRequests());
-      // save received neighbour in the closest Set of fin operation
+      // Save received neighbour in the closest Set of fin operation
       BigInteger[] neighbours = (BigInteger[]) m.body;
       if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
@@ -291,7 +291,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           if (KademliaCommonConfig.FINDMODE == 0 || request.getType() == Message.MSG_GET) {
             request.body = fop.getDestNode();
           } else {
-            request.body = Util.logDistance(fop.getDestNode(), (BigInteger) fop.getBody());
+            request.body = Util.logDistance(neighbour, (BigInteger) fop.getBody());
           }
 
           // Increment hop count
