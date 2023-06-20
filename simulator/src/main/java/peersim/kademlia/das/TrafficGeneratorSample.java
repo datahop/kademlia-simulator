@@ -211,17 +211,17 @@ public class TrafficGeneratorSample implements Control {
         boolean inRegion = false;
         BigInteger radius =
             b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-        /*System.out.println(
-        "New sample "
-            + s.getRow()
-            + " "
-            + s.getColumn()
-            + " "
-            + s.getIdByRow()
-            + " "
-            + s.getIdByColumn()
-            + " "
-            + radius);*/
+        System.out.println(
+            "New sample "
+                + s.getRow()
+                + " "
+                + s.getColumn()
+                + " "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " "
+                + radius);
 
         while (!inRegion) {
           for (int i = 0; i < Network.size(); i++) {
