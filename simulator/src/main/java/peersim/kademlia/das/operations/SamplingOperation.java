@@ -111,8 +111,13 @@ public abstract class SamplingOperation extends FindOperation {
     return res;
   }
 
-  public void increaseRadius(int multiplier) {
+  public boolean increaseRadius(int multiplier) {
     radius = radius.multiply(BigInteger.valueOf(multiplier));
+    if (Block.MAX_KEY.compareTo(radius) > 0) {
+      radius = Block.MAX_KEY;
+      return false;
+    }
+    return true;
   }
 
   public abstract void elaborateResponse(Sample[] sam);

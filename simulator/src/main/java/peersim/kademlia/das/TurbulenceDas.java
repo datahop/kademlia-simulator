@@ -172,7 +172,7 @@ public class TurbulenceDas implements Control {
     do {
       remove = Network.get(CommonState.r.nextInt(Network.size()));
       dasProt = ((DASProtocol) (Network.get(0).getProtocol(dasprotid)));
-    } while ((remove == null) || dasProt.isBuilder() || dasProt.isValidator()||(!remove.isUp()));
+    } while ((remove == null) || dasProt.isBuilder() || dasProt.isValidator() || (!remove.isUp()));
 
     // Remove node (set its state to DOWN)
     remove.setFailState(Node.DOWN);
