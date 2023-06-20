@@ -2,6 +2,7 @@ package peersim.kademlia;
 
 import java.math.BigInteger;
 import java.util.Set;
+import peersim.core.CommonState;
 
 /**
  * Some utility and mathematical function to work with BigInteger numbers and strings.
@@ -118,5 +119,35 @@ public class Util {
    */
   public static BigInteger xorDistance(BigInteger a, BigInteger b) {
     return a.xor(b);
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  public static Message generateFindNodeMessage(BigInteger id) {
+
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  public static Message generateFindNodeMessage() {
+    UniformRandomGenerator urg =
+        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+    BigInteger id = urg.generate();
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
+
+    return m;
   }
 }

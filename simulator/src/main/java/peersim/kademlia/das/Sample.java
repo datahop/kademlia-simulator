@@ -35,7 +35,7 @@ public class Sample {
    * ordered by row
    */
   public int sampleNumberByRow() {
-    return this.row * this.block.getSize() + this.column;
+    return (this.row - 1) * this.block.getSize() + (this.column - 1);
   }
 
   /**
@@ -43,7 +43,7 @@ public class Sample {
    * ordered by column
    */
   public int sampleNumberByColumn() {
-    return this.column * this.block.getSize() + this.row;
+    return (this.column - 1) * this.block.getSize() + (this.row - 1);
   }
 
   /** Map this sample to the DHT keyspace */
@@ -62,6 +62,15 @@ public class Sample {
       }
     } else if (KademliaCommonConfigDas.MAPPING_FN
         == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
+      /*System.out.println(
+      "ComputeId "
+          + this.row
+          + " "
+          + this.column
+          + " "
+          + this.sampleNumberByRow()
+          + " "
+          + this.sampleNumberByColumn());*/
       this.idByRow =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
@@ -69,7 +78,8 @@ public class Sample {
       this.idByColumn =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
-              .add(BigInteger.valueOf(blockId));
+              .add(BigInteger.valueOf(blockId))
+              .add(BigInteger.valueOf(1));
 
     } else {
       System.out.println("Error: invalid selection for sample mapping function");
