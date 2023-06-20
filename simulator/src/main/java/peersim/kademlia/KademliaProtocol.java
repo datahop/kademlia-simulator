@@ -263,7 +263,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           callback.operationComplete(fop);
         }
         ((GetOperation) fop).setValue(m.value);
-        logger.info(
+        logger.warning(
             "Getprocess finished found " + ((GetOperation) fop).getValue() + " hops " + fop.nrHops);
       }
 

@@ -71,7 +71,7 @@ public class RoutingTable implements Cloneable {
     // Remove the node from the k-bucket
     bucketAtDistance(Util.logDistance(nodeId, node)).removeNeighbour(node);
   }
-  
+
   /**
    * Retrieves the closest neighbors to a key from the appropriate k-bucket using log distance.
    *
