@@ -6,38 +6,42 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- * Gives an implementation for the rounting table component of a kademlia node
+ * Provides an implementation for the routing table component of a Kademlia node.
  *
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
  */
 public class RoutingTable implements Cloneable {
 
-  // node ID of the node
+  /** Node ID of the node. */
   protected BigInteger nodeId = null;
 
-  // k-buckets
+  /** K-buckets. */
   protected TreeMap<Integer, KBucket> k_buckets = null;
 
-  // number of k-buckets
+  /** Number of k-buckets. */
   protected int nBuckets;
 
-  // bucket size
+  /** Bucket size. */
   protected int k;
 
-  // number of max bucket replacements
+  /** Number of maximum bucket replacements. */
   protected int maxReplacements;
 
-  // distance for the lowest bucket
+  /** Distance for the lowest bucket. */
   protected int bucketMinDistance;
 
-  // ______________________________________________________________________________________________
-  /** Instanciates a new empty routing table with the specified size */
-  // public RoutingTable() {
+  protected int findMode;
+  /**
+   * Instantiates a new routing table with the specified parameters.
+   *
+   * @param nBuckets the number of k-buckets
+   * @param k the bucket size
+   * @param maxReplacements the maximum number of bucket replacements
+   */
   public RoutingTable(int nBuckets, int k, int maxReplacements) {
-
+    // Initialize k-buckets.
     k_buckets = new TreeMap<Integer, KBucket>();
-    // initialize k-bukets
 
     this.nBuckets = nBuckets;
 
@@ -47,14 +51,17 @@ public class RoutingTable implements Cloneable {
 
     bucketMinDistance = KademliaCommonConfig.BITS - nBuckets;
 
-    for (int i = 0; i <= nBuckets; i++) {
+    this.findMode = KademliaCommonConfig.FINDMODE;
+
+    /** Fills the k-buckets map with empty buckets. */
+    for (int i = 0; i < nBuckets; i++) {
       k_buckets.put(i, new KBucket());
     }
   }
 
   // Add a neighbour to the correct k-bucket
   public boolean addNeighbour(BigInteger node) {
-    // add the node to the k-bucket
+    // Add the node to the k-bucket
     return bucketAtDistance(Util.logDistance(nodeId, node)).addNeighbour(node);
   }
 
@@ -65,16 +72,28 @@ public class RoutingTable implements Cloneable {
     bucketAtDistance(Util.logDistance(nodeId, node)).removeNeighbour(node);
   }
 
+  /**
+   * Retrieves the closest neighbors to a key from the appropriate k-bucket using log distance.
+   *
+   * @param key the key to find neighbors for
+   * @param src the source node ID
+   * @return an array of BigInteger representing the closest neighbors
+   */
   // Return the neighbours with a specific common prefix len
   public BigInteger[] getNeighbours(final int dist) {
     BigInteger[] result = new BigInteger[0];
     ArrayList<BigInteger> resultList = new ArrayList<BigInteger>();
+    // Add neighbors at the given distance
     resultList.addAll(bucketAtDistance(dist).neighbours.keySet());
 
     if (resultList.size() < k && (dist + 1) <= 256) {
+      // Add neighbors at the next distance
+
       resultList.addAll(bucketAtDistance(dist + 1).neighbours.keySet());
+      // Remove excess neighbors until the size is <= k
       while (resultList.size() > k) resultList.remove(resultList.size() - 1);
     }
+    // Add neighbors at the previous distance
     if (resultList.size() < k & (dist - 1) >= 0) {
       resultList.addAll(bucketAtDistance(dist - 1).neighbours.keySet());
       while (resultList.size() > k) resultList.remove(resultList.size() - 1);
@@ -82,7 +101,13 @@ public class RoutingTable implements Cloneable {
     return resultList.toArray(result);
   }
 
-  // Return the closest neighbour to a key from the correct k-bucket
+  /**
+   * Return the closest neighbour to a key from the correct k-bucket.
+   *
+   * @param key The key to find the closest neighbour to.
+   * @param src The source identifier to exclude from neighbour candidates.
+   * @return An array of the closest neighbours.
+   */
   public BigInteger[] getNeighbours(final BigInteger key, final BigInteger src) {
     // Resulting neighbours
     BigInteger[] result = new BigInteger[KademliaCommonConfig.K];
@@ -90,16 +115,16 @@ public class RoutingTable implements Cloneable {
     // Neighbour candidates
     ArrayList<BigInteger> neighbour_candidates = new ArrayList<BigInteger>();
 
-    // Get the lenght of the longest common prefix
+    // Get the length of the longest common prefix
     int prefix_len = Util.logDistance(nodeId, key);
 
     if (prefix_len < 0) return new BigInteger[] {nodeId};
-    // return the k-bucket if is full
+    // Return the k-bucket if it is full
     if (bucketAtDistance(prefix_len).neighbours.size() >= KademliaCommonConfig.K) {
       return bucketAtDistance(prefix_len).neighbours.keySet().toArray(result);
     }
 
-    // Else get k closest node from all k-buckets
+    // Else get k closest nodes from all k-buckets
     prefix_len = 0;
     while (prefix_len < KademliaCommonConfig.BITS) {
       neighbour_candidates.addAll(bucketAtDistance(prefix_len).neighbours.keySet());
@@ -146,12 +171,26 @@ public class RoutingTable implements Cloneable {
 
   // ______________________________________________________________________________________________
   /**
-   * Print a string representation of the table
+   * Generate a string representation of the routing table.
    *
-   * @return String
+   * @return the string representation of the routing table
    */
   public String toString() {
-    return "";
+    StringBuilder sb = new StringBuilder();
+    sb.append("Routing table for Node ").append(nodeId).append(":\n");
+
+    for (int i = 0; i < nBuckets; i++) {
+      // Print the number of elements in each k-bucket
+      //  sb.append("KBucket ").append(i);
+
+      sb.append(k_buckets.get(i).getNeighborCount()).append("\n");
+
+      // Uncomment to print all the elements in this k-bucket (row)
+      // KBucket kBucket = k_buckets.get(i);
+      // sb.append(kBucket.toString()).append("\n");
+    }
+
+    return sb.toString();
   }
 
   public KBucket getBucket(BigInteger node) {

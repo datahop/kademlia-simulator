@@ -14,31 +14,32 @@ import peersim.edsim.EDSimulator;
  * @author Daniele Furlan, Maurizio Bonani
  * @version 1.0
  */
-
-// ______________________________________________________________________________________________
 public class TrafficGenerator implements Control {
 
-  // ______________________________________________________________________________________________
-  /** MSPastry Protocol to act */
+  /** MSPastry Protocol to act. */
   private static final String PAR_PROT = "protocol";
 
   /** MSPastry Protocol ID to act */
   protected final int pid;
 
   private boolean first = true;
-  // ______________________________________________________________________________________________
+
+  /**
+   * Constructs a TrafficGenerator object.
+   *
+   * @param prefix the prefix string
+   */
   public TrafficGenerator(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
   }
 
-  // ______________________________________________________________________________________________
   /**
-   * generates a random find node message, by selecting randomly the destination.
+   * Generates a random find node message, by selecting randomly the destination.
    *
    * @return Message
    */
   private Message generateFindNodeMessage() {
-    // existing active destination node
+    // Get an existing active destination node
     Node n = Network.get(CommonState.r.nextInt(Network.size()));
     while (!n.isUp()) {
       n = Network.get(CommonState.r.nextInt(Network.size()));
@@ -53,7 +54,7 @@ public class TrafficGenerator implements Control {
 
 
   /**
-   * generates a random region-based find node message, by selecting randomly the destination.
+   * Generates a random region-based find node message, by selecting randomly the destination.
    *
    * @return Message
    */
@@ -90,7 +91,6 @@ public class TrafficGenerator implements Control {
 
     // send message
     EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-
     //EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
 
     return false;

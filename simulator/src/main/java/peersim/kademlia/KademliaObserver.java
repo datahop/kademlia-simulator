@@ -46,9 +46,11 @@ public class KademliaObserver implements Control {
   /** Successfull find operations */
   public static IncrementalStats find_ok = new IncrementalStats();
 
+  /** Messages exchanged in the Kademlia network */
   private static HashMap<Long, Map<String, Object>> messages =
       new HashMap<Long, Map<String, Object>>();
 
+  /** Log of operations in the Kademlia network */
   private static HashMap<Long, Map<String, Object>> operations =
       new HashMap<Long, Map<String, Object>>();
 
@@ -87,7 +89,7 @@ public class KademliaObserver implements Control {
       header = header.substring(0, header.length() - 1);
       header += "\n";
       writer.write(header);
-
+      // Iterate through each find operation and write its data to the file
       for (Map<String, Object> entry : map.values()) {
         String line = "";
         for (Object key : keySet) {
@@ -174,18 +176,19 @@ public class KademliaObserver implements Control {
     // so we don't want to log them.
     if (m.src == null) return;
 
+    // Add the message to the message log, but first check if it hasn't already been added
     assert (!messages.keySet().contains(m.id));
     messages.put(m.id, m.toMap(sent));
   }
 
   /**
-   * Reports an operation, adding it to the find operation log.
+   * Reports an operation, adding it to the operation log.
    *
    * @param op The operation to report.
    */
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
-
+    // Calculate the operation stop time and then add the opearation to the operation log.
     assert (!operations.keySet().contains(op.getId()));
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     operations.put(op.getId(), op.toMap());

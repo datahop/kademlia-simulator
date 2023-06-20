@@ -1,5 +1,6 @@
 package peersim.kademlia;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -10,7 +11,7 @@ import peersim.transport.Transport;
 /**
  * Initialization class that performs the bootsrap filling the k-buckets of all initial nodes.<br>
  * In particular every node is added to the routing table of every other node in the network. In the
- * end however the various nodes doesn't have the same k-buckets because when a k-bucket is full a
+ * end however the various nodes don't have the same k-buckets because when a k-bucket is full a
  * random node in it is deleted.
  *
  * @author Daniele Furlan, Maurizio Bonani
@@ -67,7 +68,7 @@ public class StateBuilder implements peersim.core.Control {
   }
 
   /**
-   * Execytes the Kademlia network by sorting the nodes in ascending order of nodeID, and randomly
+   * Executes the Kademlia network by sorting the nodes in ascending order of nodeID, and randomly
    * adding 100 (not the 50 mentioned in the previous comment) nodes to each node's k-bucket. Then
    * adds 50 nearby nodes to each node's k-bucket.
    *
@@ -112,20 +113,24 @@ public class StateBuilder implements peersim.core.Control {
     for (int i = 0; i < sz; i++) {
       Node iNode = Network.get(i);
       KademliaProtocol iKad = (KademliaProtocol) (iNode.getProtocol(kademliaid));
+      BigInteger iNodeId = iKad.getKademliaNode().getId();
 
       int start = i;
       if (i > sz - 50) {
         start = sz - 25;
       }
       for (int k = 0; k < 50; k++) {
-        start = start++;
+        start++;
+        // start > 0 isn't necessary anymore
         if (start > 0 && start < sz) {
-          KademliaProtocol jKad = (KademliaProtocol) (Network.get(start++).getProtocol(kademliaid));
-          iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+          KademliaProtocol jKad = (KademliaProtocol) (Network.get(start).getProtocol(kademliaid));
+          BigInteger jNodeId = jKad.getKademliaNode().getId();
+          if (!jNodeId.equals(iNodeId)) {
+            iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+          }
         }
       }
     }
-
     return false;
   } // end execute()
 }
