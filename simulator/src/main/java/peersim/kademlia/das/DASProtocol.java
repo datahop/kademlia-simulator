@@ -677,6 +677,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     while (!doSampling(op)) {
       if (!op.increaseRadius(2)) break;
+      logger.warning("Increasing radius " + op.getId());
+
     }
   }
 
