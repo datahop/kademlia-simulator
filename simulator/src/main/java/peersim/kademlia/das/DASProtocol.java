@@ -459,13 +459,16 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
           if (op.getAvailableRequests() == KademliaCommonConfigDas.ALPHA) {
             for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
             while (!doSampling(op)) {
-              if (!op.increaseRadius(2)) break;
-              logger.warning("Increasing radius " + op.getId());
+              if (!op.increaseRadius(2)) {
+                logger.warning("Operation completed max increase");
+                samplingOp.remove(m.operationId);
+                logger.warning("Sampling operation finished");
+                KademliaObserver.reportOperation(op);
+                break;
+              }
+              logger.warning(
+                  "Increasing " + op.getRadius() + " " + op.getClass().getCanonicalName());
             }
-            /*samplingOp.remove(m.operationId);
-            logger.warning("Sampling operation finished");
-            KademliaObserver.reportOperation(op);*/
-
           }
         }
       } else {
@@ -727,8 +730,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     while (!doSampling(op)) {
-      if (!op.increaseRadius(2)) break;
-      logger.warning("Increasing radius " + op.getId());
+      if (!op.increaseRadius(2)) {
+        logger.warning("Operation completed max increase");
+        samplingOp.remove(op.getId());
+        logger.warning("Sampling operation finished");
+        KademliaObserver.reportOperation(op);
+        break;
+      }
+      logger.warning("Increasing " + op.getRadius() + " " + op.getClass().getCanonicalName());
     }
   }
 
