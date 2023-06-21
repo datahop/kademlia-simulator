@@ -180,7 +180,7 @@ public class TurbulenceDasValidator implements Control {
     int i = Network.size();
     do {
       remove = Network.get(CommonState.r.nextInt(Network.size()));
-      dasProt = ((DASProtocol) (remove).getProtocol(dasprotid)));
+      dasProt = ((DASProtocol) (remove).getProtocol(dasprotid));
       // } while ((remove == null) || dasProt.isBuilder() || dasProt.isValidator() ||
       // (!remove.isUp()));
       i--;
@@ -191,7 +191,6 @@ public class TurbulenceDasValidator implements Control {
     System.out.println("Removing validator " + dasProt.getKademliaId());
 
     remove.setFailState(Node.DOWN);
-
     return false;
   }
 
