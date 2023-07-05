@@ -509,15 +509,15 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     Node src = this.kadProtocol.getNode();
     Node dest = this.kadProtocol.nodeIdtoNode(destId);
+    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
 
     if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE) {
 
-      transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
       transport.send(src, dest, m, myPid);
     } else {
       // Send message taking into account the transmission delay and the availability of upload
       // interface
-      Timeout t = new Timeout(destId, m.id, m.operationId);
+      // Timeout t = new Timeout(destId, m.id, m.operationId);
       Sample[] samples = (Sample[]) m.body;
       BigInteger[] nghbrs = (BigInteger[]) m.value;
       double msgSize =
@@ -528,6 +528,8 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       double transDelay = 0.0;
       if (this.isValidator) {
         transDelay = 1000 * msgSize / KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE;
+      } else if (isBuilder()) {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.BUILDER_UPLOAD_RATE;
       } else {
         transDelay = 1000 * msgSize / KademliaCommonConfigDas.NON_VALIDATOR_UPLOAD_RATE;
       }
@@ -535,13 +537,26 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       // also update the time when interface is available again
       long timeNow = CommonState.getTime();
       long latency = propagationLatency;
+      logger.warning("Transmission propagationLatency " + latency);
       latency += (long) transDelay; // truncated value
+      logger.warning("Transmission total latency " + latency);
       if (this.uploadInterfaceBusyUntil > timeNow) {
         latency += this.uploadInterfaceBusyUntil - timeNow;
         this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
+
       } else {
         this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
       }
+      logger.warning("Transmission busy until " + uploadInterfaceBusyUntil + " " + latency);
+      logger.warning(
+          "Transmission "
+              + latency
+              + " "
+              + transDelay
+              + " "
+              + samples.length
+              + " "
+              + nghbrs.length);
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);

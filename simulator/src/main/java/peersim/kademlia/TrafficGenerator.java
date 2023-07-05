@@ -52,7 +52,6 @@ public class TrafficGenerator implements Control {
     return m;
   }
 
-
   /**
    * Generates a random region-based find node message, by selecting randomly the destination.
    *
@@ -91,7 +90,7 @@ public class TrafficGenerator implements Control {
 
     // send message
     EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-    //EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
+    // EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
 
     return false;
   }

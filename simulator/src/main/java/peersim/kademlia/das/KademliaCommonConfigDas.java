@@ -47,4 +47,6 @@ public class KademliaCommonConfigDas {
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
   public static int NON_VALIDATOR_UPLOAD_RATE = 20;
+
+  public static int BUILDER_UPLOAD_RATE = 10000;
 }
