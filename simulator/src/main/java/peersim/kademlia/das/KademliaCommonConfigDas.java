@@ -25,6 +25,15 @@ public class KademliaCommonConfigDas {
   /** Number of samples retrieved for the random sampling */
   public static int N_SAMPLES = 75;
 
+  /**
+   * Size of a node record (a single neighbor information returned alongside samples in
+   * GET_SAMPLE_RESPONSE) in Mbits - I used ENR size for this, which is 300 bytes
+   */
+  public static double NODE_RECORD_SIZE = 0.0024;
+
+  /** Size of a sample in Mbits - each cell contains 512 B of data + 48 B KZG commitment */
+  public static double SAMPLE_SIZE = 0.00448;
+
   /** Number of samples returned by a single node */
   public static int MAX_SAMPLES_RETURNED = 1000;
 
@@ -32,4 +41,12 @@ public class KademliaCommonConfigDas {
 
   /** Number of samples returned by a single node */
   public static int MAX_HOPS = 5000;
+
+  /** Default upload bandwith of a validator in Mbits/sec */
+  public static int VALIDATOR_UPLOAD_RATE = 100;
+
+  /** Default upload bandwith of a non-validator in Mbits/sec */
+  public static int NON_VALIDATOR_UPLOAD_RATE = 20;
+
+  public static int BUILDER_UPLOAD_RATE = 10000;
 }

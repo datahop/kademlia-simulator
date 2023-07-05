@@ -45,6 +45,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
   private static String prefix = null;
   private UnreliableTransport transport;
+  /** Store the time until which this node's uplink is busy sending data */
+  private long uploadInterfaceBusyUntil;
+
   private int tid;
   private int kademliaId;
 
@@ -119,6 +122,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     samplesRequested = 0;
     queried = new HashSet<BigInteger>();
+    uploadInterfaceBusyUntil = 0;
 
     sentMsg = new TreeMap<Long, Long>();
   }
@@ -505,14 +509,61 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
 
     Node src = this.kadProtocol.getNode();
     Node dest = this.kadProtocol.nodeIdtoNode(destId);
-
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
-    transport.send(src, dest, m, myPid);
 
+    if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE) {
+
+      transport.send(src, dest, m, myPid);
+    } else {
+      // Send message taking into account the transmission delay and the availability of upload
+      // interface
+      // Timeout t = new Timeout(destId, m.id, m.operationId);
+      Sample[] samples = (Sample[]) m.body;
+      BigInteger[] nghbrs = (BigInteger[]) m.value;
+      double msgSize =
+          samples.length * KademliaCommonConfigDas.SAMPLE_SIZE
+              + nghbrs.length * KademliaCommonConfigDas.NODE_RECORD_SIZE;
+      long propagationLatency = transport.getLatency(src, dest);
+      // Add the transmission time of the message (upload)
+      double transDelay = 0.0;
+      if (this.isValidator) {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE;
+      } else if (isBuilder()) {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.BUILDER_UPLOAD_RATE;
+      } else {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.NON_VALIDATOR_UPLOAD_RATE;
+      }
+      // If the interface is busy, incorporate the additional delay
+      // also update the time when interface is available again
+      long timeNow = CommonState.getTime();
+      long latency = propagationLatency;
+      latency += (long) transDelay; // truncated value
+      if (this.uploadInterfaceBusyUntil > timeNow) {
+        latency += this.uploadInterfaceBusyUntil - timeNow;
+        this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
+
+      } else {
+        this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
+      }
+      logger.info(
+          "Transmission "
+              + latency
+              + " "
+              + transDelay
+              + " "
+              + samples.length
+              + " "
+              + nghbrs.length);
+      // add to sent msg
+      this.sentMsg.put(m.id, m.timestamp);
+      EDSimulator.add(latency, m, dest, myPid);
+    }
+
+    // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.warning("Send message added " + m.id + " " + latency);
+      logger.info("Send message added " + m.id + " " + latency);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
