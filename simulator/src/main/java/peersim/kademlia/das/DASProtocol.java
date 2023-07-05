@@ -537,9 +537,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       // also update the time when interface is available again
       long timeNow = CommonState.getTime();
       long latency = propagationLatency;
-      logger.warning("Transmission propagationLatency " + latency);
       latency += (long) transDelay; // truncated value
-      logger.warning("Transmission total latency " + latency);
       if (this.uploadInterfaceBusyUntil > timeNow) {
         latency += this.uploadInterfaceBusyUntil - timeNow;
         this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
@@ -547,8 +545,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       } else {
         this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
       }
-      logger.warning("Transmission busy until " + uploadInterfaceBusyUntil + " " + latency);
-      logger.warning(
+      logger.info(
           "Transmission "
               + latency
               + " "
@@ -566,7 +563,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.warning("Send message added " + m.id + " " + latency);
+      logger.info("Send message added " + m.id + " " + latency);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
