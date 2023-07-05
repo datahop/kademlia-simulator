@@ -540,7 +540,9 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       // also update the time when interface is available again
       long timeNow = CommonState.getTime();
       long latency = propagationLatency;
+      logger.warning("Transmission propagationLatency " + latency);
       latency += (long) transDelay; // truncated value
+      logger.warning("Transmission total latency " + latency);
       if (this.uploadInterfaceBusyUntil > timeNow) {
         latency += this.uploadInterfaceBusyUntil - timeNow;
         this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
