@@ -206,22 +206,23 @@ public class TrafficGeneratorSample implements Control {
       int samplesWithinRegion = 0; // samples that are within at least one node's region
       int totalSamples = 0;
 
+      // make nodes request their initial samples directly from the builder
       while (b.hasNext()) {
         Sample s = b.next();
         boolean inRegion = false;
         BigInteger radius =
             b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-        System.out.println(
-            "New sample "
-                + s.getRow()
-                + " "
-                + s.getColumn()
-                + " "
-                + s.getIdByRow()
-                + " "
-                + s.getIdByColumn()
-                + " "
-                + radius);
+        /*System.out.println(
+        "New sample "
+            + s.getRow()
+            + " "
+            + s.getColumn()
+            + " "
+            + s.getIdByRow()
+            + " "
+            + s.getIdByColumn()
+            + " "
+            + radius);*/
 
         while (!inRegion) {
           for (int i = 0; i < Network.size(); i++) {
@@ -243,6 +244,7 @@ public class TrafficGeneratorSample implements Control {
             }
           }
           if (!inRegion) {
+            System.out.println("Increasing radius!!");
             radius = radius.multiply(BigInteger.valueOf(2));
           }
         }

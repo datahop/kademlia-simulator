@@ -133,7 +133,7 @@ public class Block implements Iterator<Sample>, Cloneable {
         MAX_KEY
             .divide(BigInteger.valueOf(Network.size()))
             .multiply(BigInteger.valueOf(numberOfCopiesPerSample));
-    radius = radius.shiftRight(1);
+    // radius = radius.shiftRight(1);
     return radius;
   }
 

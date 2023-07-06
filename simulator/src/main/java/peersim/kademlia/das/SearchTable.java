@@ -2,12 +2,10 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
+import peersim.kademlia.Util;
 
 public class SearchTable {
 
@@ -31,7 +29,7 @@ public class SearchTable {
     this.currentBlock = currentBlock;
   }
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
     List<BigInteger> result = new ArrayList<>();
     Collections.addAll(
@@ -46,7 +44,7 @@ public class SearchTable {
             currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
 
     return result.toArray(new BigInteger[0]);
-  }
+  }*/
 
   public void addNodes(BigInteger[] nodes) {
 
@@ -68,28 +66,26 @@ public class SearchTable {
     return samplesIndexed;
   }*/
 
-  public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = sampleId.add(radius);
-
-    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
-    return new ArrayList<BigInteger>(subSet);
-
-    // return sampleMap.get(sampleId);
-
+  // Return nodes that should have the indicate sample
+  public List<BigInteger> getNodesForSample(BigInteger sampleId, BigInteger radius) {
+    ArrayList<BigInteger> result = new ArrayList<BigInteger>();
+    // TODO we should make it more efficient (now it's O(n))
+    for (BigInteger nodeId : nodesIndexed) {
+      // if radius is larger than the distance between the node and the sample ID, then add the node
+      // to the result
+      if (radius.compareTo(Util.xorDistance(nodeId, sampleId)) == 1) result.add(nodeId);
+    }
+    return result;
   }
 
-  public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
+  BigInteger[] getNodesForSamples(BigInteger[] samples, BigInteger radius) {
 
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples) {
       // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
-      result.addAll(getNodesbySample(sample, radius));
+      result.addAll(getNodesForSample(sample, radius));
     }
-    return result;
+    return result.toArray(new BigInteger[0]);
   }
 }
