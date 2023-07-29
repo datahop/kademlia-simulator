@@ -50,7 +50,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   private long uploadInterfaceBusyUntil;
 
   private int tid;
-  private int kademliaId;
+  protected int kademliaId;
 
   protected KademliaProtocol kadProtocol;
   /** allow to call the service initializer only once */
