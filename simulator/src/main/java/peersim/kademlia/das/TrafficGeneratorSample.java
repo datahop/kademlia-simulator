@@ -243,6 +243,7 @@ public class TrafficGeneratorSample implements Control {
             }
           }
           if (!inRegion) {
+            System.out.println("Not in region!");
             radius = radius.multiply(BigInteger.valueOf(2));
           }
         }

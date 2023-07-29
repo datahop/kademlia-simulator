@@ -71,6 +71,10 @@ public abstract class SamplingOperation extends FindOperation {
   }
   // public abstract BigInteger[] startSampling();
 
+  public BigInteger getRadius() {
+    return radius;
+  }
+
   public BigInteger[] doSampling() {
 
     List<BigInteger> nextNodes = new ArrayList<>();
@@ -113,7 +117,7 @@ public abstract class SamplingOperation extends FindOperation {
 
   public boolean increaseRadius(int multiplier) {
     radius = radius.multiply(BigInteger.valueOf(multiplier));
-    if (Block.MAX_KEY.compareTo(radius) < 0) {
+    if (Block.MAX_KEY.compareTo(radius) <= 0) {
       radius = Block.MAX_KEY;
       return false;
     }
