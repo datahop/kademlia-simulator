@@ -22,31 +22,41 @@ import peersim.kademlia.UniformRandomGenerator;
 public class CustomDistributionDas implements peersim.core.Control {
 
   private static final String PAR_PROT_KAD = "protocolkad";
-  private static final String PAR_PROT_DAS = "protocoldas";
+  private static final String PAR_PROT_DAS_BUILDER = "protocoldasbuilder";
+  private static final String PAR_PROT_DAS_VALIDATOR = "protocoldasvalidator";
+  private static final String PAR_PROT_DAS_NON_VALIDATOR = "protocoldasnonvalidator";
   private static final String PAR_PROT_EVIL_KAD = "protocolEvilkad";
   private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
-  private static final String PAR_EVIL_RATIO = "evilNodeRatio";
+  private static final String PAR_EVIL_RATIO_VAL = "evilNodeRatioValidator";
+  private static final String PAR_EVIL_RATIO_NONVAL = "evilNodeRatioNonValidator";
+
   private static final String PAR_VALIDATOR_RATE = "validator_rate";
 
   /** Protocol identifiers for Kademlia, DAS, etc. * */
   private int protocolKadID;
-
   private int protocolEvilKadID;
-  private int protocolDasID;
+  private int protocolDasBuilderID;
+  private int protocolDasValidatorID;
+  private int protocolDasNonValidatorID;
+
   private int protocolEvilDasID;
   /** Ratio of evil nodes to total number of nodes * */
-  private double evilRatio;
+  private double evilRatioValidator;
+  private double evilRatioNonValidator;
+  private double validatorRate;
 
   private BigInteger builderAddress;
   private UniformRandomGenerator urg;
-  private double validatorRate;
 
   public CustomDistributionDas(String prefix) {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
     protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
-    protocolDasID = Configuration.getPid(prefix + "." + PAR_PROT_DAS);
+    protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
+    protocolDasValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_VALIDATOR);
+    protocolDasNonValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_NON_VALIDATOR);
     protocolEvilDasID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_DAS, 0);
-    evilRatio = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO, 0.0);
+    evilRatioValidator = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO_VAL, 0.0);
+    evilRatioNonValidator = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO_NONVAL, 0.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
     validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
   }
@@ -58,8 +68,9 @@ public class CustomDistributionDas implements peersim.core.Control {
    * @return boolean always false
    */
   public boolean execute() {
-    int numEvilNodes = (int) (Network.size() * evilRatio);
-    System.out.println("Number of malicious nodes: " + numEvilNodes);
+    int numEvilValidatorNodes = (int) (Network.size() * evilRatioValidator);
+    int numEvilNonValidatorNodes = (int) (Network.size() * evilRatioNonValidator);
+    System.out.println("Number of malicious nodes: " + numEvilValidatorNodes+" "+numEvilNonValidatorNodes);
     int numValidators = (int) (Network.size() * validatorRate);
     List<BigInteger> validatorsIds = new ArrayList<>();
     List<DASProtocol> validators = new ArrayList<>();
@@ -75,40 +86,57 @@ public class CustomDistributionDas implements peersim.core.Control {
       DASProtocol dasProt = null;
 
       /** Generate honest and evil nodes * */
-      if ((i > 0) && (i < (numEvilNodes + 1))) {
+      if ( i == 0){
+        kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
+        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
+        kadProt.setProtocolID(protocolKadID);
+        dasProt.setDASProtocolID(protocolDasBuilderID);
+        builderAddress = dasProt.getKademliaProtocol().getKademliaNode().getId();
+
+        generalNode.setProtocol(protocolDasBuilderID, dasProt);
+        generalNode.setProtocol(protocolEvilDasID, dasProt);
+      } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolEvilKadID)));
         dasProt = ((EvilDASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
         kadProt.setProtocolID(protocolEvilKadID);
         dasProt.setDASProtocolID(protocolEvilDasID);
         node.setEvil(true);
-
-      } else {
+        dasProt.setBuilderAddress(builderAddress);
+        validatorsIds.add(dasProt.getKademliaId());
+        validators.add(dasProt);
+      } else if (i >= (numEvilValidatorNodes + 1) && i < (numEvilValidatorNodes+numEvilNonValidatorNodes+1)){
+        kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolEvilKadID)));
+        dasProt = ((EvilDASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
+        kadProt.setProtocolID(protocolEvilKadID);
+        dasProt.setDASProtocolID(protocolEvilDasID);
+        node.setEvil(true);
+        dasProt.setBuilderAddress(builderAddress);
+      } else if(i>=(numEvilValidatorNodes+numEvilNonValidatorNodes+1) && i < (numEvilValidatorNodes+numEvilNonValidatorNodes+numValidators+1)) {
+        assert (!node.isEvil());
         kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
-        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasID)));
+        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasValidatorID)));
         kadProt.setProtocolID(protocolKadID);
-        dasProt.setDASProtocolID(protocolDasID);
-      }
+        dasProt.setDASProtocolID(protocolDasValidatorID);
+        dasProt.setBuilderAddress(builderAddress);
+        validatorsIds.add(dasProt.getKademliaId());
+        validators.add(dasProt);
+      } else {
+        assert (!node.isEvil());
+        kadProt = ((KademliaProtocol) (Network.get(i).getProtocol(protocolKadID)));
+        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
+        kadProt.setProtocolID(protocolKadID);
+        dasProt.setDASProtocolID(protocolDasNonValidatorID);
+        dasProt.setBuilderAddress(builderAddress);
 
-      generalNode.setKademliaProtocol(kadProt);
-      generalNode.setDASProtocol(dasProt);
-      generalNode.setProtocol(protocolDasID, dasProt);
-      if (protocolEvilDasID > 0) generalNode.setProtocol(protocolEvilDasID, dasProt);
-      kadProt.setNode(node);
+      }
 
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
+      kadProt.setNode(node);
+      generalNode.setKademliaProtocol(kadProt);
+      generalNode.setDASProtocol(dasProt);
 
-      if (i >= (numEvilNodes + 1) && i < numValidators + (numEvilNodes + 1)) {
-        assert (!node.isEvil());
-        dasProt.setValidator(true);
-        validatorsIds.add(dasProt.getKademliaId());
-        validators.add(dasProt);
-      }
 
-      if (i == 0) {
-        dasProt.setBuilder(true);
-        builderAddress = dasProt.getKademliaProtocol().getKademliaNode().getId();
-      } else dasProt.setBuilderAddress(builderAddress);
     }
 
     System.out.println("Validators " + validators.size());
