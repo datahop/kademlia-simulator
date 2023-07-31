@@ -2,6 +2,7 @@ package peersim.kademlia.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,15 +35,15 @@ public abstract class Operation {
   protected long timestamp = 0;
 
   /** Number of hops the message did */
-  public int nrHops = 0;
+  protected int nrHops;
 
   protected ArrayList<BigInteger> returned;
 
   /** Timestamp stop Operation */
-  public long stopTime;
+  protected long stopTime;
 
   /** Messages in the operation */
-  public String messages;
+  protected List<Long> messages;
   /**
    * defaul constructor
    *
@@ -52,10 +53,10 @@ public abstract class Operation {
     this.timestamp = timestamp;
     this.destNode = dstNode;
     this.srcNode = srcNode;
-
+    this.nrHops = 0;
     // set a new find ID
     operationId = OPERATION_ID_GENERATOR++;
-    this.messages = "";
+    this.messages = new ArrayList<>();
     returned = new ArrayList<BigInteger>();
   }
 
@@ -87,8 +88,33 @@ public abstract class Operation {
     this.finished = finished;
   }
 
-  public void AddMessage(long messageId) {
-    this.messages = this.messages + messageId + "|";
+  public void addMessage(long msgId) {
+    messages.add(msgId);
+  }
+
+  public List<Long> getMessages() {
+    return messages;
+  }
+
+  public String getMessagesString() {
+    // this.messages = this.messages + messageId + "|";
+    String msgs = "";
+    for (Long msg : messages) {
+      msgs += msg + "|";
+    }
+    return msgs;
+  }
+
+  public int getHops() {
+    return nrHops;
+  }
+
+  public void addHops(int nrHops) {
+    this.nrHops += nrHops;
+  }
+
+  public void increaseHops() {
+    nrHops++;
   }
 
   public void setStopTime(long time) {

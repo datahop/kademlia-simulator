@@ -58,7 +58,7 @@ public abstract class SamplingOperation extends FindOperation {
 
   public abstract boolean completed();
 
-  public abstract BigInteger[] getSamples(BigInteger peerId);
+  // public abstract BigInteger[] getSamples(BigInteger peerId);
 
   public BigInteger[] getSamples() {
     List<BigInteger> result = new ArrayList<>();
