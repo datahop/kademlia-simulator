@@ -142,7 +142,15 @@ public class TrafficGeneratorSample implements Control {
    * @return boolean
    */
   public boolean execute() {
-    if (first) {
+    Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
+
+    for (int i = 0; i < Network.size(); i++) {
+      Node n = Network.get(i);
+      // b.initIterator();
+      EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+    }
+
+    /*if (first) {
 
       for (int i = 0; i < Network.size(); i++) {
         DASProtocol dasProt =
@@ -152,104 +160,104 @@ public class TrafficGeneratorSample implements Control {
       }
       first = false;
       second = true;
-    } else {
-      /*Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-      int samplesWithinRegion = 0; // samples that are within at least one node's region
-      int totalSamples = 0;
-      while (b.hasNext()) {
-        Sample s = b.next();
-        boolean inRegion = false;
+    } else {*/
+    /*Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
+    int samplesWithinRegion = 0; // samples that are within at least one node's region
+    int totalSamples = 0;
+    while (b.hasNext()) {
+      Sample s = b.next();
+      boolean inRegion = false;
 
-        BigInteger radius =
-            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+      BigInteger radius =
+          b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
-        while (!inRegion) {
-          for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
-            Node n = nodeMap.get(nodeId);
-            DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-            if (n.isUp() && !dasProt.isBuilder()) {
-              totalSamples++;
-              System.out.println("Assigned row " + s.getIdByRow() + " to:" + nodeId);
-              EDSimulator.add(
-                  0,
-                  generateNewSampleMessage(s.getIdByRow()),
-                  n,
-                  n.getDASProtocol().getDASProtocolID());
-              nodesMissing.remove(nodeId);
-              if (inRegion == false) {
-                samplesWithinRegion++;
-                inRegion = true;
-              }
+      while (!inRegion) {
+        for (BigInteger nodeId : getNodesbySample(s.getIdByRow(), radius)) {
+          Node n = nodeMap.get(nodeId);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          if (n.isUp() && !dasProt.isBuilder()) {
+            totalSamples++;
+            System.out.println("Assigned row " + s.getIdByRow() + " to:" + nodeId);
+            EDSimulator.add(
+                0,
+                generateNewSampleMessage(s.getIdByRow()),
+                n,
+                n.getDASProtocol().getDASProtocolID());
+            nodesMissing.remove(nodeId);
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
             }
-          }
-          for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
-            Node n = nodeMap.get(nodeId);
-            DASProtocol dasProt = ((DASProtocol) n.getDASProtocol());
-            if (n.isUp() && !dasProt.isBuilder()) {
-              totalSamples++;
-              EDSimulator.add(
-                  0, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
-              System.out.println("Assigned column " + s.getIdByColumn() + " to:" + nodeId);
-              nodesMissing.remove(nodeId);
-              if (inRegion == false) {
-                samplesWithinRegion++;
-                inRegion = true;
-              }
-            }
-          }
-          if (!inRegion) {
-            radius = radius.multiply(BigInteger.valueOf(2));
           }
         }
-      }*/
-      Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-      int samplesWithinRegion = 0; // samples that are within at least one node's region
-      int totalSamples = 0;
-
-      while (b.hasNext()) {
-        Sample s = b.next();
-        boolean inRegion = false;
-        BigInteger radius =
-            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-        System.out.println(
-            "New sample "
-                + s.getRow()
-                + " "
-                + s.getColumn()
-                + " "
-                + s.getIdByRow()
-                + " "
-                + s.getIdByColumn()
-                + " "
-                + radius);
-
-        while (!inRegion) {
-          for (int i = 0; i < Network.size(); i++) {
-            Node n = Network.get(i);
-            DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-            // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
-            // else
-            if (n.isUp()
-                && (s.isInRegionByRow(dasProt.getKademliaId(), radius)
-                    || s.isInRegionByColumn(dasProt.getKademliaId(), radius))) {
-              totalSamples++;
-              EDSimulator.add(
-                  1, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
-              nodesMissing.remove(dasProt.getKademliaId());
-              if (inRegion == false) {
-                samplesWithinRegion++;
-                inRegion = true;
-              }
+        for (BigInteger nodeId : getNodesbySample(s.getIdByColumn(), radius)) {
+          Node n = nodeMap.get(nodeId);
+          DASProtocol dasProt = ((DASProtocol) n.getDASProtocol());
+          if (n.isUp() && !dasProt.isBuilder()) {
+            totalSamples++;
+            EDSimulator.add(
+                0, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
+            System.out.println("Assigned column " + s.getIdByColumn() + " to:" + nodeId);
+            nodesMissing.remove(nodeId);
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
             }
           }
-          if (!inRegion) {
-            System.out.println("Not in region!");
-            radius = radius.multiply(BigInteger.valueOf(2));
-          }
+        }
+        if (!inRegion) {
+          radius = radius.multiply(BigInteger.valueOf(2));
         }
       }
+    }*/
+    /*Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
+    int samplesWithinRegion = 0; // samples that are within at least one node's region
+    int totalSamples = 0;*/
 
-      for (int i = 0; i < Network.size(); i++) {
+    /*while (b.hasNext()) {
+      Sample s = b.next();
+      boolean inRegion = false;
+      BigInteger radius =
+          b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+      System.out.println(
+          "New sample "
+              + s.getRow()
+              + " "
+              + s.getColumn()
+              + " "
+              + s.getIdByRow()
+              + " "
+              + s.getIdByColumn()
+              + " "
+              + radius);
+
+      while (!inRegion) {
+        for (int i = 0; i < Network.size(); i++) {
+          Node n = Network.get(i);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          // if (dasProt.isBuilder()) EDSimulator.add(0, generateNewBlockMessage(s), n, daspid);
+          // else
+          if (n.isUp()
+              && (s.isInRegionByRow(dasProt.getKademliaId(), radius)
+                  || s.isInRegionByColumn(dasProt.getKademliaId(), radius))) {
+            totalSamples++;
+            EDSimulator.add(
+                1, generateNewSampleMessage(s.getIdByColumn()), n, dasProt.getDASProtocolID());
+            nodesMissing.remove(dasProt.getKademliaId());
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
+            }
+          }
+        }
+        if (!inRegion) {
+          System.out.println("Not in region!");
+          radius = radius.multiply(BigInteger.valueOf(2));
+        }
+      }
+    }*/
+
+    /*for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         b.initIterator();
         EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
@@ -275,7 +283,7 @@ public class TrafficGeneratorSample implements Control {
       // }
       ID_GENERATOR++;
       second = false;
-    }
+    }*/
     return false;
   }
 
