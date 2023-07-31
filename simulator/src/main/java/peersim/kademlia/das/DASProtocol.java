@@ -37,7 +37,7 @@ import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
-public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
+public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
 
   protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
@@ -97,10 +97,11 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    *
    * @return Object
    */
-  public Object clone() {
+  public abstract Object clone();
+  /*public Object clone() {
     DASProtocol dolly = new DASProtocol(DASProtocol.prefix);
     return dolly;
-  }
+  }*/
 
   /**
    * Used only by the initializer when creating the prototype. Every other instance call CLONE to
@@ -227,11 +228,6 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
     return this.isBuilder;
   }
 
-  public void setBuilder(boolean isBuilder) {
-    logger.warning("Set builder " + isBuilder + " " + this.kademliaId);
-    this.isBuilder = isBuilder;
-  }
-
   public boolean isValidator() {
     return this.isValidator;
   }
@@ -255,6 +251,14 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
    * @param myPid the sender Pid
    */
   protected void handleInitNewBlock(Message m, int myPid) {
+    time = CommonState.getTime();
+    currentBlock = (Block) m.body;
+    kv.erase();
+    samplesRequested = 0;
+    row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
+    column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
+  }
+  /*protected void handleInitNewBlock(Message m, int myPid) {
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
     kv.erase();
@@ -307,7 +311,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
       kadOps.clear();
       queried.clear();
     }
-  }
+  }*/
 
   /**
    * Start a topic query operation.<br>
@@ -624,6 +628,7 @@ public class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, Missi
   }
 
   public void addKnownValidator(BigInteger[] ids) {
+    logger.info("Adding validator list " + ids.length);
     validatorsList = ids;
   }
 

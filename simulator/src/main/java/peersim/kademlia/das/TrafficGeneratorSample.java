@@ -278,6 +278,7 @@ public class TrafficGeneratorSample implements Control {
       ID_GENERATOR++;
       second = false;
     }*/
+    ID_GENERATOR++;
     return false;
   }
 

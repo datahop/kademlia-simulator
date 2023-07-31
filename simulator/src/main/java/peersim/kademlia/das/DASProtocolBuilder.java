@@ -1,5 +1,9 @@
 package peersim.kademlia.das;
 
+import java.math.BigInteger;
+import peersim.core.CommonState;
+import peersim.core.Node;
+import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 
 public class DASProtocolBuilder extends DASProtocol {
@@ -19,7 +23,61 @@ public class DASProtocolBuilder extends DASProtocol {
 
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
-    logger.warning("Init block builder node - do nothing");
+    super.handleInitNewBlock(m, myPid);
+    logger.warning("Builder new block:" + currentBlock.getBlockId());
+    while (currentBlock.hasNext()) {
+      Sample s = currentBlock.next();
+      kv.add(s.getIdByRow(), s);
+      kv.add(s.getIdByColumn(), s);
+    }
+    currentBlock.initIterator();
+
+    int samplesWithinRegion = 0; // samples that are within at least one node's region
+    int totalSamples = 0;
+
+    while (currentBlock.hasNext()) {
+      Sample s = currentBlock.next();
+      boolean inRegion = false;
+      BigInteger radius =
+          currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+      logger.info(
+          "New sample "
+              + s.getRow()
+              + " "
+              + s.getColumn()
+              + " "
+              + s.getIdByRow()
+              + " "
+              + s.getIdByColumn()
+              + " "
+              + radius);
+
+      // while (!inRegion) {
+      for (BigInteger id : validatorsList) {
+        logger.info("Sample " + s.getIdByRow() + " " + s.getIdByColumn() + " " + radius + " " + id);
+        Node n = this.getKademliaProtocol().nodeIdtoNode(id);
+        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+
+        if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
+          totalSamples++;
+          EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+          if (inRegion == false) {
+            samplesWithinRegion++;
+            inRegion = true;
+          }
+        }
+      }
+      /*if (!inRegion) {
+        System.out.println("Not in region!");
+        radius = radius.multiply(BigInteger.valueOf(2));
+      }*/
+      // }
+    }
+    logger.warning(
+        samplesWithinRegion
+            + " samples out of "
+            + currentBlock.getNumSamples()
+            + " samples are within a node's region");
   }
 
   @Override
@@ -33,6 +91,19 @@ public class DASProtocolBuilder extends DASProtocol {
     logger.warning("Received sample evil node: do nothing");
   }
 
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for a specific sample.
+   *
+   * @return Message
+   */
+  protected Message generateSeedSampleMessage(Sample s) {
+
+    Message m = new Message(Message.MSG_SEED_SAMPLE, s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
   /*public void processEvent(Node myNode, int myPid, Object event) {
     logger.warning("Process event " + myPid + " " + this);
   }*/
