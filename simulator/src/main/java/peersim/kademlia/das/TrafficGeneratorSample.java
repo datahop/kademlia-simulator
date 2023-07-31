@@ -29,12 +29,6 @@ import peersim.kademlia.UniformRandomGenerator;
 // ______________________________________________________________________________________________
 public class TrafficGeneratorSample implements Control {
 
-  // ______________________________________________________________________________________________
-  /** MSPastry Protocol to act */
-  private static final String PAR_KADPROT = "kadprotocol";
-
-  private static final String PAR_DASPROT = "dasprotocol";
-
   /** MSPastry Protocol ID to act */
   //  private final int kadpid, daspid;
 

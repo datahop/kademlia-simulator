@@ -8,7 +8,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
-    EvilDASProtocol.prefix = prefix;
+    DASProtocolBuilder.prefix = prefix;
   }
 
   @Override
@@ -19,7 +19,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
-    logger.warning("Init block evil node - do nothing");
+    logger.warning("Init block builder node - do nothing");
   }
 
   @Override
@@ -43,7 +43,7 @@ public class DASProtocolBuilder extends DASProtocol {
    * @return Object
    */
   public Object clone() {
-    EvilDASProtocol dolly = new EvilDASProtocol(EvilDASProtocol.prefix);
+    DASProtocolBuilder dolly = new DASProtocolBuilder(DASProtocolBuilder.prefix);
     return dolly;
   }
 }

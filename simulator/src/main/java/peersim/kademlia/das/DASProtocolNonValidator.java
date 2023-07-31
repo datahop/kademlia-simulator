@@ -8,7 +8,7 @@ public class DASProtocolNonValidator extends DASProtocol {
 
   public DASProtocolNonValidator(String prefix) {
     super(prefix);
-    EvilDASProtocol.prefix = prefix;
+    DASProtocolNonValidator.prefix = prefix;
   }
 
   @Override
@@ -19,7 +19,7 @@ public class DASProtocolNonValidator extends DASProtocol {
 
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
-    logger.warning("Init block evil node - do nothing");
+    logger.warning("Init block non-validator node - do nothing");
   }
 
   @Override
@@ -43,7 +43,7 @@ public class DASProtocolNonValidator extends DASProtocol {
    * @return Object
    */
   public Object clone() {
-    EvilDASProtocol dolly = new EvilDASProtocol(EvilDASProtocol.prefix);
+    DASProtocolNonValidator dolly = new DASProtocolNonValidator(DASProtocolNonValidator.prefix);
     return dolly;
   }
 }
