@@ -2,6 +2,7 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
+import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
@@ -49,8 +50,8 @@ public class DASProtocolValidator extends DASProtocol {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
-    // logger.warning("Starting random sampling");
-    // startRandomSampling();
+    logger.warning("Starting random sampling");
+    startRandomSampling();
   }
 
   /**
@@ -98,7 +99,7 @@ public class DASProtocolValidator extends DASProtocol {
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    /*while (!doSampling(op)) {
+    while (!doSampling(op)) {
       if (!op.increaseRadius(2)) {
         logger.warning("Operation completed max increase");
         samplingOp.remove(op.getId());
@@ -107,8 +108,8 @@ public class DASProtocolValidator extends DASProtocol {
         break;
       }
       logger.warning("Increasing " + op.getRadius() + " " + op.getClass().getCanonicalName());
-    }*/
-    doSampling(op);
+    }
+    // doSampling(op);
   }
 
   /*public void processEvent(Node myNode, int myPid, Object event) {
