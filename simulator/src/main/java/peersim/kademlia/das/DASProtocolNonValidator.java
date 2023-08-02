@@ -19,11 +19,11 @@ public class DASProtocolNonValidator extends DASProtocol {
     System.exit(-1);
   }
 
-  @Override
+  /*@Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block non-validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-  }
+  }*/
 
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
@@ -31,9 +31,7 @@ public class DASProtocolNonValidator extends DASProtocol {
     logger.warning("Starting random sampling");
     startRandomSampling();
   }
-  /*public void processEvent(Node myNode, int myPid, Object event) {
-    logger.warning("Process event " + myPid + " " + this);
-  }*/
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

@@ -40,7 +40,6 @@ public class DASProtocolBuilder extends DASProtocol {
     currentBlock.initIterator();
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
-    int totalSamples = 0;
 
     while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
@@ -66,7 +65,6 @@ public class DASProtocolBuilder extends DASProtocol {
         DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
 
         if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
-          totalSamples++;
           // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
           Sample[] samples = {s};
           Message msg = generateSeedSampleMessage(samples);
@@ -80,11 +78,6 @@ public class DASProtocolBuilder extends DASProtocol {
           }
         }
       }
-      /*if (!inRegion) {
-        System.out.println("Not in region!");
-        radius = radius.multiply(BigInteger.valueOf(2));
-      }*/
-      // }
     }
     logger.warning(
         samplesWithinRegion
@@ -93,11 +86,11 @@ public class DASProtocolBuilder extends DASProtocol {
             + " samples are within a node's region");
   }
 
-  @Override
+  /*@Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block evil node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-  }
+  }*/
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
@@ -117,9 +110,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
     return m;
   }
-  /*public void processEvent(Node myNode, int myPid, Object event) {
-    logger.warning("Process event " + myPid + " " + this);
-  }*/
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

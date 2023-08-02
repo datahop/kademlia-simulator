@@ -25,11 +25,6 @@ public class DASProtocolValidator extends DASProtocol {
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
       logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
-      // just to check whether we started actual sampling
-      // we increase the counter when asking the builder and decrease when receiving the sample from
-      // the builder
-      // when reaches 0 - we start the actual sampling (potential conflicts with the init sampling
-      // message)
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
@@ -39,11 +34,11 @@ public class DASProtocolValidator extends DASProtocol {
     }
   }
 
-  @Override
+  /*@Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-  }
+  }*/
 
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
@@ -112,9 +107,6 @@ public class DASProtocolValidator extends DASProtocol {
     // doSampling(op);
   }
 
-  /*public void processEvent(Node myNode, int myPid, Object event) {
-    logger.warning("Process event " + myPid + " " + this);
-  }*/
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

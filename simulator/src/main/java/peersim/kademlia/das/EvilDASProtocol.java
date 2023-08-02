@@ -27,11 +27,11 @@ public class EvilDASProtocol extends DASProtocol {
     logger.warning("Init block evil node - do nothing");
   }
 
-  @Override
+  /*@Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block evil node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-  }
+  }*/
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
