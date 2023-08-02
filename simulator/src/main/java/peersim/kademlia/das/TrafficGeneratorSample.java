@@ -30,7 +30,9 @@ import peersim.kademlia.UniformRandomGenerator;
 public class TrafficGeneratorSample implements Control {
 
   /** MSPastry Protocol ID to act */
-  //  private final int kadpid, daspid;
+  private final int kadpid;
+
+  private static final String PAR_KADPROT = "kadprotocol";
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -51,6 +53,7 @@ public class TrafficGeneratorSample implements Control {
   private HashSet<BigInteger> nodesMissing;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
+    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
 
     KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
@@ -140,13 +143,12 @@ public class TrafficGeneratorSample implements Control {
 
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
-        Node start = Network.get(CommonState.r.nextInt(Network.size()));
+        Node start = Network.get(i);
         if (start.isUp()) {
           for (int j = 0; j < 3; j++) {
-
             // send message
             EDSimulator.add(
-                0, generateFindNodeMessage(), start, start.getKademliaProtocol().getProtocolID());
+                CommonState.r.nextInt(300000), generateFindNodeMessage(), start, kadpid);
           }
         }
       }
@@ -155,7 +157,10 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();
-        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        if (n.getDASProtocol().isBuilder())
+          EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        else
+          EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
       ID_GENERATOR++;
     }

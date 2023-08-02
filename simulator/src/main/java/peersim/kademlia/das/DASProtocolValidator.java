@@ -21,25 +21,21 @@ public class DASProtocolValidator extends DASProtocol {
     logger.warning("seed sample receveived");
     if (m.body == null) return;
 
-    Sample s = (Sample) m.body;
-    logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
-    // just to check whether we started actual sampling
-    // we increase the counter when asking the builder and decrease when receiving the sample from
-    // the builder
-    // when reaches 0 - we start the actual sampling (potential conflicts with the init sampling
-    // message)
+    Sample[] samples = (Sample[]) m.body;
+    for (Sample s : samples) {
+      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
+      // just to check whether we started actual sampling
+      // we increase the counter when asking the builder and decrease when receiving the sample from
+      // the builder
+      // when reaches 0 - we start the actual sampling (potential conflicts with the init sampling
+      // message)
 
-    kv.add((BigInteger) s.getIdByRow(), s);
-    kv.add((BigInteger) s.getIdByColumn(), s);
-    // count # of samples for each row and column
-    column[s.getColumn()]++;
-    row[s.getRow()]++;
-  }
-
-  @Override
-  protected void handleGetSample(Message m, int myPid) {
-    /** Ignore sample request * */
-    logger.warning("Handle get sample - return nothing " + this);
+      kv.add((BigInteger) s.getIdByRow(), s);
+      kv.add((BigInteger) s.getIdByColumn(), s);
+      // count # of samples for each row and column
+      column[s.getColumn()]++;
+      row[s.getRow()]++;
+    }
   }
 
   @Override
@@ -55,11 +51,6 @@ public class DASProtocolValidator extends DASProtocol {
     startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
     // startRandomSampling();
-  }
-
-  @Override
-  protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("Received sample validator node: do nothing");
   }
 
   /**

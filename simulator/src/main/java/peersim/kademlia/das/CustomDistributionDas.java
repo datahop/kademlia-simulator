@@ -197,10 +197,9 @@ public class CustomDistributionDas implements peersim.core.Control {
 
       if (i == 0) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
-        dasProt.setDASProtocolID(protocolDasBuilderID);
+
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
-        dasProt.setDASProtocolID(protocolEvilDasID);
       } else if (i >= (numEvilValidatorNodes + numEvilNonValidatorNodes + 1)
           && i
               < (numEvilValidatorNodes
@@ -208,20 +207,34 @@ public class CustomDistributionDas implements peersim.core.Control {
                   + (numValidators - numEvilValidatorNodes)
                   + 1)) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasValidatorID)));
-        dasProt.setDASProtocolID(protocolDasValidatorID);
         validatorsIds.add(kadProt.getKademliaNode().getId());
 
       } else {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
-        dasProt.setDASProtocolID(protocolDasNonValidatorID);
       }
 
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 
+      /*System.out.println(
+          "Dasprot id "
+              + protocolDasBuilderID
+              + " "
+              + protocolDasValidatorID
+              + " "
+              + protocolDasNonValidatorID
+              + " "
+              + protocolKadID);*/
+
       generalNode.setProtocol(protocolKadID, kadProt);
       generalNode.setKademliaProtocol(kadProt);
       generalNode.setDASProtocol(dasProt);
+      dasProt.setDASProtocolID(protocolDasBuilderID);
+
+      generalNode.setProtocol(protocolDasBuilderID, dasProt);
+      generalNode.setProtocol(protocolEvilDasID, null);
+      generalNode.setProtocol(protocolDasValidatorID, null);
+      generalNode.setProtocol(protocolDasNonValidatorID, null);
     }
 
     // System.out.println("Validators " + validatorsIds.size());

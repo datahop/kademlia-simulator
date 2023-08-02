@@ -19,7 +19,7 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
-    logger.warning("Handle get sample - return nothing " + this);
+    logger.warning("Builder handle get sample - return nothing " + this);
   }
 
   @Override
@@ -68,7 +68,8 @@ public class DASProtocolBuilder extends DASProtocol {
         if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
           totalSamples++;
           // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
-          Message msg = generateSeedSampleMessage(s);
+          Sample[] samples = {s};
+          Message msg = generateSeedSampleMessage(samples);
           msg.operationId = -1;
           msg.src = this.getKademliaProtocol().getKademliaNode();
           msg.dst = n.getKademliaProtocol().getKademliaNode();
@@ -109,7 +110,7 @@ public class DASProtocolBuilder extends DASProtocol {
    *
    * @return Message
    */
-  protected Message generateSeedSampleMessage(Sample s) {
+  protected Message generateSeedSampleMessage(Sample[] s) {
 
     Message m = new Message(Message.MSG_SEED_SAMPLE, s);
     m.timestamp = CommonState.getTime();

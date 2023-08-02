@@ -156,8 +156,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
       m = (Message) event;
-
-      m.dst = this.getKademliaProtocol().getKademliaNode();
+      // m.dst = this.kadProtocol.getKademliaNode();
       KademliaObserver.reportMsg(m, false);
     }
 
@@ -521,8 +520,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     Node dest = this.kadProtocol.nodeIdtoNode(destId);
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
 
-    if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE || m.getType() != Message.MSG_SEED_SAMPLE) {
-
+    if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
       transport.send(src, dest, m, myPid);
     } else {
       // Send message taking into account the transmission delay and the availability of upload
@@ -530,9 +528,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       // Timeout t = new Timeout(destId, m.id, m.operationId);
       Sample[] samples = (Sample[]) m.body;
       BigInteger[] nghbrs = (BigInteger[]) m.value;
-      double msgSize =
-          samples.length * KademliaCommonConfigDas.SAMPLE_SIZE
-              + nghbrs.length * KademliaCommonConfigDas.NODE_RECORD_SIZE;
+      double samplesSize = 0.0;
+      if (samples != null) samplesSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
+      double nghbrsSize = 0.0;
+      if (nghbrs != null) nghbrsSize = nghbrs.length * KademliaCommonConfigDas.NODE_RECORD_SIZE;
+      double msgSize = samplesSize + nghbrsSize;
       long propagationLatency = transport.getLatency(src, dest);
       // Add the transmission time of the message (upload)
       double transDelay = 0.0;
@@ -557,15 +557,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       } else {
         this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
       }
-      logger.info(
-          "Transmission "
-              + latency
-              + " "
-              + transDelay
-              + " "
-              + samples.length
-              + " "
-              + nghbrs.length);
+      logger.info("Transmission " + latency + " " + transDelay);
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);

@@ -441,7 +441,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @return a reference to the created operation object
    */
   public Operation handleInit(Message m, int myPid) {
-    logger.info("handleInitFind " + (BigInteger) m.body);
+    logger.warning("handleInitFind " + (BigInteger) m.body);
     KademliaObserver.find_op.add(1);
 
     // Create find operation and add to operations array

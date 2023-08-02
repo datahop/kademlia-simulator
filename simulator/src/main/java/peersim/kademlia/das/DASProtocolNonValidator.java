@@ -14,12 +14,6 @@ public class DASProtocolNonValidator extends DASProtocol {
   }
 
   @Override
-  protected void handleGetSample(Message m, int myPid) {
-    /** Ignore sample request * */
-    logger.warning("Handle get sample - return nothing " + this);
-  }
-
-  @Override
   protected void handleSeedSample(Message m, int myPid) {
     System.err.println("Non-validator should not receive seed sample");
     System.exit(-1);
@@ -29,11 +23,6 @@ public class DASProtocolNonValidator extends DASProtocol {
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block non-validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-  }
-
-  @Override
-  protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("Received sample non-validator node: do nothing");
   }
 
   @Override
