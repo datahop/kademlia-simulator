@@ -138,10 +138,26 @@ public class TrafficGeneratorSample implements Control {
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
 
-    for (int i = 0; i < Network.size(); i++) {
-      Node n = Network.get(i);
-      // b.initIterator();
-      EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+    if (first) {
+      for (int i = 0; i < Network.size(); i++) {
+        Node start = Network.get(CommonState.r.nextInt(Network.size()));
+        if (start.isUp()) {
+          for (int j = 0; j < 3; i++) {
+
+            // send message
+            EDSimulator.add(
+                0, generateFindNodeMessage(), start, start.getKademliaProtocol().getProtocolID());
+          }
+        }
+      }
+      first = false;
+    } else {
+      for (int i = 0; i < Network.size(); i++) {
+        Node n = Network.get(i);
+        // b.initIterator();
+        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+      }
+      ID_GENERATOR++;
     }
 
     /*if (first) {
@@ -278,7 +294,7 @@ public class TrafficGeneratorSample implements Control {
       ID_GENERATOR++;
       second = false;
     }*/
-    ID_GENERATOR++;
+
     return false;
   }
 

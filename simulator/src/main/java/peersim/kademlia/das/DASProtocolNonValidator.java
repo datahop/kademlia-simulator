@@ -36,6 +36,12 @@ public class DASProtocolNonValidator extends DASProtocol {
     logger.warning("Received sample non-validator node: do nothing");
   }
 
+  @Override
+  protected void handleInitNewBlock(Message m, int myPid) {
+    super.handleInitNewBlock(m, myPid);
+    // logger.warning("Starting random sampling");
+    // startRandomSampling();
+  }
   /*public void processEvent(Node myNode, int myPid, Object event) {
     logger.warning("Process event " + myPid + " " + this);
   }*/
