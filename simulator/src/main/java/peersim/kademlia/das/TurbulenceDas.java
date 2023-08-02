@@ -159,7 +159,7 @@ public class TurbulenceDas implements Control {
     // dasProt.setBuilder(false);
     BigInteger builderAddress = builder.getKademliaProtocol().getKademliaNode().getId();
     dasProt.setBuilderAddress(builderAddress);
-    dasProt.setValidator(false);
+    //dasProt.setValidator(false);
     return false;
   }
 

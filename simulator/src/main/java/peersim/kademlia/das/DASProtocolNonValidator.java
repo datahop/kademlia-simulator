@@ -9,6 +9,8 @@ public class DASProtocolNonValidator extends DASProtocol {
   public DASProtocolNonValidator(String prefix) {
     super(prefix);
     DASProtocolNonValidator.prefix = prefix;
+    isValidator = false;
+    isBuilder = false;
   }
 
   @Override

@@ -9,6 +9,8 @@ public class DASProtocolValidator extends DASProtocol {
   public DASProtocolValidator(String prefix) {
     super(prefix);
     DASProtocolValidator.prefix = prefix;
+    isValidator = true;
+    isBuilder = false;
   }
 
   @Override

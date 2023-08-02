@@ -124,7 +124,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
-    isValidator = false;
     searchTable = new SearchTable(currentBlock);
     row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
@@ -230,10 +229,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   public boolean isValidator() {
     return this.isValidator;
-  }
-
-  public void setValidator(boolean isValidator) {
-    this.isValidator = isValidator;
   }
 
   public void setBuilderAddress(BigInteger address) {

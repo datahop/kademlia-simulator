@@ -13,6 +13,8 @@ public class DASProtocolBuilder extends DASProtocol {
   public DASProtocolBuilder(String prefix) {
     super(prefix);
     DASProtocolBuilder.prefix = prefix;
+    isBuilder = true;
+    isValidator = false;
   }
 
   @Override
