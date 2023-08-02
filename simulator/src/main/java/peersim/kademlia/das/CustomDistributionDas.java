@@ -217,14 +217,14 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setEventsCallback(dasProt);
 
       /*System.out.println(
-          "Dasprot id "
-              + protocolDasBuilderID
-              + " "
-              + protocolDasValidatorID
-              + " "
-              + protocolDasNonValidatorID
-              + " "
-              + protocolKadID);*/
+      "Dasprot id "
+          + protocolDasBuilderID
+          + " "
+          + protocolDasValidatorID
+          + " "
+          + protocolDasNonValidatorID
+          + " "
+          + protocolKadID);*/
 
       generalNode.setProtocol(protocolKadID, kadProt);
       generalNode.setKademliaProtocol(kadProt);

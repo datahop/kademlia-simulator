@@ -389,6 +389,26 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     sendMessage(response, m.src.getId(), myPid);
   }
 
+  private void rebuild(Sample s) {
+    column[s.getColumn()]++;
+    row[s.getRow()]++;
+    if (column[s.getColumn()] >= column.length / 2 && column[s.getColumn()] != column.length) {
+      Sample[] samples = currentBlock.getSamplesByColumn(s.getColumn());
+      for (Sample sam : samples) {
+        kv.add((BigInteger) sam.getIdByRow(), sam);
+        kv.add((BigInteger) sam.getIdByColumn(), sam);
+      }
+      column[s.getColumn()] = currentBlock.getSize();
+    }
+    if (row[s.getRow()] >= row.length / 2 && row[s.getRow()] != row.length) {
+      Sample[] samples = currentBlock.getSamplesByRow(s.getRow());
+      for (Sample sam : samples) {
+        kv.add((BigInteger) sam.getIdByRow(), sam);
+        kv.add((BigInteger) sam.getIdByColumn(), sam);
+      }
+    }
+  }
+
   protected void handleGetSampleResponse(Message m, int myPid) {
 
     if (m.body == null) return;
@@ -415,8 +435,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column
-      column[s.getColumn()]++;
-      row[s.getRow()]++;
+      rebuild(s);
     }
 
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
@@ -547,9 +566,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       // also update the time when interface is available again
       long timeNow = CommonState.getTime();
       long latency = propagationLatency;
-      logger.warning("Transmission propagationLatency " + latency);
+      logger.info("Transmission propagationLatency " + latency);
       latency += (long) transDelay; // truncated value
-      logger.warning("Transmission total latency " + latency);
+      logger.info("Transmission total latency " + latency);
       if (this.uploadInterfaceBusyUntil > timeNow) {
         latency += this.uploadInterfaceBusyUntil - timeNow;
         this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value

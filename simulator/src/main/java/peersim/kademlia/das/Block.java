@@ -147,6 +147,19 @@ public class Block implements Iterator<Sample>, Cloneable {
     return this.blockSamples;
   }
 
+  public Sample[] getSamplesByRow(int row) {
+    return this.blockSamples[row];
+  }
+
+  public Sample[] getSamplesByColumn(int column) {
+
+    Sample[] samples = new Sample[SIZE];
+    for (int i = 0; i < blockSamples.length; i++) {
+      samples[i] = this.blockSamples[i][column];
+    }
+    return this.blockSamples[row];
+  }
+
   /* Returns the ids of n random selected samples */
   public BigInteger[] getNRandomSamplesIds(int n) {
 
