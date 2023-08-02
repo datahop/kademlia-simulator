@@ -142,7 +142,7 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node start = Network.get(CommonState.r.nextInt(Network.size()));
         if (start.isUp()) {
-          for (int j = 0; j < 3; i++) {
+          for (int j = 0; j < 3; j++) {
 
             // send message
             EDSimulator.add(
