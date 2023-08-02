@@ -20,19 +20,20 @@ public class DASProtocolNonValidator extends DASProtocol {
   }
 
   @Override
-  protected void handleInitNewBlock(Message m, int myPid) {
-    logger.warning("Init block non-validator node - do nothing");
+  protected void handleSeedSample(Message m, int myPid) {
+    System.err.println("Non-validator should not receive seed sample");
+    System.exit(-1);
   }
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Init block evil node - getting samples " + this);
+    logger.warning("Init block non-validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
   }
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("Received sample evil node: do nothing");
+    logger.warning("Received sample non-validator node: do nothing");
   }
 
   /*public void processEvent(Node myNode, int myPid, Object event) {

@@ -1,5 +1,6 @@
 package peersim.kademlia.das;
 
+import java.math.BigInteger;
 import peersim.kademlia.Message;
 
 public class DASProtocolValidator extends DASProtocol {
@@ -14,25 +15,40 @@ public class DASProtocolValidator extends DASProtocol {
   }
 
   @Override
+  protected void handleSeedSample(Message m, int myPid) {
+    logger.warning("seed sample receveived");
+    if (m.body == null) return;
+
+    Sample s = (Sample) m.body;
+    logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
+    // just to check whether we started actual sampling
+    // we increase the counter when asking the builder and decrease when receiving the sample from
+    // the builder
+    // when reaches 0 - we start the actual sampling (potential conflicts with the init sampling
+    // message)
+
+    kv.add((BigInteger) s.getIdByRow(), s);
+    kv.add((BigInteger) s.getIdByColumn(), s);
+    // count # of samples for each row and column
+    column[s.getColumn()]++;
+    row[s.getRow()]++;
+  }
+
+  @Override
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
     logger.warning("Handle get sample - return nothing " + this);
   }
 
   @Override
-  protected void handleInitNewBlock(Message m, int myPid) {
-    logger.warning("Init block validator node - do nothing");
-  }
-
-  @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Init block evil node - getting samples " + this);
+    logger.warning("Init block validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
   }
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("Received sample evil node: do nothing");
+    logger.warning("Received sample validator node: do nothing");
   }
 
   /*public void processEvent(Node myNode, int myPid, Object event) {

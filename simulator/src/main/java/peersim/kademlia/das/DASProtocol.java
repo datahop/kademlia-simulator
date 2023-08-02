@@ -78,7 +78,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected int[] row, column;
 
-  protected int samplesRequested;
+  // protected int samplesRequested;
 
   protected BigInteger[] validatorsList;
 
@@ -125,9 +125,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
     searchTable = new SearchTable(currentBlock);
-    row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
-    column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
-    samplesRequested = 0;
+
     queried = new HashSet<BigInteger>();
     uploadInterfaceBusyUntil = 0;
 
@@ -175,6 +173,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       case Message.MSG_GET_SAMPLE:
         m = (Message) event;
         handleGetSample(m, myPid);
+        break;
+      case Message.MSG_SEED_SAMPLE:
+        m = (Message) event;
+        handleSeedSample(m, myPid);
         break;
       case Message.MSG_GET_SAMPLE_RESPONSE:
         m = (Message) event;
@@ -249,9 +251,14 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
     kv.erase();
-    samplesRequested = 0;
-    row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
-    column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
+    // samplesRequested = 0;
+    row = new int[currentBlock.getSize() + 1];
+    column = new int[currentBlock.getSize() + 1];
+  }
+
+  protected void handleSeedSample(Message m, int myPid) {
+    System.err.println("This should not happen");
+    System.exit(-1);
   }
   /*protected void handleInitNewBlock(Message m, int myPid) {
     time = CommonState.getTime();
@@ -320,13 +327,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     if (isBuilder()) return;
 
-    logger.warning(
-        "Getting sample from builder "
-            + sampleId[0]
-            + " from:"
-            + builderAddress
-            + " "
-            + samplesRequested);
+    logger.warning("Getting sample from builder " + sampleId[0] + " from:" + builderAddress);
     Message msg = generateGetSampleMessage(sampleId);
     msg.operationId = -1;
     msg.src = this.getKademliaProtocol().getKademliaNode();
@@ -336,7 +337,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             .getKademliaProtocol()
             .getKademliaNode();
     sendMessage(msg, builderAddress, myPid);
-    samplesRequested++;
+    // samplesRequested++;
   }
 
   protected void handleGetSample(Message m, int myPid) {
@@ -403,15 +404,13 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               + " "
               + s.getRow()
               + " "
-              + s.getColumn()
-              + " "
-              + samplesRequested);
+              + s.getColumn());
       // just to check whether we started actual sampling
       // we increase the counter when asking the builder and decrease when receiving the sample from
       // the builder
       // when reaches 0 - we start the actual sampling (potential conflicts with the init sampling
       // message)
-      if (!samplingStarted) samplesRequested--;
+      // if (!samplingStarted) samplesRequested--;
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
@@ -489,7 +488,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
       // We start a new operation
       // we start the actual sampling when the last sample from the builder is received
-    } else if (!samplingStarted && samplesRequested == 0) {
+    } else if (!samplingStarted) { // && samplesRequested == 0) {
       if (isValidator()) {
         logger.warning("Starting validator (rows and columns) sampling");
         startRowsandColumnsSampling();

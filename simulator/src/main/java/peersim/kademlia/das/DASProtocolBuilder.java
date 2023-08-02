@@ -3,7 +3,6 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import peersim.core.CommonState;
 import peersim.core.Node;
-import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 
 public class DASProtocolBuilder extends DASProtocol {
@@ -21,6 +20,12 @@ public class DASProtocolBuilder extends DASProtocol {
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
     logger.warning("Handle get sample - return nothing " + this);
+  }
+
+  @Override
+  protected void handleSeedSample(Message m, int myPid) {
+    System.err.println("Builder should not receive seed sample");
+    System.exit(-1);
   }
 
   @Override
@@ -62,7 +67,12 @@ public class DASProtocolBuilder extends DASProtocol {
 
         if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
           totalSamples++;
-          EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+          // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+          Message msg = generateSeedSampleMessage(s);
+          msg.operationId = -1;
+          msg.src = this.getKademliaProtocol().getKademliaNode();
+          msg.dst = n.getKademliaProtocol().getKademliaNode();
+          sendMessage(msg, id, dasProt.getDASProtocolID());
           if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;
@@ -90,7 +100,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("Received sample evil node: do nothing");
+    logger.warning("Received sample builder node: do nothing");
   }
 
   // ______________________________________________________________________________________________
