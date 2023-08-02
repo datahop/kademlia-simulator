@@ -161,10 +161,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         m = (Message) event;
         handleInitNewBlock(m, myPid);
         break;
-        /*case Message.MSG_INIT_GET_SAMPLE:
+      case Message.MSG_INIT_GET_SAMPLE:
         m = (Message) event;
         handleInitGetSample(m, myPid);
-        break;*/
+        break;
       case Message.MSG_GET_SAMPLE:
         m = (Message) event;
         handleGetSample(m, myPid);
@@ -273,15 +273,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
    *
    * @param m Message received (contains the node to find)
    * @param myPid the sender Pid
-   *     <p>protected void handleInitGetSample(Message m, int myPid) { BigInteger[] sampleId = new
-   *     BigInteger[1]; sampleId[0] = ((BigInteger) m.body);
-   *     <p>if (isBuilder()) return;
-   *     <p>logger.warning("Getting sample from builder " + sampleId[0] + " from:" +
-   *     builderAddress); Message msg = generateGetSampleMessage(sampleId); msg.operationId = -1;
-   *     msg.src = this.getKademliaProtocol().getKademliaNode(); msg.dst =
-   *     this.getKademliaProtocol() .nodeIdtoNode(builderAddress) .getKademliaProtocol()
-   *     .getKademliaNode(); sendMessage(msg, builderAddress, myPid); // samplesRequested++; }
    */
+  protected abstract void handleInitGetSample(Message m, int myPid);
+
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
     logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);

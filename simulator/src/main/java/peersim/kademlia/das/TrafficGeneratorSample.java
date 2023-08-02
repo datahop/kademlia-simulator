@@ -1,12 +1,6 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeSet;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -49,8 +43,6 @@ public class TrafficGeneratorSample implements Control {
 
   private boolean first = true, second = false;
 
-  private HashMap<BigInteger, Node> nodeMap;
-  private HashSet<BigInteger> nodesMissing;
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
     kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
@@ -61,8 +53,6 @@ public class TrafficGeneratorSample implements Control {
     KademliaCommonConfigDas.BLOCK_DIM_SIZE =
         Configuration.getInt(
             prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfigDas.BLOCK_DIM_SIZE);
-    nodeMap = new HashMap<>();
-    nodesMissing = new HashSet<>();
   }
 
   // ______________________________________________________________________________________________
@@ -74,20 +64,6 @@ public class TrafficGeneratorSample implements Control {
   private Message generateNewBlockMessage(Block b) {
 
     Message m = Message.makeInitNewBlock(b);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a GET message for t1 key.
-   *
-   * @return Message
-   */
-  private Message generateNewSampleMessage(BigInteger s) {
-
-    Message m = Message.makeInitGetSample(s);
     m.timestamp = CommonState.getTime();
 
     return m;
@@ -109,27 +85,6 @@ public class TrafficGeneratorSample implements Control {
     m.timestamp = CommonState.getTime();
 
     return m;
-  }
-
-  private List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger top = sampleId.add(radius);
-    // BigInteger max = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE);
-
-    /*if (sampleId.add(radius).compareTo(max) == 1) {
-      top = max;
-      System.out.println("Max value " + top);
-    }*/
-
-    BigInteger bottom;
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.valueOf(0);
-    else bottom = sampleId.subtract(radius);
-
-    System.out.println("Nodes by sample " + top + " " + bottom);
-    TreeSet<BigInteger> nodesIndexed = new TreeSet<BigInteger>(nodeMap.keySet());
-    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
-
-    return new ArrayList<BigInteger>(subSet);
   }
 
   // ______________________________________________________________________________________________
