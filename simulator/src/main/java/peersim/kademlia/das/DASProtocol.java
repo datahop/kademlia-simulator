@@ -251,8 +251,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     currentBlock = (Block) m.body;
     kv.erase();
     // samplesRequested = 0;
-    row = new int[currentBlock.getSize() + 1];
-    column = new int[currentBlock.getSize() + 1];
+    row = new int[currentBlock.getSize()];
+    column = new int[currentBlock.getSize()];
     if (validatorsList != null) searchTable.addNodes(validatorsList);
   }
 
@@ -390,22 +390,24 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   }
 
   private void rebuild(Sample s) {
-    column[s.getColumn()]++;
-    row[s.getRow()]++;
-    if (column[s.getColumn()] >= column.length / 2 && column[s.getColumn()] != column.length) {
+    column[s.getColumn() - 1]++;
+    row[s.getRow() - 1]++;
+    if (column[s.getColumn() - 1] >= column.length / 2
+        && column[s.getColumn() - 1] != column.length) {
       Sample[] samples = currentBlock.getSamplesByColumn(s.getColumn());
       for (Sample sam : samples) {
         kv.add((BigInteger) sam.getIdByRow(), sam);
         kv.add((BigInteger) sam.getIdByColumn(), sam);
       }
-      column[s.getColumn()] = currentBlock.getSize();
+      column[s.getColumn() - 1] = currentBlock.getSize();
     }
-    if (row[s.getRow()] >= row.length / 2 && row[s.getRow()] != row.length) {
+    if (row[s.getRow() - 1] >= row.length / 2 && row[s.getRow() - 1] != row.length) {
       Sample[] samples = currentBlock.getSamplesByRow(s.getRow());
       for (Sample sam : samples) {
         kv.add((BigInteger) sam.getIdByRow(), sam);
         kv.add((BigInteger) sam.getIdByColumn(), sam);
       }
+      row[s.getRow() - 1] = currentBlock.getSize();
     }
   }
 

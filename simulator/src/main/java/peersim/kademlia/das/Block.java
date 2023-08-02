@@ -148,16 +148,16 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   public Sample[] getSamplesByRow(int row) {
-    return this.blockSamples[row];
+    return this.blockSamples[row - 1];
   }
 
   public Sample[] getSamplesByColumn(int column) {
 
     Sample[] samples = new Sample[SIZE];
     for (int i = 0; i < blockSamples.length; i++) {
-      samples[i] = this.blockSamples[i][column];
+      samples[i] = this.blockSamples[i][column - 1];
     }
-    return this.blockSamples[row];
+    return samples;
   }
 
   /* Returns the ids of n random selected samples */

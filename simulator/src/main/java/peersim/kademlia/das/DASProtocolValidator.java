@@ -33,8 +33,8 @@ public class DASProtocolValidator extends DASProtocol {
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column
-      column[s.getColumn()]++;
-      row[s.getRow()]++;
+      column[s.getColumn() - 1]++;
+      row[s.getRow() - 1]++;
     }
   }
 
