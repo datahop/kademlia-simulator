@@ -60,29 +60,36 @@ public class DASProtocolBuilder extends DASProtocol {
               + " "
               + radius);
 
-      // while (!inRegion) {
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        BigInteger id = dasProt.getKademliaId();
-        logger.info("Sample " + s.getIdByRow() + " " + s.getIdByColumn() + " " + radius + " " + id);
+      while (!inRegion) {
+        for (int i = 0; i < Network.size(); i++) {
+          Node n = Network.get(i);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          BigInteger id = dasProt.getKademliaId();
+          if (dasProt.isBuilder()) continue;
+          logger.info(
+              "Sample " + s.getIdByRow() + " " + s.getIdByColumn() + " " + radius + " " + id);
 
-        if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
-          // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
-          if (dasProt.isValidator()) {
-            Sample[] samples = {s};
-            Message msg = generateSeedSampleMessage(samples);
-            msg.operationId = -1;
-            msg.src = this.getKademliaProtocol().getKademliaNode();
-            msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());
-            if (inRegion == false) {
-              samplesWithinRegion++;
-              inRegion = true;
+          if (n.isUp() && (s.isInRegionByRow(id, radius) || s.isInRegionByColumn(id, radius))) {
+            // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+            if (dasProt.isValidator()) {
+              Sample[] samples = {s};
+              Message msg = generateSeedSampleMessage(samples);
+              msg.operationId = -1;
+              msg.src = this.getKademliaProtocol().getKademliaNode();
+              msg.dst = n.getKademliaProtocol().getKademliaNode();
+              sendMessage(msg, id, dasProt.getDASProtocolID());
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
+            } else {
+              EDSimulator.add(
+                  2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
             }
-          } else {
-            EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
           }
+        }
+        if (!inRegion) {
+          radius = radius.multiply(BigInteger.valueOf(2));
         }
       }
     }

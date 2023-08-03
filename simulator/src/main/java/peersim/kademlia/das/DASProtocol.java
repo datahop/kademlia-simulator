@@ -230,6 +230,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   public void setBuilderAddress(BigInteger address) {
     this.builderAddress = address;
+    searchTable.removeNode(address);
   }
 
   public BigInteger getBuilderAddress() {
@@ -325,7 +326,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     sendMessage(response, m.src.getId(), myPid);
   }
 
-  private void rebuild(Sample s) {
+  private void reconstruct(Sample s) {
     column[s.getColumn() - 1]++;
     row[s.getRow() - 1]++;
     if (column[s.getColumn() - 1] >= column.length / 2
@@ -366,8 +367,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
-      // count # of samples for each row and column
-      rebuild(s);
+      // count # of samples for each row and column and reconstruct if more than half received
+      reconstruct(s);
     }
 
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
@@ -502,7 +503,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.info("Send message added " + m.id + " " + latency);
+      logger.warning("Send message added " + m.id + " " + latency);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);

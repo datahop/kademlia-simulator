@@ -8,7 +8,7 @@ package peersim.kademlia.das;
  */
 public class KademliaCommonConfigDas {
 
-  public static int ALPHA = 3; // number of simultaneous lookup messages
+  public static int ALPHA = 5; // number of simultaneous lookup messages
 
   /** Different ways of mapping samples to DHT keyspace */
   public static int SAMPLE_MAPPING_RANDOM = 1;

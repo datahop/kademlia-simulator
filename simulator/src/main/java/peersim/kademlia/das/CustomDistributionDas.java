@@ -216,6 +216,9 @@ public class CustomDistributionDas implements peersim.core.Control {
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 
+      if (i == 0) builderAddress = dasProt.getKademliaProtocol().getKademliaNode().getId();
+      dasProt.setBuilderAddress(builderAddress);
+
       /*System.out.println(
       "Dasprot id "
           + protocolDasBuilderID
