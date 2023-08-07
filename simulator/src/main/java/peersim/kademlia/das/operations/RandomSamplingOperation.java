@@ -35,8 +35,9 @@ public class RandomSamplingOperation extends SamplingOperation {
       Block currentBlock,
       SearchTable searchTable,
       boolean isValidator,
+      int numValidators,
       MissingNode callback) {
-    super(srcNode, destNode, timestamp, currentBlock, isValidator, callback);
+    super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
     setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
@@ -47,22 +48,6 @@ public class RandomSamplingOperation extends SamplingOperation {
       samples.put(rs.getIdByColumn(), false);
     }
   }
-
-  /*public BigInteger[] getSamples(BigInteger peerId) {
-
-    List<BigInteger> list = new ArrayList<>();
-    Collections.addAll(
-        list,
-        currentBlock.getSamplesByRadiusByRow(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    Collections.addAll(
-        list,
-        currentBlock.getSamplesByRadiusByColumn(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    return list.toArray(new BigInteger[0]);
-  }*/
 
   public boolean completed() {
 

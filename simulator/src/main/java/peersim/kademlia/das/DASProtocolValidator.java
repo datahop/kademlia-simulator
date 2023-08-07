@@ -88,6 +88,7 @@ public class DASProtocolValidator extends DASProtocol {
             row,
             column,
             this.isValidator,
+            validatorsList.length,
             this);
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId());
@@ -102,7 +103,8 @@ public class DASProtocolValidator extends DASProtocol {
         KademliaObserver.reportOperation(op);
         break;
       }
-      logger.warning("Increasing " + op.getRadius() + " " + op.getClass().getCanonicalName());
+      logger.warning(
+          "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
     }
     // doSampling(op);
   }

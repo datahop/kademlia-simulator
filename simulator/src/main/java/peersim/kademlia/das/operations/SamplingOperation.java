@@ -23,16 +23,25 @@ public abstract class SamplingOperation extends FindOperation {
   protected Block currentBlock;
   // protected HashSet<BigInteger> queried;
 
-  protected BigInteger radius;
+  protected BigInteger radiusValidator, radiusNonValidator;
 
   public SamplingOperation(
-      BigInteger srcNode, BigInteger destNode, long timestamp, Block block, boolean isValidator) {
+      BigInteger srcNode,
+      BigInteger destNode,
+      long timestamp,
+      Block block,
+      boolean isValidator,
+      int numValidators) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-    radius = currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+    radiusValidator =
+        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+    radiusNonValidator =
+        currentBlock.computeRegionRadius(
+            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
   }
 
   public SamplingOperation(
@@ -41,6 +50,7 @@ public abstract class SamplingOperation extends FindOperation {
       long timestamp,
       Block block,
       boolean isValidator,
+      int numValidators,
       MissingNode callback) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
@@ -49,8 +59,11 @@ public abstract class SamplingOperation extends FindOperation {
     this.callback = callback;
     currentBlock = block;
 
-    radius = currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-
+    radiusValidator =
+        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+    radiusNonValidator =
+        currentBlock.computeRegionRadius(
+            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
@@ -71,8 +84,12 @@ public abstract class SamplingOperation extends FindOperation {
   }
   // public abstract BigInteger[] startSampling();
 
-  public BigInteger getRadius() {
-    return radius;
+  public BigInteger getRadiusValidator() {
+    return radiusValidator;
+  }
+
+  public BigInteger getRadiusNonValidator() {
+    return radiusNonValidator;
   }
 
   public BigInteger[] doSampling() {
@@ -95,10 +112,20 @@ public abstract class SamplingOperation extends FindOperation {
     for (BigInteger sample : samples.keySet()) {
 
       if (!samples.get(sample)) {
-        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radius);
+        List<BigInteger> validatorsBySample = searchTable.getNodesbySample(sample, radiusValidator);
+        List<BigInteger> nonValidatorsBySample =
+            searchTable.getNodesbySample(sample, radiusNonValidator);
 
-        if (nodesBySample != null && nodesBySample.size() > 0) nodes.addAll(nodesBySample);
-        else if (callback != null) callback.missing(sample, this);
+        boolean found = false;
+        if (validatorsBySample != null && validatorsBySample.size() > 0) {
+          nodes.addAll(validatorsBySample);
+          found = true;
+        }
+        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+          nodes.addAll(nonValidatorsBySample);
+          found = true;
+        }
+        if (!found && callback != null) callback.missing(sample, this);
       }
     }
     Collections.shuffle(nodes);
@@ -116,9 +143,9 @@ public abstract class SamplingOperation extends FindOperation {
   }
 
   public boolean increaseRadius(int multiplier) {
-    radius = radius.multiply(BigInteger.valueOf(multiplier));
-    if (Block.MAX_KEY.compareTo(radius) <= 0) {
-      radius = Block.MAX_KEY;
+    radiusValidator = radiusValidator.multiply(BigInteger.valueOf(multiplier));
+    if (Block.MAX_KEY.compareTo(radiusValidator) <= 0) {
+      radiusValidator = Block.MAX_KEY;
       return false;
     }
     return true;

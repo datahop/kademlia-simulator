@@ -21,8 +21,20 @@ public class DASProtocolNonValidator extends DASProtocol {
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    System.err.println("Non-validator should not receive seed sample");
+    logger.warning("Non-validator should not receive seed sample");
     System.exit(-1);
+    /*if (m.body == null) return;
+
+    Sample[] samples = (Sample[]) m.body;
+    for (Sample s : samples) {
+      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
+
+      kv.add((BigInteger) s.getIdByRow(), s);
+      kv.add((BigInteger) s.getIdByColumn(), s);
+      // count # of samples for each row and column
+      column[s.getColumn() - 1]++;
+      row[s.getRow() - 1]++;
+    }*/
   }
 
   @Override

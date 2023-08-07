@@ -17,8 +17,10 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       int row,
       int column,
       boolean isValidator,
+      int numValidators,
       MissingNode callback) {
-    super(srcNode, timestamp, block, searchTable, row, column, isValidator, callback);
+    super(
+        srcNode, timestamp, block, searchTable, row, column, isValidator, numValidators, callback);
 
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
