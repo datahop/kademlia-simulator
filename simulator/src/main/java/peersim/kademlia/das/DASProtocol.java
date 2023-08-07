@@ -284,6 +284,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     // samples to return
     List<Sample> s = new ArrayList<>();
+    if (!isValidator())
+      logger.warning("Non-validator received " + samples.size() + " from " + m.src.getId());
 
     List<BigInteger> nodes = new ArrayList<>();
     for (BigInteger id : samples) {

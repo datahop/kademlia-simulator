@@ -112,6 +112,10 @@ public class DASProtocolBuilder extends DASProtocol {
             && (s.isInRegionByRow(id, radiusNonValidator)
                 || s.isInRegionByColumn(id, radiusNonValidator))) {
           // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+          if (inRegion == false) {
+            samplesWithinRegion++;
+            inRegion = true;
+          }
           if (!dasProt.isValidator()) {
             EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
           }
