@@ -416,7 +416,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                   + op.getSamples().length);
           if (op.getAvailableRequests() == KademliaCommonConfigDas.ALPHA) {
             for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
-            /*while (!doSampling(op)) {
+            while (!doSampling(op)) {
               if (!op.increaseRadius(2)) {
                 logger.warning("Operation completed max increase");
                 samplingOp.remove(m.operationId);
@@ -425,9 +425,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                 break;
               }
               logger.warning(
-                  "Increasing " + op.getRadius() + " " + op.getClass().getCanonicalName());
-            }*/
-            doSampling(op);
+                  "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
+            }
+            // doSampling(op);
           }
         }
       } else {

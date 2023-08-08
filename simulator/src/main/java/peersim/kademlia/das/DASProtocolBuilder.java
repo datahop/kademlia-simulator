@@ -69,64 +69,66 @@ public class DASProtocolBuilder extends DASProtocol {
               + " "
               + radiusNonValidator);
 
-      // while (!inRegion) {
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        BigInteger id = dasProt.getKademliaId();
-        if (dasProt.isBuilder()) continue;
-        logger.info(
-            "Sample "
-                + s.getIdByRow()
-                + " "
-                + s.getIdByColumn()
-                + " "
-                + radiusValidator
-                + " "
-                + radiusNonValidator
-                + " "
-                + id);
+      while (!inRegion) {
+        for (int i = 0; i < Network.size(); i++) {
+          Node n = Network.get(i);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          BigInteger id = dasProt.getKademliaId();
+          if (dasProt.isBuilder()) continue;
+          logger.info(
+              "Sample "
+                  + s.getIdByRow()
+                  + " "
+                  + s.getIdByColumn()
+                  + " "
+                  + radiusValidator
+                  + " "
+                  + radiusNonValidator
+                  + " "
+                  + id);
 
-        if (n.isUp()
-            && (s.isInRegionByRow(id, radiusValidator)
-                || s.isInRegionByColumn(id, radiusValidator))) {
-          // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
-          if (dasProt.isValidator()) {
-            Sample[] samples = {s};
-            Message msg = generateSeedSampleMessage(samples);
-            msg.operationId = -1;
-            msg.src = this.getKademliaProtocol().getKademliaNode();
-            msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());
+          if (n.isUp()
+              && (s.isInRegionByRow(id, radiusValidator)
+                  || s.isInRegionByColumn(id, radiusValidator))) {
+            // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
+            if (dasProt.isValidator()) {
+              Sample[] samples = {s};
+              Message msg = generateSeedSampleMessage(samples);
+              msg.operationId = -1;
+              msg.src = this.getKademliaProtocol().getKademliaNode();
+              msg.dst = n.getKademliaProtocol().getKademliaNode();
+              sendMessage(msg, id, dasProt.getDASProtocolID());
+              if (inRegion == false) {
+                samplesWithinRegion++;
+                inRegion = true;
+              }
+              /*} else {
+                EDSimulator.add(
+                    2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
+              }*/
+            }
+          }
+          if (n.isUp()
+              && (s.isInRegionByRow(id, radiusNonValidator)
+                  || s.isInRegionByColumn(id, radiusNonValidator))) {
+            // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
             if (inRegion == false) {
               samplesWithinRegion++;
               inRegion = true;
             }
-            /*} else {
+            if (!dasProt.isValidator()) {
               EDSimulator.add(
                   2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
-            }*/
+            }
           }
-        }
-        if (n.isUp()
-            && (s.isInRegionByRow(id, radiusNonValidator)
-                || s.isInRegionByColumn(id, radiusNonValidator))) {
-          // EDSimulator.add(0, generateSeedSampleMessage(s), n, dasProt.getDASProtocolID());
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
-          }
-          if (!dasProt.isValidator()) {
-            EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
-          }
-        }
 
-        /*if (!inRegion) {
-          radius = radius.multiply(BigInteger.valueOf(2));
-        }*/
+          if (!inRegion) {
+            radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+            // radiusNonValidator = radiusNonValidator.multiply(BigInteger.valueOf(2));
+          }
+        }
       }
     }
-    // }
     logger.warning(
         samplesWithinRegion
             + " samples out of "
