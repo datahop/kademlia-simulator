@@ -150,61 +150,13 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   }
 
   /**
-   * Search through the network for a node with a specific node ID, using binary search based on the
-   * ordering of the network. If the binary search does not find a node with the given ID, a
-   * traditional search is performed for more reliability (in case the network is not ordered).
-   *
-   * @param searchNodeId the ID of the node to search for
-   * @return the node with the given ID, or null if not found
-   */
-  public Node nodeIdtoNode(BigInteger searchNodeId) {
-    // If the given searchNodeId is null, return null
-    if (searchNodeId == null) return null;
-
-    // Set the initial search range to cover the entire network
-    int inf = 0;
-    int sup = Network.size() - 1;
-    int m;
-
-    // Perform binary search until the search range is empty
-    while (inf <= sup) {
-      // Calculate the midpoint of the search range
-      m = (inf + sup) / 2;
-
-      // Get the ID of the node at the midpoint
-      BigInteger mId =
-          ((KademliaProtocol) Network.get(m).getProtocol(kademliaid)).getKademliaNode().getId();
-
-      // If the midpoint node has the desired ID, return it
-      if (mId.equals(searchNodeId)) return Network.get(m);
-
-      // If the midpoint node has a smaller ID than the desired ID, narrow the search range to the
-      // upper half of the current range
-      if (mId.compareTo(searchNodeId) < 0) inf = m + 1;
-      // Otherwise, narrow the search range to the lower half of the current range
-      else sup = m - 1;
-    }
-
-    // If the binary search did not find a node with the desired ID, perform a traditional search
-    // through the network
-    BigInteger mId;
-    for (int i = Network.size() - 1; i >= 0; i--) {
-      mId = ((KademliaProtocol) Network.get(i).getProtocol(kademliaid)).getKademliaNode().getId();
-      if (mId.equals(searchNodeId)) return Network.get(i);
-    }
-
-    // If no node with the desired ID was found, return null
-    return null;
-  }
-
-  /**
    * Gets the node associated with this Kademlia protocol instance by calling nodeIdtoNode method
    * with the ID of this KademliaNod.
    *
    * @return the node associated with this Kademlia protocol instance,
    */
   public Node getNode() {
-    return nodeIdtoNode(this.getKademliaNode().getId());
+    return Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
   }
 
   /**
@@ -287,7 +239,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
           request.operationId = m.operationId;
           request.src = this.getKademliaNode();
-          request.dst = nodeIdtoNode(neighbour).getKademliaProtocol().getKademliaNode();
+          request.dst =
+              Util.nodeIdtoNode(neighbour, kademliaid).getKademliaProtocol().getKademliaNode();
 
           if (KademliaCommonConfig.FINDMODE == 0 || request.getType() == Message.MSG_GET) {
             request.body = fop.getDestNode();
@@ -312,7 +265,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               Message request = new Message(Message.MSG_PUT);
               request.operationId = m.operationId;
               request.src = this.getKademliaNode();
-              request.dst = nodeIdtoNode(id).getKademliaProtocol().getKademliaNode();
+              request.dst =
+                  Util.nodeIdtoNode(id, kademliaid).getKademliaProtocol().getKademliaNode();
               request.body = ((PutOperation) fop).getBody();
               request.value = ((PutOperation) fop).getValue();
 
@@ -497,7 +451,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       if (nextNode != null) {
         // Set the destination of the message to the next closest node
         m.dst =
-            nodeIdtoNode(nextNode)
+            Util.nodeIdtoNode(nextNode, kademliaid)
                 .getKademliaProtocol()
                 .getKademliaNode(); // new KademliaNode(nextNode);
 
@@ -543,8 +497,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     assert m.dst != null;
 
     // Get source and destination nodes
-    Node src = nodeIdtoNode(this.getKademliaNode().getId());
-    Node dest = nodeIdtoNode(destId);
+    Node src = Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
+    Node dest = Util.nodeIdtoNode(destId, kademliaid);
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 

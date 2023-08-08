@@ -49,4 +49,7 @@ public class KademliaCommonConfigDas {
   public static int NON_VALIDATOR_UPLOAD_RATE = 100;
 
   public static int BUILDER_UPLOAD_RATE = 10000;
+
+  public static int VALIDATOR_DEADLINE = 4000;
+  public static int RANDOM_SAMPLING_DEADLINE = 12000;
 }

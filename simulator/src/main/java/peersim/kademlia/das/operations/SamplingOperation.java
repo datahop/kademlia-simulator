@@ -38,10 +38,10 @@ public abstract class SamplingOperation extends FindOperation {
     this.isValidator = isValidator;
     currentBlock = block;
     radiusValidator =
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-    radiusNonValidator =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+    radiusNonValidator =
+        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
   }
 
   public SamplingOperation(
@@ -60,10 +60,10 @@ public abstract class SamplingOperation extends FindOperation {
     currentBlock = block;
 
     radiusValidator =
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-    radiusNonValidator =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+    radiusNonValidator =
+        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
@@ -108,37 +108,42 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger getNeighbour() {
 
     BigInteger res = null;
-    List<BigInteger> nodes = new ArrayList<>();
-    for (BigInteger sample : samples.keySet()) {
+    if (closestSet.isEmpty()) {
+      List<BigInteger> nodes = new ArrayList<>();
+      for (BigInteger sample : samples.keySet()) {
 
-      if (!samples.get(sample)) {
-        List<BigInteger> validatorsBySample = searchTable.getNodesbySample(sample, radiusValidator);
-        List<BigInteger> nonValidatorsBySample =
-            searchTable.getNodesbySample(sample, radiusNonValidator);
+        if (!samples.get(sample)) {
+          List<BigInteger> validatorsBySample =
+              searchTable.getValidatorNodesbySample(sample, radiusValidator);
+          List<BigInteger> nonValidatorsBySample =
+              searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
 
-        boolean found = false;
-        if (validatorsBySample != null && validatorsBySample.size() > 0) {
-          nodes.addAll(validatorsBySample);
-          found = true;
+          boolean found = false;
+          if (validatorsBySample != null && validatorsBySample.size() > 0) {
+            nodes.addAll(validatorsBySample);
+            Collections.shuffle(nodes);
+            found = true;
+          }
+          if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+            nodes.addAll(nonValidatorsBySample);
+            found = true;
+          }
+          if (!found && callback != null) callback.missing(sample, this);
         }
-        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          nodes.addAll(nonValidatorsBySample);
-          found = true;
+      }
+      // Collections.shuffle(nodes);
+
+      for (BigInteger node : nodes) {
+        if (closestSet.get(node) == null) {
+          closestSet.put(node, true);
         }
-        if (!found && callback != null) callback.missing(sample, this);
       }
     }
-    Collections.shuffle(nodes);
-
-    for (BigInteger node : nodes) {
-      if (closestSet.get(node) == null) {
-        closestSet.put(node, true);
-        this.available_requests--; // decrease available requets
-        res = node;
-        break;
-      }
+    if (!closestSet.isEmpty()) {
+      res = closestSet.entrySet().iterator().next().getKey();
+      this.available_requests--; // decrease available requets
+      closestSet.remove(res);
     }
-
     return res;
   }
 

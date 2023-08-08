@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import peersim.core.Node;
 import peersim.kademlia.Message;
+import peersim.kademlia.Util;
 
 public class DASProtocolNonValidator extends DASProtocol {
 
@@ -43,14 +44,15 @@ public class DASProtocolNonValidator extends DASProtocol {
     // super.handleInitGetSample(m, myPid);
     BigInteger[] samples = {(BigInteger) m.body};
     BigInteger radius =
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+        currentBlock.computeRegionRadius(
+            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length);
     for (BigInteger sample : samples) {
       if (!reqSamples.contains(sample)) {
-        for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
+        for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
           Message msg = generateGetSampleMessage(samples);
           msg.operationId = -1;
           msg.src = this.kadProtocol.getKademliaNode();
-          Node n = kadProtocol.nodeIdtoNode(id);
+          Node n = Util.nodeIdtoNode(id, kademliaId);
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, myPid);
           reqSamples.add(sample);

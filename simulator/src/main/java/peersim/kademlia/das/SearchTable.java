@@ -17,6 +17,10 @@ public class SearchTable {
 
   private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
+  private TreeSet<BigInteger> validatorsIndexed; // , samplesIndexed;
+
+  private TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
+
   private HashSet<BigInteger> blackList; // , samplesIndexed;
 
   public SearchTable(Block currentblock) {
@@ -24,6 +28,9 @@ public class SearchTable {
     this.currentBlock = currentblock;
     // this.sampleMap = new HashMap<>();
     this.nodesIndexed = new TreeSet<>();
+    this.validatorsIndexed = new TreeSet<>();
+    this.nonValidatorsIndexed = new TreeSet<>();
+
     this.blackList = new HashSet<>();
   }
 
@@ -51,17 +58,38 @@ public class SearchTable {
   public void addNodes(BigInteger[] nodes) {
 
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id)) nodesIndexed.add(id);
+      if (!blackList.contains(id) && !validatorsIndexed.contains(id)) {
+        nonValidatorsIndexed.add(id);
+      }
+    }
+  }
+
+  /*public void addNonValidatorNodes(BigInteger[] nodes) {
+
+    for (BigInteger id : nodes) {
+      if (!blackList.contains(id) && !validatorsIndexed.contains(id)) {
+        nodesIndexed.add(id);
+      }
+    }
+  }*/
+
+  public void addValidatorNodes(BigInteger[] nodes) {
+    for (BigInteger id : nodes) {
+      if (!blackList.contains(id)) {
+        validatorsIndexed.add(id);
+      }
     }
   }
 
   public void removeNode(BigInteger node) {
     this.blackList.add(node);
     this.nodesIndexed.remove(node);
+    this.validatorsIndexed.remove(node);
+    this.nonValidatorsIndexed.remove(node);
   }
 
   public TreeSet<BigInteger> nodesIndexed() {
-    return nodesIndexed;
+    return nonValidatorsIndexed;
   }
 
   /*public HashSet<BigInteger> samplesIndexed() {
@@ -76,6 +104,34 @@ public class SearchTable {
     BigInteger top = sampleId.add(radius);
 
     Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
+    return new ArrayList<BigInteger>(subSet);
+
+    // return sampleMap.get(sampleId);
+
+  }
+
+  public List<BigInteger> getValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
+
+    BigInteger bottom = sampleId.subtract(radius);
+    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
+
+    BigInteger top = sampleId.add(radius);
+
+    Collection<BigInteger> subSet = validatorsIndexed.subSet(bottom, true, top, true);
+    return new ArrayList<BigInteger>(subSet);
+
+    // return sampleMap.get(sampleId);
+
+  }
+
+  public List<BigInteger> getNonValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
+
+    BigInteger bottom = sampleId.subtract(radius);
+    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
+
+    BigInteger top = sampleId.add(radius);
+
+    Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
 
     // return sampleMap.get(sampleId);
