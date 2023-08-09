@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import peersim.kademlia.KademliaCommonConfig;
+import peersim.kademlia.RoutingTable;
 
 public class SearchTable {
 
@@ -23,7 +25,9 @@ public class SearchTable {
 
   private HashSet<BigInteger> blackList; // , samplesIndexed;
 
-  public SearchTable(Block currentblock) {
+  private RoutingTable routingTable;
+
+  public SearchTable(Block currentblock, BigInteger id) {
 
     this.currentBlock = currentblock;
     // this.sampleMap = new HashMap<>();
@@ -32,6 +36,9 @@ public class SearchTable {
     this.nonValidatorsIndexed = new TreeSet<>();
 
     this.blackList = new HashSet<>();
+
+    routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
+    routingTable.setNodeId(id);
   }
 
   public void setBlock(Block currentBlock) {
@@ -78,6 +85,7 @@ public class SearchTable {
       if (!blackList.contains(id)) {
         validatorsIndexed.add(id);
       }
+      routingTable.addNeighbour(id);
     }
   }
 
@@ -147,5 +155,10 @@ public class SearchTable {
       result.addAll(getNodesbySample(sample, radius));
     }
     return result;
+  }
+
+  public BigInteger[] findKClosestValidators(BigInteger sampleId) {
+
+    return routingTable.getNeighbours(sampleId, sampleId);
   }
 }

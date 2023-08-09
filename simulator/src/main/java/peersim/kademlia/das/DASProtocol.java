@@ -120,7 +120,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
-    searchTable = new SearchTable(currentBlock);
 
     queried = new HashSet<BigInteger>();
     uploadInterfaceBusyUntil = 0;
@@ -209,6 +208,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void setKademliaProtocol(KademliaProtocol prot) {
     this.kadProtocol = prot;
     this.logger = prot.getLogger();
+    searchTable = new SearchTable(currentBlock, this.getKademliaId());
   }
 
   /**
@@ -701,7 +701,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       return;
     }
     searchTable.addNodes(list.toArray(new BigInteger[0]));
-    logger.warning(
+    logger.info(
         "Search table nodes found "
             // + searchTable.samplesIndexed().size()
             // + " "
@@ -736,5 +736,33 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         logger.warning("Sampling operation finished");
         KademliaObserver.reportOperation(op);
       }*/
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for a specific sample.
+   *
+   * @return Message
+   */
+  protected Message generateSeedSampleMessage(Sample[] s) {
+
+    Message m = new Message(Message.MSG_SEED_SAMPLE, s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  protected Message generateNewSampleMessage(BigInteger s) {
+
+    Message m = Message.makeInitGetSample(s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
   }
 }

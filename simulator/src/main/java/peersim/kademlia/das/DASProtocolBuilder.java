@@ -3,7 +3,6 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
@@ -36,12 +35,12 @@ public class DASProtocolBuilder extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Builder new block:" + currentBlock.getBlockId());
-    while (currentBlock.hasNext()) {
+    /*while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       kv.add(s.getIdByRow(), s);
       kv.add(s.getIdByColumn(), s);
     }
-    currentBlock.initIterator();
+    currentBlock.initIterator();*/
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;
@@ -195,34 +194,6 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
     logger.warning("Received sample builder node: do nothing");
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a GET message for a specific sample.
-   *
-   * @return Message
-   */
-  protected Message generateSeedSampleMessage(Sample[] s) {
-
-    Message m = new Message(Message.MSG_SEED_SAMPLE, s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a GET message for t1 key.
-   *
-   * @return Message
-   */
-  private Message generateNewSampleMessage(BigInteger s) {
-
-    Message m = Message.makeInitGetSample(s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
   }
 
   /**
