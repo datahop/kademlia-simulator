@@ -8,7 +8,7 @@ package peersim.kademlia.das;
  */
 public class KademliaCommonConfigDas {
 
-  public static int ALPHA = 3; // number of simultaneous lookup messages
+  public static int ALPHA = 5; // number of simultaneous lookup messages
 
   /** Different ways of mapping samples to DHT keyspace */
   public static int SAMPLE_MAPPING_RANDOM = 1;
@@ -46,7 +46,10 @@ public class KademliaCommonConfigDas {
   public static int VALIDATOR_UPLOAD_RATE = 100;
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
-  public static int NON_VALIDATOR_UPLOAD_RATE = 20;
+  public static int NON_VALIDATOR_UPLOAD_RATE = 100;
 
   public static int BUILDER_UPLOAD_RATE = 10000;
+
+  public static int VALIDATOR_DEADLINE = 4000;
+  public static int RANDOM_SAMPLING_DEADLINE = 12000;
 }

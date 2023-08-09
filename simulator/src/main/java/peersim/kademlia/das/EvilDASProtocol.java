@@ -12,6 +12,11 @@ public class EvilDASProtocol extends DASProtocol {
   }
 
   @Override
+  protected void handleSeedSample(Message m, int myPid) {
+    logger.warning("seed sample receveived - do nothing " + this);
+  }
+
+  @Override
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
     logger.warning("Handle get sample - return nothing " + this);

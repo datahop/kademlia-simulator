@@ -122,6 +122,22 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   /** Compute the radius of the region containing the desired number of copies of each sample */
+  public BigInteger computeRegionRadius(int numberOfCopiesPerSample, int numValidators) {
+
+    /**
+     * Calculate the radius by dividing Id space by number of nodes in the network, and multiplying
+     * by number of copies per sample The result is divided by 2 to calculate the radius (instead of
+     * diameter)
+     */
+    BigInteger radius =
+        MAX_KEY
+            .divide(BigInteger.valueOf(numValidators))
+            .multiply(BigInteger.valueOf(numberOfCopiesPerSample));
+    radius = radius.shiftRight(1);
+    return radius;
+  }
+
+  /** Compute the radius of the region containing the desired number of copies of each sample */
   public BigInteger computeRegionRadius(int numberOfCopiesPerSample) {
 
     /**
@@ -145,6 +161,19 @@ public class Block implements Iterator<Sample>, Cloneable {
   /* Returns all the block samples */
   public Sample[][] getSamples() {
     return this.blockSamples;
+  }
+
+  public Sample[] getSamplesByRow(int row) {
+    return this.blockSamples[row - 1];
+  }
+
+  public Sample[] getSamplesByColumn(int column) {
+
+    Sample[] samples = new Sample[SIZE];
+    for (int i = 0; i < blockSamples.length; i++) {
+      samples[i] = this.blockSamples[i][column - 1];
+    }
+    return samples;
   }
 
   /* Returns the ids of n random selected samples */

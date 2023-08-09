@@ -3,6 +3,8 @@ package peersim.kademlia;
 import java.math.BigInteger;
 import java.util.Set;
 import peersim.core.CommonState;
+import peersim.core.Network;
+import peersim.core.Node;
 
 /**
  * Some utility and mathematical function to work with BigInteger numbers and strings.
@@ -149,5 +151,53 @@ public class Util {
     m.timestamp = CommonState.getTime();
 
     return m;
+  }
+
+  /**
+   * Search through the network for a node with a specific node ID, using binary search based on the
+   * ordering of the network. If the binary search does not find a node with the given ID, a
+   * traditional search is performed for more reliability (in case the network is not ordered).
+   *
+   * @param searchNodeId the ID of the node to search for
+   * @return the node with the given ID, or null if not found
+   */
+  public static Node nodeIdtoNode(BigInteger searchNodeId, int kademliaid) {
+    // If the given searchNodeId is null, return null
+    if (searchNodeId == null) return null;
+
+    // Set the initial search range to cover the entire network
+    int inf = 0;
+    int sup = Network.size() - 1;
+    int m;
+
+    // Perform binary search until the search range is empty
+    while (inf <= sup) {
+      // Calculate the midpoint of the search range
+      m = (inf + sup) / 2;
+
+      // Get the ID of the node at the midpoint
+      BigInteger mId =
+          ((KademliaProtocol) Network.get(m).getProtocol(kademliaid)).getKademliaNode().getId();
+
+      // If the midpoint node has the desired ID, return it
+      if (mId.equals(searchNodeId)) return Network.get(m);
+
+      // If the midpoint node has a smaller ID than the desired ID, narrow the search range to the
+      // upper half of the current range
+      if (mId.compareTo(searchNodeId) < 0) inf = m + 1;
+      // Otherwise, narrow the search range to the lower half of the current range
+      else sup = m - 1;
+    }
+
+    // If the binary search did not find a node with the desired ID, perform a traditional search
+    // through the network
+    BigInteger mId;
+    for (int i = Network.size() - 1; i >= 0; i--) {
+      mId = ((KademliaProtocol) Network.get(i).getProtocol(kademliaid)).getKademliaNode().getId();
+      if (mId.equals(searchNodeId)) return Network.get(i);
+    }
+
+    // If no node with the desired ID was found, return null
+    return null;
   }
 }

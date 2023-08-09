@@ -35,7 +35,7 @@ public class DASDHTProtocol extends DASProtocol {
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
     kv.erase();
-    samplesRequested = 0;
+    // samplesRequested = 0;
     row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     if (isBuilder()) {
@@ -96,7 +96,14 @@ public class DASDHTProtocol extends DASProtocol {
     logger.warning("Starting random sampling");
     SamplingOperation op =
         new RandomSamplingOperationDHT(
-            this.getKademliaId(), null, time, currentBlock, searchTable, this.isValidator, this);
+            this.getKademliaId(),
+            null,
+            time,
+            currentBlock,
+            searchTable,
+            this.isValidator,
+            validatorsList.length,
+            this);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
@@ -148,6 +155,7 @@ public class DASDHTProtocol extends DASProtocol {
             row,
             column,
             this.isValidator,
+            validatorsList.length,
             this);
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));

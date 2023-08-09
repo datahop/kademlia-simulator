@@ -279,6 +279,8 @@ public class EDSimulator {
         }
         /*System.out.println(
         "Node "
+            + ev.node.getID()
+            + " "
             + prot
             + " "
             + pid

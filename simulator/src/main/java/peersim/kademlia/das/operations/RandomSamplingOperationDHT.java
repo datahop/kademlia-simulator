@@ -16,8 +16,17 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
       Block currentBlock,
       SearchTable searchTable,
       boolean isValidator,
+      int numValidators,
       MissingNode callback) {
-    super(srcNode, destNode, timestamp, currentBlock, searchTable, isValidator, callback);
+    super(
+        srcNode,
+        destNode,
+        timestamp,
+        currentBlock,
+        searchTable,
+        isValidator,
+        numValidators,
+        callback);
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     samples.clear();

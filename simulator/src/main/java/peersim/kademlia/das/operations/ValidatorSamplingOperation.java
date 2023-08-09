@@ -36,8 +36,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int row,
       int column,
       boolean isValidator,
+      int numValidators,
       MissingNode callback) {
-    super(srcNode, null, timestamp, block, isValidator, callback);
+    super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
 
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
@@ -83,35 +84,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
   }
-
-  /*public BigInteger[] getSamples(BigInteger peerId) {
-
-    List<BigInteger> list = new ArrayList<>();
-    if (row > 0) {
-      Collections.addAll(
-          list,
-          currentBlock.getSamplesByRadiusByRow(
-              peerId,
-              currentBlock.computeRegionRadius(
-                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    } else if (column > 0) {
-      Collections.addAll(
-          list,
-          currentBlock.getSamplesByRadiusByColumn(
-              peerId,
-              currentBlock.computeRegionRadius(
-                  KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    }
-
-    List<BigInteger> result = new ArrayList<>();
-
-    for (BigInteger s : samples.keySet()) {
-      if (samples.get(s) != null) {
-        if (!samples.get(s) && list.contains(s)) result.add(s);
-      }
-    }
-    return result.toArray(new BigInteger[0]);
-  }*/
 
   public boolean completed() {
 
