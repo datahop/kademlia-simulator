@@ -3,19 +3,18 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import peersim.kademlia.KademliaCommonConfig;
+// import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.RoutingTable;
 
 public class SearchTable {
 
   // private HashMap<BigInteger, List<BigInteger>> sampleMap;
 
-  private Block currentBlock;
+  // private Block currentBlock;
 
   private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
@@ -27,9 +26,9 @@ public class SearchTable {
 
   private RoutingTable routingTable;
 
-  public SearchTable(Block currentblock, BigInteger id) {
+  public SearchTable(/*Block currentblock , BigInteger id*/ ) {
 
-    this.currentBlock = currentblock;
+    // this.currentBlock = currentblock;
     // this.sampleMap = new HashMap<>();
     this.nodesIndexed = new TreeSet<>();
     this.validatorsIndexed = new TreeSet<>();
@@ -37,15 +36,15 @@ public class SearchTable {
 
     this.blackList = new HashSet<>();
 
-    routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
-    routingTable.setNodeId(id);
+    // routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
+    // routingTable.setNodeId(id);
   }
 
-  public void setBlock(Block currentBlock) {
+  /*public void setBlock(Block currentBlock) {
     this.currentBlock = currentBlock;
-  }
+  }*/
 
-  public BigInteger[] getSamples(BigInteger peerId) {
+  /*public BigInteger[] getSamples(BigInteger peerId) {
 
     List<BigInteger> result = new ArrayList<>();
     Collections.addAll(
@@ -60,7 +59,7 @@ public class SearchTable {
             currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
 
     return result.toArray(new BigInteger[0]);
-  }
+  }*/
 
   public void addNodes(BigInteger[] nodes) {
 
@@ -85,7 +84,7 @@ public class SearchTable {
       if (!blackList.contains(id)) {
         validatorsIndexed.add(id);
       }
-      routingTable.addNeighbour(id);
+      // routingTable.addNeighbour(id);
     }
   }
 
@@ -157,8 +156,8 @@ public class SearchTable {
     return result;
   }
 
-  public BigInteger[] findKClosestValidators(BigInteger sampleId) {
+  /*public BigInteger[] findKClosestValidators(BigInteger sampleId) {
 
     return routingTable.getNeighbours(sampleId, sampleId);
-  }
+  }*/
 }

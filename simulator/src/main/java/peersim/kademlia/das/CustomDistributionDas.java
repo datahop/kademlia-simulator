@@ -80,7 +80,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     System.out.println(
         "Number of malicious nodes: " + numEvilValidatorNodes + " " + numEvilNonValidatorNodes);
     List<BigInteger> validatorsIds = new ArrayList<>();
-    // List<DASProtocol> validators = new ArrayList<>();
+    List<BigInteger> nonValidatorsIds = new ArrayList<>();
 
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
@@ -211,6 +211,7 @@ public class CustomDistributionDas implements peersim.core.Control {
 
       } else {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
+        nonValidatorsIds.add(kadProt.getKademliaNode().getId());
       }
 
       dasProt.setKademliaProtocol(kadProt);
@@ -244,6 +245,8 @@ public class CustomDistributionDas implements peersim.core.Control {
     // for (DASProtocol validator : validators) {
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
+      if (i == 0)
+        ((DASProtocolBuilder) generalNode.getDASProtocol()).setNonValidators(nonValidatorsIds);
       generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }
 

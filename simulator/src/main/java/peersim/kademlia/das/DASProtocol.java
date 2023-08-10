@@ -125,6 +125,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     uploadInterfaceBusyUntil = 0;
 
     sentMsg = new TreeMap<Long, Long>();
+
+    searchTable = new SearchTable();
   }
 
   /**
@@ -208,7 +210,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void setKademliaProtocol(KademliaProtocol prot) {
     this.kadProtocol = prot;
     this.logger = prot.getLogger();
-    searchTable = new SearchTable(currentBlock, this.getKademliaId());
+    /*searchTable = new SearchTable(currentBlock, this.getKademliaId());*/
   }
 
   /**
@@ -426,7 +428,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                   + op.getSamples().length);
           if (op.getAvailableRequests() == KademliaCommonConfigDas.ALPHA) {
             for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
-            /*while (!doSampling(op)) {
+            while (!doSampling(op)) {
               if (!op.increaseRadius(2)) {
                 logger.warning("Operation completed max increase");
                 samplingOp.remove(m.operationId);
@@ -436,8 +438,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               }
               logger.warning(
                   "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
-            }*/
-            doSampling(op);
+            }
+            //doSampling(op);
           }
         }
       } else {

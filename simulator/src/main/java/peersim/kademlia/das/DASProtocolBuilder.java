@@ -2,7 +2,9 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
@@ -11,12 +13,15 @@ import peersim.kademlia.Util;
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
+  private TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
+
+    nonValidatorsIndexed = new TreeSet<>();
   }
 
   @Override
@@ -34,7 +39,7 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("Builder new block:" + currentBlock.getBlockId());
+    logger.warning("Builder new block:" + currentBlock.getBlockId()+" "+validatorsList.length+" "+nonValidatorsIndexed.size());
     /*while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       kv.add(s.getIdByRow(), s);
@@ -53,69 +58,71 @@ public class DASProtocolBuilder extends DASProtocol {
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length);
       BigInteger radiusNonValidator =
           currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-      // while (!inRegion) {
-      List<BigInteger> idsValidatorsRows =
-          searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
-      List<BigInteger> idsValidatorsColumns =
-          searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
+      while (!inRegion) {
+        List<BigInteger> idsValidatorsRows =
+            searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
+        List<BigInteger> idsValidatorsColumns =
+            searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
 
-      List<BigInteger> idsNonValidatorsRows =
-          searchTable.getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
-      List<BigInteger> idsNonValidatorsColumns =
-          searchTable.getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);
+        List<BigInteger> idsNonValidatorsRows =
+            getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
+        List<BigInteger> idsNonValidatorsColumns =
+            getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);
 
-      List<BigInteger> idsValidators = new ArrayList<>();
-      idsValidators.addAll(idsValidatorsRows);
-      idsValidators.addAll(idsValidatorsColumns);
+        List<BigInteger> idsValidators = new ArrayList<>();
+        idsValidators.addAll(idsValidatorsRows);
+        idsValidators.addAll(idsValidatorsColumns);
 
-      List<BigInteger> idsNonValidators = new ArrayList<>();
-      idsNonValidators.addAll(idsNonValidatorsRows);
-      idsNonValidators.addAll(idsNonValidatorsColumns);
+        List<BigInteger> idsNonValidators = new ArrayList<>();
+        idsNonValidators.addAll(idsNonValidatorsRows);
+        idsNonValidators.addAll(idsNonValidatorsColumns);
 
-      logger.warning("New sample " + s.getRow() + " " + s.getColumn() + " " + idsValidators.size());
-      /*  + " "
-      + +idsNonValidators.size());*/
+        logger.warning(
+            "New sample " + s.getRow() + " " + s.getColumn() + " " + idsValidators.size());
+        /*  + " "
+        + +idsNonValidators.size());*/
 
-      for (BigInteger id : idsValidators) {
-        Node n = Util.nodeIdtoNode(id, kademliaId);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        if (dasProt.isBuilder()) continue;
-        if (n.isUp()) {
-          Sample[] samples = {s};
-          Message msg = generateSeedSampleMessage(samples);
-          msg.operationId = -1;
-          msg.src = this.getKademliaProtocol().getKademliaNode();
-          msg.dst = n.getKademliaProtocol().getKademliaNode();
-          sendMessage(msg, id, dasProt.getDASProtocolID());
-          samplesValidators++;
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
+        for (BigInteger id : idsValidators) {
+          Node n = Util.nodeIdtoNode(id, kademliaId);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          if (dasProt.isBuilder()) continue;
+          if (n.isUp()) {
+            Sample[] samples = {s};
+            Message msg = generateSeedSampleMessage(samples);
+            msg.operationId = -1;
+            msg.src = this.getKademliaProtocol().getKademliaNode();
+            msg.dst = n.getKademliaProtocol().getKademliaNode();
+            sendMessage(msg, id, dasProt.getDASProtocolID());
+            samplesValidators++;
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
+            }
           }
         }
-      }
 
-      for (BigInteger id : idsNonValidators) {
-        Node n = Util.nodeIdtoNode(id, kademliaId);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        if (dasProt.isBuilder()) continue;
-        if (n.isUp()) {
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
-          }
-          samplesNonValidators++;
+        for (BigInteger id : idsNonValidators) {
+          Node n = Util.nodeIdtoNode(id, kademliaId);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          if (dasProt.isBuilder()) continue;
+          if (n.isUp()) {
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
+            }
+            samplesNonValidators++;
 
-          if (!dasProt.isValidator()) {
-            EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
+            if (!dasProt.isValidator()) {
+              EDSimulator.add(
+                  2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
+            }
           }
         }
+        if (!inRegion) {
+          radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+          // radiusNonValidator = radiusNonValidator.multiply(BigInteger.valueOf(2));
+        }
       }
-      if (!inRegion) {
-        radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
-        // radiusNonValidator = radiusNonValidator.multiply(BigInteger.valueOf(2));
-      }
-      // }
       // searchTable.getV
       /*while (!inRegion) {
         for (int i = 0; i < Network.size(); i++) {
@@ -196,6 +203,11 @@ public class DASProtocolBuilder extends DASProtocol {
     logger.warning("Received sample builder node: do nothing");
   }
 
+  public void setNonValidators(List<BigInteger> nonValidators) {
+    for (BigInteger id : nonValidators) {
+      nonValidatorsIndexed.add(id);
+    }
+  }
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -205,5 +217,19 @@ public class DASProtocolBuilder extends DASProtocol {
   public Object clone() {
     DASProtocolBuilder dolly = new DASProtocolBuilder(DASProtocolBuilder.prefix);
     return dolly;
+  }
+
+  private List<BigInteger> getNonValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
+
+    BigInteger bottom = sampleId.subtract(radius);
+    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
+
+    BigInteger top = sampleId.add(radius);
+
+    Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
+    return new ArrayList<BigInteger>(subSet);
+
+    // return sampleMap.get(sampleId);
+
   }
 }

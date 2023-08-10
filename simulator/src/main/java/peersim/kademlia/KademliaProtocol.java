@@ -82,7 +82,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   protected Logger logger;
 
   /** Key-value store. */
-  private KeyValueStore kv;
+  public KeyValueStore kv;
 
   /** Callback for Kademlia events. */
   private KademliaEvents callback;
