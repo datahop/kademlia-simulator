@@ -109,6 +109,7 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
   }
 
+  public void generateParcels(){}
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -227,6 +228,13 @@ public class Block implements Iterator<Sample>, Cloneable {
     if (column > SIZE - 1) return null;
     return s;
   }
+
+  public boolean hasNextByColumn(){
+    if(column<SIZE)return true;
+    return false;
+  }
+
+
 
   /*Resets the iterator pointers */
   public void initIterator() {

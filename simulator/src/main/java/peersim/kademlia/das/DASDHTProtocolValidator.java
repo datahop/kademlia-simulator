@@ -5,12 +5,12 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
+import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.das.operations.ValidatorSamplingOperationDHT;
-import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 
-public class DASDHTProtocolValidator extends DASProtocol {
+public class DASDHTProtocolValidator extends DASDHTProtocol {
 
   protected static String prefix = null;
 
@@ -19,6 +19,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
     DASDHTProtocolValidator.prefix = prefix;
     isValidator = true;
     isBuilder = false;
+    System.out.println("DAS DHT Validator");
   }
 
   @Override
@@ -26,7 +27,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
     logger.warning("seed sample receveived");
     if (m.body == null) return;
 
-    Sample[] samples = (Sample[]) m.body;
+    /*Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
       logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
 
@@ -40,7 +41,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
 
       Message msg = generatePutMessageSample(s);
       this.kadProtocol.handleInit(msg, kademliaId);
-    }
+    }*/
   }
 
   @Override
@@ -185,13 +186,39 @@ public class DASDHTProtocolValidator extends DASProtocol {
     return m;
   }
 
+  /**
+   * Starts the random sampling operation
+   *
+   * @param m initial message
+   * @param myPid protocol pid
+   */
+  protected void startRandomSampling() {
+
+    logger.warning("Starting random sampling");
+    SamplingOperation op =
+        new RandomSamplingOperationDHT(
+            this.getKademliaId(),
+            null,
+            time,
+            currentBlock,
+            searchTable,
+            this.isValidator,
+            validatorsList.length,
+            this);
+    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
+    samplingOp.put(op.getId(), op);
+    logger.warning("Sampling operation started random");
+    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
+    doSampling(op);
+  }
+
   @Override
   public void nodesFound(Operation op, BigInteger[] neighbours) {}
 
   @Override
   public void missing(BigInteger sample, Operation op) {}
 
-  @Override
+  /*@Override
   public void putValueReceived(Object o) {
     Sample s = (Sample) o;
     logger.warning("Sample received put operation " + s.getId());
@@ -202,16 +229,16 @@ public class DASDHTProtocolValidator extends DASProtocol {
     if (!samplingStarted) {
       logger.warning("Starting validator (rows and columns) sampling");
       startRowsandColumnsSampling();
-      // startRandomSampling();
+      startRandomSampling();
       samplingStarted = true;
     }
-  }
+  }*/
 
   @Override
   public void operationComplete(Operation op) {
     logger.warning("Operation complete " + op.getClass().getSimpleName());
 
-    if (op instanceof GetOperation) {
+    /*if (op instanceof GetOperation) {
       GetOperation get = (GetOperation) op;
       Sample s = (Sample) get.getValue();
       SamplingOperation sop = kadOps.get(get);
@@ -243,7 +270,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
                   + sop.getTimestamp());
         } // else doSampling(sop);
       }
-    }
+    }*/
   }
 
   /**
