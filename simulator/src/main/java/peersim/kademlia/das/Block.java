@@ -61,6 +61,8 @@ public class Block implements Iterator<Sample>, Cloneable {
     row = column = 0;
 
     parcelMap = new HashMap<>();
+    parcelByRow = new HashMap<>();
+    parcelByColumn = new HashMap<>();
     for (int i = 1; i <= blockSamples.length; i++) {
       for (int j = 1; j <= blockSamples[0].length; j++) {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
@@ -84,6 +86,10 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
+    parcelMap = new HashMap<>();
+    parcelByRow = new HashMap<>();
+    parcelByColumn = new HashMap<>();
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {

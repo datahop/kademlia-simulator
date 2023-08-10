@@ -1,6 +1,7 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.List;
 import peersim.kademlia.Message;
 import peersim.kademlia.operations.Operation;
 
@@ -31,6 +32,15 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
 
     currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
     currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
+    for (int i = 0; i < currentBlock.getSize(); i++) {
+      List<Parcel> p = currentBlock.getParcelByRow(i);
+      logger.warning("Parcel row " + i + " " + p.size());
+    }
+    for (int i = 0; i < currentBlock.getSize(); i++) {
+      List<Parcel> p = currentBlock.getParcelByColumn(i);
+      logger.warning("Parcel column " + i + " " + p.size());
+    }
     /*while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       Message msg = generatePutMessageSample(s);
