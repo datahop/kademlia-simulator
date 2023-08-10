@@ -2,6 +2,7 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
+import peersim.core.Network;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.SamplingOperation;
@@ -99,7 +100,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
             validatorsList.length,
             this);
 
-    op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
+    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning(
         "Sampling operation started validator "
@@ -109,7 +110,8 @@ public class DASDHTProtocolValidator extends DASProtocol {
             + " "
             + timestamp);
 
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
+    // op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
+    op.setAvailableRequests(Network.size());
     doSampling(op);
   }
 
@@ -131,7 +133,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
       boolean success = false;
       logger.warning("Dosampling " + sop.getAvailableRequests());
 
-      while (sop.getAvailableRequests() > 0 && sop.getSamples().length > 0) {
+      /*while (sop.getAvailableRequests() > 0 && sop.getSamples().length > 0) {
         BigInteger[] reqSamples = sop.getSamples();
         BigInteger sample = reqSamples[CommonState.r.nextInt(reqSamples.length)];
         logger.warning("Requesting sample " + sample + " " + reqSamples.length);
@@ -141,8 +143,14 @@ public class DASDHTProtocolValidator extends DASProtocol {
         Operation get = this.kadProtocol.handleInit(msg, kademliaId);
         kadOps.put(get, sop);
         success = true;
-      }
+      }*/
 
+      for (BigInteger sample : sop.getSamples()) {
+        Message msg = generateGetMessageSample(sample);
+        Operation get = this.kadProtocol.handleInit(msg, kademliaId);
+        kadOps.put(get, sop);
+        success = true;
+      }
       return success;
     }
   }
@@ -233,8 +241,7 @@ public class DASDHTProtocolValidator extends DASProtocol {
                   + CommonState.getTime()
                   + " "
                   + sop.getTimestamp());
-
-        } else doSampling(sop);
+        } // else doSampling(sop);
       }
     }
   }

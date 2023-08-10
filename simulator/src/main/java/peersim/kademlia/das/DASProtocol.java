@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -91,6 +92,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected long time;
 
+  protected TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -127,6 +130,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     sentMsg = new TreeMap<Long, Long>();
 
     searchTable = new SearchTable();
+    nonValidatorsIndexed = new TreeSet<>();
   }
 
   /**
@@ -439,7 +443,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               logger.warning(
                   "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
             }
-            //doSampling(op);
+            // doSampling(op);
           }
         }
       } else {
@@ -571,6 +575,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (validatorsList != null) searchTable.addValidatorNodes(validatorsList);
   }
 
+  public void setNonValidators(List<BigInteger> nonValidators) {
+    for (BigInteger id : nonValidators) {
+      nonValidatorsIndexed.add(id);
+    }
+  }
   /**
    * Starts the random sampling operation
    *

@@ -192,7 +192,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
           && Arrays.asList(neighbours).contains(fop.getDestNode())
           && !(fop instanceof RegionBasedFindOperation)) {
 
-        logger.warning("Found node " + fop.getDestNode());
+        logger.info("Found node " + fop.getDestNode());
 
         // Complete the operation and log the result.
         if (callback != null) {
@@ -207,7 +207,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         fop.setFinished(true);
 
         ((GetOperation) fop).setValue(m.value);
-        logger.warning(
+        logger.info(
             "Getprocess finished found "
                 + ((GetOperation) fop).getValue()
                 + " hops "
@@ -277,7 +277,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
               // Todo: verify
               sendMessage(request, id, myPid);
             }
-            logger.warning("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
+            logger.info("Sending PUT_VALUE to " + fop.getNeighboursList().size() + " nodes");
           } else if (fop instanceof GetOperation) {
             // Remove the find operation record
             findOp.remove(fop.getId());
@@ -317,7 +317,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         }
       }
       if (fop.isFinished() && fop.getAvailableRequests() == KademliaCommonConfig.ALPHA) {
-        logger.warning("Operation completed. reporting...");
+        logger.info("Operation completed. reporting...");
         KademliaObserver.reportOperation(fop);
         findOp.remove(fop.getId());
         // Update statistics
@@ -336,7 +336,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @param m The message containing the put request.
    */
   private void handlePut(Message m) {
-    logger.warning("Handle put sample:" + m.body);
+    logger.info("Handle put sample:" + m.body);
     kv.add((BigInteger) m.body, m.value);
     callback.putValueReceived(m.value);
   }
@@ -395,7 +395,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    * @return a reference to the created operation object
    */
   public Operation handleInit(Message m, int myPid) {
-    logger.warning("handleInitFind " + (BigInteger) m.body);
+    logger.info("handleInitFind " + (BigInteger) m.body);
     KademliaObserver.find_op.add(1);
 
     // Create find operation and add to operations array
@@ -415,7 +415,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
         break;
       case Message.MSG_INIT_GET:
         fop = new GetOperation(this.node.getId(), (BigInteger) m.body, m.timestamp);
-        logger.warning("New Get operation " + fop.getId());
 
         break;
       case Message.MSG_INIT_PUT:

@@ -25,7 +25,7 @@ public class DASDHTProtocolBuilder extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("Builder new block:" + currentBlock.getBlockId());
+    logger.warning("DHT builder new block:" + currentBlock.getBlockId());
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;

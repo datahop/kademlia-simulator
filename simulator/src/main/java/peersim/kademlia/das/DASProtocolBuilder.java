@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
@@ -13,15 +12,12 @@ import peersim.kademlia.Util;
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
-  private TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
-
-    nonValidatorsIndexed = new TreeSet<>();
   }
 
   @Override
@@ -39,7 +35,13 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("Builder new block:" + currentBlock.getBlockId()+" "+validatorsList.length+" "+nonValidatorsIndexed.size());
+    logger.warning(
+        "Builder new block:"
+            + currentBlock.getBlockId()
+            + " "
+            + validatorsList.length
+            + " "
+            + nonValidatorsIndexed.size());
     /*while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       kv.add(s.getIdByRow(), s);
