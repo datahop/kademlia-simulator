@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
-import peersim.kademlia.Util;
 import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.das.operations.ValidatorSamplingOperationDHT;
@@ -38,47 +37,9 @@ public class DASDHTProtocol extends DASProtocol {
     // samplesRequested = 0;
     row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
-    if (isBuilder()) {
-
-      logger.warning("Builder new block:" + currentBlock.getBlockId());
-      while (currentBlock.hasNext()) {
-        Sample s = currentBlock.next();
-        Message msg = generatePutMessageSample(s);
-        this.kadProtocol.handleInit(msg, kademliaId);
-      }
-    } else {
-      for (int i = 0; i < row.length; i++) {
-        row[i] = 0;
-      }
-      for (int i = 0; i < column.length; i++) {
-        column[i] = 0;
-      }
-      samplingStarted = false;
-      for (int i = 0; i < 3; i++) {
-        Message lookup = Util.generateFindNodeMessage();
-        this.kadProtocol.handleInit(lookup, kademliaId);
-      }
-      Message lookup = Util.generateFindNodeMessage(this.getKademliaId());
-      this.kadProtocol.handleInit(lookup, kademliaId);
-
-      for (SamplingOperation sop : samplingOp.values()) {
-        KademliaObserver.reportOperation(sop);
-        logger.warning(
-            "Sampling operation finished init "
-                + sop.getId()
-                + " "
-                + CommonState.getTime()
-                + " "
-                + sop.getTimestamp());
-      }
-      samplingOp.clear();
-      kadOps.clear();
-      queried.clear();
-    }
   }
 
   protected void handleInitGetSample(Message m, int myPid) {
-
     if (isBuilder()) return;
     BigInteger[] sampleId = new BigInteger[1];
     sampleId[0] = ((BigInteger) m.body);
@@ -280,7 +241,7 @@ public class DASDHTProtocol extends DASProtocol {
    *
    * @return Message
    */
-  private Message generatePutMessageSample(Sample s) {
+  protected Message generatePutMessageSample(Sample s) {
 
     // Existing active destination node
     Message m = Message.makeInitPutValue(s.getId(), s);

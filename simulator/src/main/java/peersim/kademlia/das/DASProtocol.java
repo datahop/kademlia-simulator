@@ -44,7 +44,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
   protected static final String PAR_KADEMLIA = "kademlia";
   protected static final String PAR_ALPHA = "alpha";
-
+  protected static final String PAR_PARCEL = "parcelSize";
   private static String prefix = null;
   private UnreliableTransport transport;
   /** Store the time until which this node's uplink is busy sending data */
@@ -119,6 +119,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     KademliaCommonConfigDas.ALPHA =
         Configuration.getInt(prefix + "." + PAR_ALPHA, KademliaCommonConfigDas.ALPHA);
 
+    KademliaCommonConfigDas.PARCEL_SIZE =
+        Configuration.getInt(prefix + "." + PAR_PARCEL, KademliaCommonConfigDas.PARCEL_SIZE);
     kv = new KeyValueStore();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();

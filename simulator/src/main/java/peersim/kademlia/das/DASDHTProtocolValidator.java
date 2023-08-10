@@ -171,21 +171,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     return m;
   }
 
-  // ______________________________________________________________________________________________
-  /**
-   * Generates a PUT message for t1 key and string message
-   *
-   * @return Message
-   */
-  private Message generatePutMessageSample(Sample s) {
-
-    // Existing active destination node
-    Message m = Message.makeInitPutValue(s.getId(), s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
   /**
    * Starts the random sampling operation
    *
