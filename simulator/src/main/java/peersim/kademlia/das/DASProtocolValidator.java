@@ -36,7 +36,7 @@ public class DASProtocolValidator extends DASProtocol {
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Init block validator node - getting samples " + this);
+    logger.warning("Error. Init block validator node - getting samples. do nothing " + this);
     // super.handleInitGetSample(m, myPid);
   }
 

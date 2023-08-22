@@ -19,7 +19,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     DASDHTProtocolValidator.prefix = prefix;
     isValidator = true;
     isBuilder = false;
-    System.out.println("DAS DHT Validator");
   }
 
   @Override
@@ -54,7 +53,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     // logger.warning("Starting validator (rows and columns) sampling");
-    // startRowsandColumnsSampling();
+    startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
     // startRandomSampling();
   }

@@ -4,9 +4,7 @@ import java.math.BigInteger;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
-import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
 import peersim.kademlia.das.operations.SamplingOperation;
-import peersim.kademlia.das.operations.ValidatorSamplingOperationDHT;
 import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 
@@ -39,11 +37,10 @@ public class DASDHTProtocol extends DASProtocol {
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
   }
 
+  @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    if (isBuilder()) return;
-    BigInteger[] sampleId = new BigInteger[1];
-    sampleId[0] = ((BigInteger) m.body);
-    logger.info("Getting sample  " + sampleId[0]);
+    logger.warning("Error. Init block  getting samples dht node. do nothing " + this);
+    // super.handleInitGetSample(m, myPid);
   }
 
   /**
@@ -54,7 +51,7 @@ public class DASDHTProtocol extends DASProtocol {
    */
   protected void startRandomSampling() {
 
-    logger.warning("Starting random sampling");
+    /*logger.warning("Starting random sampling");
     SamplingOperation op =
         new RandomSamplingOperationDHT(
             this.getKademliaId(),
@@ -69,7 +66,7 @@ public class DASDHTProtocol extends DASProtocol {
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    doSampling(op);*/
   }
 
   /**
@@ -79,7 +76,7 @@ public class DASDHTProtocol extends DASProtocol {
    * @param myPid protocol pid
    */
   protected void startRowsandColumnsSampling() {
-    logger.warning(
+    /*logger.warning(
         "Starting rows and columns fetch "
             + rowWithHighestNumSamples()
             + " "
@@ -96,7 +93,7 @@ public class DASDHTProtocol extends DASProtocol {
     createValidatorSamplingOperation(
         CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
     createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);*/
   }
 
   /**
@@ -107,7 +104,7 @@ public class DASDHTProtocol extends DASProtocol {
    */
   private void createValidatorSamplingOperation(int row, int column, long timestamp) {
 
-    ValidatorSamplingOperationDHT op =
+    /*ValidatorSamplingOperationDHT op =
         new ValidatorSamplingOperationDHT(
             this.getKademliaId(),
             timestamp,
@@ -130,12 +127,12 @@ public class DASDHTProtocol extends DASProtocol {
             + timestamp);
 
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    doSampling(op);*/
   }
 
   protected boolean doSampling(SamplingOperation sop) {
 
-    if (sop.completed()) {
+    /*if (sop.completed()) {
       samplingOp.remove(sop.getId());
       KademliaObserver.reportOperation(sop);
       logger.warning(
@@ -164,7 +161,8 @@ public class DASDHTProtocol extends DASProtocol {
       }
 
       return success;
-    }
+    }*/
+    return false;
   }
 
   @Override

@@ -196,7 +196,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Init block evil node - getting samples " + this);
+    logger.warning("Error. Init block builder node - getting samples. do nothing " + this);
     // super.handleInitGetSample(m, myPid);
   }
 

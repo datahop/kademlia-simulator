@@ -131,6 +131,7 @@ public class Block implements Iterator<Sample>, Cloneable {
       for (int j = 0; j < blockSamples.length; j++) {
         samples.push(blockSamples[i][j]);
         samplesNum++;
+        // System.out.println("Samples size " + samples.size() + " " + parcelSize);
         if (samplesNum == parcelSize) {
           Parcel p = new Parcel(parcelSize);
           for (Sample s : samples) {
@@ -138,9 +139,12 @@ public class Block implements Iterator<Sample>, Cloneable {
             parcelMap.put(s.getId(), p);
           }
           samplesNum = 0;
+          samples.clear();
           l.add(p);
+          // System.out.println("Column " + i + " parcel " + l.size());
         }
       }
+      System.out.println("New parcel row " + i);
       parcelByRow.put(i, l);
     }
   }
@@ -161,9 +165,11 @@ public class Block implements Iterator<Sample>, Cloneable {
             parcelMap.put(s.getIdByColumn(), p);
           }
           samplesNum = 0;
+          samples.clear();
           l.add(p);
         }
       }
+      // System.out.println("New parcel column " + i);
       parcelByColumn.put(i, l);
     }
   }

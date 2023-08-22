@@ -27,11 +27,16 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
    */
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("non-validator new block:" + currentBlock.getBlockId());
+    logger.warning("Builder new block:" + currentBlock.getBlockId());
     // startRandomSampling();
 
     currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
+    logger.warning("Parcel rows generated");
+
     currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
+    logger.warning("Parcel columns generated");
 
     for (int i = 0; i < currentBlock.getSize(); i++) {
       List<Parcel> p = currentBlock.getParcelByRow(i);
@@ -50,24 +55,24 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Init block non-validato node - getting samples " + this);
+    logger.warning("Builder node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
   }
 
   @Override
   protected void handleGetSampleResponse(Message m, int myPid) {
-    logger.warning("non-validato Received sample : do nothing");
+    logger.warning("Builder Received sample : do nothing");
   }
 
   @Override
   protected void handleGetSample(Message m, int myPid) {
     /** Ignore sample request * */
-    logger.warning("non-validator handle get sample - return nothing " + this);
+    logger.warning("Builder handle get sample - return nothing " + this);
   }
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    System.err.println("non-validator should not receive seed sample");
+    System.err.println("Builder should not receive seed sample");
     System.exit(-1);
   }
 
