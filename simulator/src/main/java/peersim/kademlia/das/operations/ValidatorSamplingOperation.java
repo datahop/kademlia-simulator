@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
-import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -56,12 +55,10 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
   }
 
   public void elaborateResponse(Sample[] sam) {
 
-    this.available_requests++;
     for (Sample s : sam) {
       if (row > 0) {
         if (samples.containsKey(s.getId())) {
@@ -85,6 +82,37 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
+  public void elaborateResponse(Sample[] sam, BigInteger n) {
+
+    this.available_requests--;
+    if (this.available_requests == 0) nodes.clear();
+    for (Sample s : sam) {
+      if (row > 0) {
+        if (samples.containsKey(s.getId())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
+            fs.removeFetchingNode(nodes.get(n));
+            samplesCount++;
+          }
+        }
+      } else {
+        if (samples.containsKey(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getIdByColumn());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
+            fs.removeFetchingNode(nodes.get(n));
+            samplesCount++;
+          }
+        }
+      }
+    }
+    // System.out.println("Row " + samplesCount + " " + samples.size());
+    if (samplesCount >= samples.size() / 2) completed = true;
+
+    nodes.remove(n);
+  }
+
   public boolean completed() {
 
     return completed;
@@ -94,7 +122,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    while ((getAvailableRequests() > 0)) { // I can send a new find request
+    while (true) { // I can send a new find request
 
       // get an available neighbour
       BigInteger nextNode = getNeighbour();

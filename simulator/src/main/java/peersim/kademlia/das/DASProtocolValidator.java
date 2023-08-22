@@ -24,7 +24,8 @@ public class DASProtocolValidator extends DASProtocol {
 
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
-      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
+      // logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " +
+      // s.getColumn());
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
@@ -43,8 +44,8 @@ public class DASProtocolValidator extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("Starting validator (rows and columns) sampling");
-    startRowsandColumnsSampling();
+    // logger.warning("Starting validator (rows and columns) sampling");
+    // startRowsandColumnsSampling();
     logger.warning("Starting random sampling");
     startRandomSampling();
   }
@@ -94,7 +95,6 @@ public class DASProtocolValidator extends DASProtocol {
     logger.warning("Sampling operation started validator " + op.getId());
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     while (!doSampling(op)) {
       if (!op.increaseRadius(2)) {
         logger.warning("Operation completed max increase");

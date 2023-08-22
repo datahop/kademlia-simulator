@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import peersim.kademlia.das.Block;
-import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Parcel;
 import peersim.kademlia.das.Sample;
@@ -55,7 +54,6 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
   }
 
   public BigInteger[] getParcels() {

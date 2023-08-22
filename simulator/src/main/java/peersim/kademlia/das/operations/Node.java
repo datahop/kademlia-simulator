@@ -14,12 +14,11 @@ public class Node implements Comparable<Node> {
   public Node(BigInteger id) {
     this.id = id;
     samples = new ArrayList<>();
-    aggressiveness = 1;
+    aggressiveness = 0;
     beingAsked = false;
   }
 
-  public void addSample(BigInteger id) {
-    FetchingSample s = new FetchingSample(id);
+  public void addSample(FetchingSample s) {
     samples.add(s);
   }
 
@@ -49,14 +48,14 @@ public class Node implements Comparable<Node> {
     return score;
   }
 
-  public void incrementAgressiveness() {
-    aggressiveness += 1;
+  public void setAgressiveness(int agr) {
+    aggressiveness = agr;
   }
 
   @Override
   public int compareTo(Node n) {
-    if (this.getScore() > n.getScore()) return 1;
-    else if (this.getScore() < n.getScore()) return -1;
+    if (this.getScore() < n.getScore()) return 1;
+    else if (this.getScore() > n.getScore()) return -1;
     else return 0;
   }
 }

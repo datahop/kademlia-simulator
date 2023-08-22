@@ -80,8 +80,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
-    // op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     doSampling(op);
   }
 
@@ -165,7 +163,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     doSampling(op);
   }
 

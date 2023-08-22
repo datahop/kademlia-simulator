@@ -38,14 +38,14 @@ public class RandomSamplingOperation extends SamplingOperation {
       int numValidators,
       MissingNode callback) {
     super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
-      samples.put(rs.getIdByRow(), new FetchingSample(rs.getIdByRow()));
-      samples.put(rs.getIdByColumn(), new FetchingSample(rs.getIdByColumn()));
+      FetchingSample s = new FetchingSample(rs.getIdByRow());
+      samples.put(rs.getIdByRow(), s);
+      samples.put(rs.getIdByColumn(), s);
     }
   }
 
@@ -65,7 +65,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     List<BigInteger> nextNodes = new ArrayList<>();
 
-    while ((getAvailableRequests() > 0)) { // I can send a new find request
+    while (true) { // I can send a new find request
 
       // get an available neighbour
       BigInteger nextNode = getNeighbour();
@@ -82,16 +82,36 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   public void elaborateResponse(Sample[] sam) {
 
-    this.available_requests++;
     for (Sample s : sam) {
       if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
-        FetchingSample fsRow = samples.get(s.getId());
-        FetchingSample fsColumn = samples.get(s.getIdByColumn());
-        if (!fsRow.isDownloaded()) fsRow.setDownloaded();
-        if (!fsColumn.isDownloaded()) fsColumn.setDownloaded();
-        samplesCount++;
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+        }
       }
     }
+    System.out.println("Samples received " + samplesCount);
+  }
+
+  public void elaborateResponse(Sample[] sam, BigInteger node) {
+    this.available_requests--;
+    if (this.available_requests == 0) nodes.clear();
+
+    for (Sample s : sam) {
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+          fs.removeFetchingNode(nodes.get(node));
+        }
+      }
+    }
+
+    nodes.remove(node);
+    System.out.println("Samples received " + samplesCount);
+
     // System.out.println("Samples received " + samples.size());
   }
 

@@ -124,7 +124,6 @@ public class DASDHTProtocolNonValidator extends DASDHTProtocol {
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     doSampling(op);
   }
 

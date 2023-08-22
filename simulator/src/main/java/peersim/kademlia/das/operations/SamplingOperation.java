@@ -23,6 +23,7 @@ public abstract class SamplingOperation extends FindOperation {
   protected boolean isValidator;
   protected MissingNode callback;
   protected Block currentBlock;
+  protected int aggressiveness;
   // protected HashSet<BigInteger> queried;
 
   protected BigInteger radiusValidator, radiusNonValidator;
@@ -48,6 +49,8 @@ public abstract class SamplingOperation extends FindOperation {
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
     nodes = new LinkedHashMap<>();
+    this.available_requests = 0;
+    aggressiveness = 0;
   }
 
   public SamplingOperation(
@@ -65,7 +68,8 @@ public abstract class SamplingOperation extends FindOperation {
     this.isValidator = isValidator;
     this.callback = callback;
     currentBlock = block;
-
+    this.available_requests = 0;
+    aggressiveness = 0;
     radiusValidator =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
@@ -104,6 +108,8 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger getNeighbour() {
 
     if (nodes.isEmpty()) {
+      System.out.println(this.srcNode + " nodes list recreated");
+      aggressiveness++;
       for (BigInteger sample : samples.keySet()) {
         if (!samples.get(sample).isDownloaded()) {
           List<BigInteger> validatorsBySample =
@@ -115,7 +121,7 @@ public abstract class SamplingOperation extends FindOperation {
           if (validatorsBySample != null && validatorsBySample.size() > 0) {
             for (BigInteger id : validatorsBySample) {
               if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
-              nodes.get(id).addSample(sample);
+              nodes.get(id).addSample(samples.get(sample));
             }
             found = true;
           }
@@ -123,7 +129,7 @@ public abstract class SamplingOperation extends FindOperation {
             for (BigInteger id : nonValidatorsBySample) {
               if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
 
-              nodes.get(id).addSample(sample);
+              nodes.get(id).addSample(samples.get(sample));
             }
             found = true;
           }
@@ -146,14 +152,33 @@ public abstract class SamplingOperation extends FindOperation {
 
       nodes.clear();
       for (Entry<BigInteger, Node> entry : nodeEntries) {
+        entry.getValue().setAgressiveness(aggressiveness);
         nodes.put(entry.getKey(), entry.getValue());
       }
     }
 
     for (Node n : nodes.values()) {
-      if (!n.isBeingAsked() && n.getScore() > 0) return n.getId();
-    }
 
+      if (!n.isBeingAsked() && n.getScore() > 0) {
+        System.out.println(
+            this.srcNode
+                + " "
+                + n.getId()
+                + " "
+                + n.getScore()
+                + " "
+                + n.getSamples().size()
+                + " "
+                + nodes.size());
+        n.setBeingAsked(true);
+        this.available_requests++;
+        for (FetchingSample s : n.getSamples()) {
+          System.out.println(this.srcNode + " " + s.getId() + " " + s.beingFetchedFrom.size());
+          s.addFetchingNode(n);
+        }
+        return n.getId();
+      }
+    }
     return null;
   }
 
@@ -165,6 +190,8 @@ public abstract class SamplingOperation extends FindOperation {
     }
     return true;
   }
+
+  public abstract void elaborateResponse(Sample[] sam, BigInteger node);
 
   public abstract void elaborateResponse(Sample[] sam);
 
