@@ -24,7 +24,12 @@ public abstract class SamplingOperation extends FindOperation {
   // protected HashSet<BigInteger> queried;
 
   protected BigInteger radiusValidator, radiusNonValidator;
+  protected HashMap<BigInteger, Integer> samplesFetching;
+  
 
+  protected Set<Node> nodeSet;
+  protected int agressiveness;
+  protected int agressiveness_step;
   public SamplingOperation(
       BigInteger srcNode,
       BigInteger destNode,
@@ -42,6 +47,8 @@ public abstract class SamplingOperation extends FindOperation {
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+    agressiveness=1;
+    agressiveness_step=1;
   }
 
   public SamplingOperation(
@@ -54,6 +61,8 @@ public abstract class SamplingOperation extends FindOperation {
       MissingNode callback) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<BigInteger, Boolean>();
+    samplesFetching = new HashMap<BigInteger, Integer>();
+
     completed = false;
     this.isValidator = isValidator;
     this.callback = callback;
