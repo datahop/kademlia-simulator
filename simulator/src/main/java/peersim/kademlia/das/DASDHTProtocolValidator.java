@@ -25,22 +25,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
   protected void handleSeedSample(Message m, int myPid) {
     logger.warning("seed sample receveived");
     if (m.body == null) return;
-
-    /*Sample[] samples = (Sample[]) m.body;
-    for (Sample s : samples) {
-      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
-
-      this.kadProtocol.kv.add((BigInteger) s.getIdByRow(), s);
-      this.kadProtocol.kv.add((BigInteger) s.getIdByColumn(), s);
-      // kv.add((BigInteger) s.getIdByRow(), s);
-      // kv.add((BigInteger) s.getIdByColumn(), s);
-      // count # of samples for each row and column
-      column[s.getColumn() - 1]++;
-      row[s.getRow() - 1]++;
-
-      Message msg = generatePutMessageSample(s);
-      this.kadProtocol.handleInit(msg, kademliaId);
-    }*/
   }
 
   @Override
@@ -56,7 +40,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     // logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
-    // startRandomSampling();
+    startRandomSampling();
   }
 
   /**
@@ -119,22 +103,22 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
       boolean success = false;
       logger.warning("Dosampling " + sop.getAvailableRequests());
 
-      /*while (sop.getAvailableRequests() > 0 && sop.getSamples().length > 0) {
-        BigInteger[] reqSamples = sop.getSamples();
-        BigInteger sample = reqSamples[CommonState.r.nextInt(reqSamples.length)];
-        logger.warning("Requesting sample " + sample + " " + reqSamples.length);
-        int req = sop.getAvailableRequests() - 1;
-        sop.setAvailableRequests(req);
-        Message msg = generateGetMessageSample(sample);
-        Operation get = this.kadProtocol.handleInit(msg, kademliaId);
-        kadOps.put(get, sop);
-        success = true;
-      }*/
-
       if (sop instanceof ValidatorSamplingOperationDHT) {
         ValidatorSamplingOperationDHT vop = (ValidatorSamplingOperationDHT) sop;
-        for (BigInteger sample : vop.getParcels()) {
-          Message msg = generateGetMessageSample(sample);
+        for (BigInteger parcel : vop.getParcels()) {
+          logger.warning("Sending parcel request " + parcel);
+          Message msg = generateGetMessageSample(parcel);
+          Operation get = this.kadProtocol.handleInit(msg, kademliaId);
+          kadOps.put(get, sop);
+          success = true;
+        }
+      }
+
+      if (sop instanceof RandomSamplingOperationDHT) {
+        RandomSamplingOperationDHT rop = (RandomSamplingOperationDHT) sop;
+        for (BigInteger parcel : rop.getParcels()) {
+          logger.warning("Sending parcel request " + parcel);
+          Message msg = generateGetMessageSample(parcel);
           Operation get = this.kadProtocol.handleInit(msg, kademliaId);
           kadOps.put(get, sop);
           success = true;
@@ -216,12 +200,19 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
       Parcel p = (Parcel) get.getValue();
       SamplingOperation sop = kadOps.get(get);
       kadOps.remove(get);
+      logger.warning("Operation " + sop.getId());
 
-      if (sop instanceof ValidatorSamplingOperationDHT && p != null) {
+      if (sop instanceof ValidatorSamplingOperationDHT && p == null) {
+        BigInteger parcelId = (BigInteger) get.getBody();
+        logger.warning("Sending parcel request " + parcelId);
+        Message msg = generateGetMessageSample(parcelId);
+        Operation gop = this.kadProtocol.handleInit(msg, kademliaId);
+        kadOps.put(gop, sop);
+      } else if (sop instanceof ValidatorSamplingOperationDHT && p != null) {
         ValidatorSamplingOperationDHT vop = (ValidatorSamplingOperationDHT) sop;
         vop.receivedParcel(p.getId());
         if (sop != null && !sop.completed()) {
-          logger.warning("Get operation DASDHT " + p.getId() + " " + sop);
+          logger.warning("Get operation DASDHT " + p.getId() + " " + sop.getId());
 
           sop.elaborateResponse(p.getSamples());
           sop.addHops(get.getHops());
@@ -245,7 +236,45 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
                     + CommonState.getTime()
                     + " "
                     + sop.getTimestamp());
-          } else doSampling(sop);
+          } // else doSampling(sop);
+        }
+      }
+
+      if (sop instanceof RandomSamplingOperationDHT && p == null) {
+        BigInteger parcelId = (BigInteger) get.getBody();
+        logger.warning("Sending parcel request " + parcelId);
+        Message msg = generateGetMessageSample(parcelId);
+        Operation gop = this.kadProtocol.handleInit(msg, kademliaId);
+        kadOps.put(gop, sop);
+      } else if (sop instanceof RandomSamplingOperationDHT && p != null) {
+        RandomSamplingOperationDHT vop = (RandomSamplingOperationDHT) sop;
+        vop.receivedParcel(p.getId());
+        if (sop != null && !sop.completed()) {
+          logger.warning("Get operation DASDHT " + p.getId() + " " + sop.getId());
+
+          sop.elaborateResponse(p.getSamples());
+          sop.addHops(get.getHops());
+          for (Long msg : get.getMessages()) {
+            sop.addMessage(msg);
+          }
+          logger.warning(
+              "Get operation completed "
+                  + p.getId()
+                  + " found "
+                  + sop.samplesCount()
+                  + " "
+                  + sop.completed());
+
+          if (sop.completed()) {
+            KademliaObserver.reportOperation(sop);
+            logger.warning(
+                "Sampling operation finished operationComplete "
+                    + sop.getId()
+                    + " "
+                    + CommonState.getTime()
+                    + " "
+                    + sop.getTimestamp());
+          } // else doSampling(sop);
         }
       }
     }
