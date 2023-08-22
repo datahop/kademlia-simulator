@@ -48,11 +48,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.column = column;
     if (row > 0) {
       for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, false);
+        samples.put(sample, new FetchingSample(sample));
       }
     } else if (column > 0) {
       for (BigInteger sample : block.getSamplesIdsByColumn(column)) {
-        samples.put(sample, false);
+        samples.put(sample, new FetchingSample(sample));
       }
     }
     this.searchTable = searchTable;
@@ -64,19 +64,19 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.available_requests++;
     for (Sample s : sam) {
       if (row > 0) {
-        if (samples.containsKey(s.getIdByRow())) {
-          if (!samples.get(s.getIdByRow())) {
+        if (samples.containsKey(s.getId())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
             samplesCount++;
-            samples.remove(s.getIdByRow());
-            samples.put(s.getIdByRow(), true);
           }
         }
       } else {
         if (samples.containsKey(s.getIdByColumn())) {
-          if (!samples.get(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getIdByColumn());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
             samplesCount++;
-            samples.remove(s.getIdByColumn());
-            samples.put(s.getIdByColumn(), true);
           }
         }
       }

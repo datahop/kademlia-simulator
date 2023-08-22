@@ -3,8 +3,11 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -14,7 +17,6 @@ import peersim.kademlia.operations.FindOperation;
 
 public abstract class SamplingOperation extends FindOperation {
 
-  protected HashMap<BigInteger, Boolean> samples;
   protected SearchTable searchTable;
   protected int samplesCount = 0;
   protected boolean completed;
@@ -24,12 +26,10 @@ public abstract class SamplingOperation extends FindOperation {
   // protected HashSet<BigInteger> queried;
 
   protected BigInteger radiusValidator, radiusNonValidator;
-  protected HashMap<BigInteger, Integer> samplesFetching;
-  
 
-  protected Set<Node> nodeSet;
-  protected int agressiveness;
-  protected int agressiveness_step;
+  protected LinkedHashMap<BigInteger, Node> nodes;
+  protected HashMap<BigInteger, FetchingSample> samples;
+
   public SamplingOperation(
       BigInteger srcNode,
       BigInteger destNode,
@@ -38,7 +38,6 @@ public abstract class SamplingOperation extends FindOperation {
       boolean isValidator,
       int numValidators) {
     super(srcNode, destNode, timestamp);
-    samples = new HashMap<BigInteger, Boolean>();
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
@@ -47,8 +46,8 @@ public abstract class SamplingOperation extends FindOperation {
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-    agressiveness=1;
-    agressiveness_step=1;
+    samples = new HashMap<>();
+    nodes = new LinkedHashMap<>();
   }
 
   public SamplingOperation(
@@ -60,9 +59,8 @@ public abstract class SamplingOperation extends FindOperation {
       int numValidators,
       MissingNode callback) {
     super(srcNode, destNode, timestamp);
-    samples = new HashMap<BigInteger, Boolean>();
-    samplesFetching = new HashMap<BigInteger, Integer>();
-
+    samples = new HashMap<>();
+    nodes = new LinkedHashMap<>();
     completed = false;
     this.isValidator = isValidator;
     this.callback = callback;
@@ -85,8 +83,8 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger[] getSamples() {
     List<BigInteger> result = new ArrayList<>();
 
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample)) result.add(sample);
+    for (FetchingSample sample : samples.values()) {
+      if (!sample.isDownloaded()) result.add(sample.getId());
     }
 
     return result.toArray(new BigInteger[0]);
@@ -101,27 +99,13 @@ public abstract class SamplingOperation extends FindOperation {
     return radiusNonValidator;
   }
 
-  public BigInteger[] doSampling() {
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-
-    BigInteger nextNode;
-    do {
-      nextNode = getNeighbour();
-      if (nextNode != null) nextNodes.add(nextNode);
-    } while (nextNode != null);
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    return new BigInteger[0];
-  }
+  public abstract BigInteger[] doSampling();
 
   public BigInteger getNeighbour() {
 
-    BigInteger res = null;
-    if (closestSet.isEmpty()) {
-      List<BigInteger> nodes = new ArrayList<>();
+    if (nodes.isEmpty()) {
       for (BigInteger sample : samples.keySet()) {
-
-        if (!samples.get(sample)) {
+        if (!samples.get(sample).isDownloaded()) {
           List<BigInteger> validatorsBySample =
               searchTable.getValidatorNodesbySample(sample, radiusValidator);
           List<BigInteger> nonValidatorsBySample =
@@ -129,31 +113,48 @@ public abstract class SamplingOperation extends FindOperation {
 
           boolean found = false;
           if (validatorsBySample != null && validatorsBySample.size() > 0) {
-            nodes.addAll(validatorsBySample);
-            Collections.shuffle(nodes);
+            for (BigInteger id : validatorsBySample) {
+              if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
+              nodes.get(id).addSample(sample);
+            }
             found = true;
           }
           if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-            nodes.addAll(nonValidatorsBySample);
+            for (BigInteger id : nonValidatorsBySample) {
+              if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
+
+              nodes.get(id).addSample(sample);
+            }
             found = true;
           }
           if (!found && callback != null) callback.missing(sample, this);
         }
       }
-      // Collections.shuffle(nodes);
+      Comparator<Entry<BigInteger, Node>> valueComparator =
+          new Comparator<Entry<BigInteger, Node>>() {
 
-      for (BigInteger node : nodes) {
-        if (closestSet.get(node) == null) {
-          closestSet.put(node, true);
-        }
+            @Override
+            public int compare(Entry<BigInteger, Node> e1, Entry<BigInteger, Node> e2) {
+              Node v1 = e1.getValue();
+              Node v2 = e2.getValue();
+              return v1.compareTo(v2);
+            }
+          };
+      List<Entry<BigInteger, Node>> nodeEntries =
+          new ArrayList<Entry<BigInteger, Node>>(nodes.entrySet());
+      Collections.sort(nodeEntries, valueComparator);
+
+      nodes.clear();
+      for (Entry<BigInteger, Node> entry : nodeEntries) {
+        nodes.put(entry.getKey(), entry.getValue());
       }
     }
-    if (!closestSet.isEmpty()) {
-      res = closestSet.entrySet().iterator().next().getKey();
-      this.available_requests--; // decrease available requets
-      closestSet.remove(res);
+
+    for (Node n : nodes.values()) {
+      if (!n.isBeingAsked() && n.getScore() > 0) return n.getId();
     }
-    return res;
+
+    return null;
   }
 
   public boolean increaseRadius(int multiplier) {

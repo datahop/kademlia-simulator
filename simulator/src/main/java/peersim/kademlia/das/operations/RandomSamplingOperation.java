@@ -44,16 +44,16 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
-      samples.put(rs.getId(), false);
-      samples.put(rs.getIdByColumn(), false);
+      samples.put(rs.getIdByRow(), new FetchingSample(rs.getIdByRow()));
+      samples.put(rs.getIdByColumn(), new FetchingSample(rs.getIdByColumn()));
     }
   }
 
   public boolean completed() {
 
     boolean completed = true;
-    for (BigInteger id : samples.keySet()) {
-      if (!samples.get(id)) {
+    for (FetchingSample s : samples.values()) {
+      if (!s.isDownloaded()) {
         completed = false;
         break;
       }
@@ -84,14 +84,12 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     this.available_requests++;
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId()) && samples.containsKey(s.getIdByColumn())) {
-        if (!samples.get(s.getId()) && !samples.get(s.getIdByColumn())) {
-          samples.remove(s.getId());
-          samples.remove(s.getIdByColumn());
-          samples.put(s.getIdByColumn(), true);
-          samples.put(s.getId(), true);
-          samplesCount++;
-        }
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fsRow = samples.get(s.getId());
+        FetchingSample fsColumn = samples.get(s.getIdByColumn());
+        if (!fsRow.isDownloaded()) fsRow.setDownloaded();
+        if (!fsColumn.isDownloaded()) fsColumn.setDownloaded();
+        samplesCount++;
       }
     }
     // System.out.println("Samples received " + samples.size());

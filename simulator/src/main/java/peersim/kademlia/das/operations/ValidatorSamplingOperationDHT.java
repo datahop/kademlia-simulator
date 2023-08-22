@@ -37,7 +37,7 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
     this.column = column;
     if (row > 0) {
       for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, false);
+        samples.put(sample, new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByRow(row);
@@ -46,7 +46,7 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       }
     } else if (column > 0) {
       for (BigInteger sample : block.getSamplesIdsByRow(column)) {
-        samples.put(sample, false);
+        samples.put(sample, new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByColumn(column);
@@ -76,11 +76,12 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
   public void elaborateResponse(Sample[] sam) {
 
     this.available_requests++;
+
     for (Sample s : sam) {
       if (samples.containsKey(s.getId())) {
-        if (!samples.get(s.getId())) {
-          samples.remove(s.getId());
-          samples.put(s.getId(), true);
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          fs.setDownloaded();
           samplesCount++;
         }
       }
