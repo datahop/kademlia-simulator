@@ -16,6 +16,8 @@ public class DASDHTProtocolNonValidator extends DASDHTProtocol {
   public DASDHTProtocolNonValidator(String prefix) {
     super(prefix);
     DASDHTProtocolNonValidator.prefix = prefix;
+    isValidator = false;
+    isBuilder = false;
   }
 
   public Object clone() {

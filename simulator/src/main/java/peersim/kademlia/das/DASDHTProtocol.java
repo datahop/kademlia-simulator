@@ -239,10 +239,10 @@ public class DASDHTProtocol extends DASProtocol {
    *
    * @return Message
    */
-  protected Message generatePutMessageSample(Sample s) {
+  protected Message generatePutMessageSample(Parcel p) {
 
     // Existing active destination node
-    Message m = Message.makeInitPutValue(s.getId(), s);
+    Message m = Message.makeInitPutValue(p.getId(), p);
     m.timestamp = CommonState.getTime();
 
     return m;

@@ -12,6 +12,8 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
   public DASDHTProtocolBuilder(String prefix) {
     super(prefix);
     DASDHTProtocolBuilder.prefix = prefix;
+    isBuilder = true;
+    isValidator = false;
   }
 
   public Object clone() {
@@ -32,19 +34,23 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
 
     currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
 
-    logger.warning("Parcel rows generated");
-
     currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
 
-    logger.warning("Parcel columns generated");
-
-    for (int i = 0; i < currentBlock.getSize(); i++) {
-      List<Parcel> p = currentBlock.getParcelByRow(i);
-      logger.warning("Parcel row " + i + " " + p.size());
+    for (int i = 1; i <= currentBlock.getSize(); i++) {
+      List<Parcel> list = currentBlock.getParcelByRow(i);
+      logger.warning("Parcel row " + i + " " + list.size());
+      for (Parcel p : list) {
+        Message msg = generatePutMessageSample(p);
+        this.kadProtocol.handleInit(msg, kademliaId);
+      }
     }
-    for (int i = 0; i < currentBlock.getSize(); i++) {
-      List<Parcel> p = currentBlock.getParcelByColumn(i);
-      logger.warning("Parcel column " + i + " " + p.size());
+    for (int i = 1; i <= currentBlock.getSize(); i++) {
+      List<Parcel> list = currentBlock.getParcelByColumn(i);
+      logger.warning("Parcel row " + i + " " + list.size());
+      for (Parcel p : list) {
+        Message msg = generatePutMessageSample(p);
+        this.kadProtocol.handleInit(msg, kademliaId);
+      }
     }
     /*while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();

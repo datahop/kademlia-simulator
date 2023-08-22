@@ -37,4 +37,8 @@ public class Parcel {
   public int getSize() {
     return size;
   }
+
+  public BigInteger getId() {
+    return parcelId;
+  }
 }

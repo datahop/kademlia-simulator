@@ -144,7 +144,7 @@ public class Block implements Iterator<Sample>, Cloneable {
           // System.out.println("Column " + i + " parcel " + l.size());
         }
       }
-      System.out.println("New parcel row " + i);
+      // System.out.println("New parcel row " + i);
       parcelByRow.put(i, l);
     }
   }
@@ -179,11 +179,11 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   public List<Parcel> getParcelByRow(int i) {
-    return parcelByRow.get(i);
+    return parcelByRow.get(i - 1);
   }
 
   public List<Parcel> getParcelByColumn(int i) {
-    return parcelByColumn.get(i);
+    return parcelByColumn.get(i - 1);
   }
   /**
    * Replicate this object by returning an identical copy.<br>

@@ -1,13 +1,19 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
+import peersim.kademlia.das.Parcel;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
 
 public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
+
+  protected HashMap<BigInteger, Boolean> parcels;
 
   public ValidatorSamplingOperationDHT(
       BigInteger srcNode,
@@ -26,6 +32,7 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
     assert (row == 0 || column == 0) : "Either row or column should be set";
     assert (!(row == 0 && column == 0)) : "Both row or column are set";
 
+    this.parcels = new HashMap<>();
     this.row = row;
     this.column = column;
     if (row > 0) {
@@ -33,14 +40,32 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
         samples.put(sample, false);
         // System.out.println(srcNode + " " + sample);
       }
+      List<Parcel> list = block.getParcelByRow(row);
+      for (Parcel p : list) {
+        parcels.put(p.getId(), false);
+      }
     } else if (column > 0) {
       for (BigInteger sample : block.getSamplesIdsByRow(column)) {
         samples.put(sample, false);
         // System.out.println(srcNode + " " + sample);
       }
+      List<Parcel> list = block.getParcelByColumn(column);
+      for (Parcel p : list) {
+        parcels.put(p.getId(), false);
+      }
     }
     this.searchTable = searchTable;
     setAvailableRequests(KademliaCommonConfigDas.ALPHA);
+  }
+
+  public BigInteger[] getParcels() {
+    List<BigInteger> result = new ArrayList<>();
+
+    for (BigInteger parcelId : parcels.keySet()) {
+      if (!parcels.get(parcelId)) result.add(parcelId);
+    }
+
+    return result.toArray(new BigInteger[0]);
   }
 
   public void elaborateResponse(Sample[] sam) {

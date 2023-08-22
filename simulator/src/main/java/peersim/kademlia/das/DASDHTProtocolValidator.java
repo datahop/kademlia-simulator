@@ -2,7 +2,6 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
-import peersim.core.Network;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
@@ -52,6 +51,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
+
     // logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
@@ -65,15 +65,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
    * @param myPid protocol pid
    */
   protected void startRowsandColumnsSampling() {
-    logger.warning(
-        "Starting rows and columns fetch "
-            + rowWithHighestNumSamples()
-            + " "
-            + row[rowWithHighestNumSamples()]
-            + " "
-            + columnWithHighestNumSamples()
-            + " "
-            + column[columnWithHighestNumSamples()]);
 
     // start 2 row 2 column Validator operation (1 row/column with the highest number of samples
     // already downloaded and another random)
@@ -102,16 +93,10 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
 
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
-    logger.warning(
-        "Sampling operation started validator "
-            + op.getId()
-            + " "
-            + KademliaCommonConfigDas.ALPHA
-            + " "
-            + timestamp);
+    logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
     // op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    op.setAvailableRequests(Network.size());
+    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     doSampling(op);
   }
 
@@ -145,11 +130,14 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
         success = true;
       }*/
 
-      for (BigInteger sample : sop.getSamples()) {
-        Message msg = generateGetMessageSample(sample);
-        Operation get = this.kadProtocol.handleInit(msg, kademliaId);
-        kadOps.put(get, sop);
-        success = true;
+      if (sop instanceof ValidatorSamplingOperationDHT) {
+        ValidatorSamplingOperationDHT vop = (ValidatorSamplingOperationDHT) sop;
+        for (BigInteger sample : vop.getParcels()) {
+          Message msg = generateGetMessageSample(sample);
+          Operation get = this.kadProtocol.handleInit(msg, kademliaId);
+          kadOps.put(get, sop);
+          success = true;
+        }
       }
       return success;
     }

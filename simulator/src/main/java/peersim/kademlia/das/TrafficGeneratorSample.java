@@ -132,6 +132,7 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();
+        // we add 1 ms delay to be sure the builder starts before validators.
         if (n.getDASProtocol().isBuilder())
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
         else
