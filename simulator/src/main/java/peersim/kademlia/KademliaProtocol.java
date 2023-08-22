@@ -107,7 +107,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   public KademliaProtocol(String prefix) {
     this.node = null; // empty nodeId
     KademliaProtocol.prefix = prefix;
-
     _init();
 
     routingTable =
@@ -171,7 +170,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   private void handleResponse(Message m, int myPid) {
     // Add the message source to my routing table
-    if (m.src != null) {
+    if (m.src != null && m.src.isServer()) {
       routingTable.addNeighbour(m.src.getId());
     }
 
@@ -186,7 +185,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       // Save received neighbour in the closest Set of fin operation
       BigInteger[] neighbours = (BigInteger[]) m.body;
       if (callback != null) callback.nodesFound(fop, neighbours);
-      for (BigInteger neighbour : neighbours) routingTable.addNeighbour(neighbour);
+      for (BigInteger neighbour : neighbours)
+        if (Util.nodeIdtoNode(neighbour, myPid).getKademliaProtocol().getKademliaNode().isServer())
+          routingTable.addNeighbour(neighbour);
 
       if (!fop.isFinished()
           && Arrays.asList(neighbours).contains(fop.getDestNode())
@@ -504,7 +505,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   private void sendMessage(Message m, BigInteger destId, int myPid) {
     // Add destination node to routing table
-    this.routingTable.addNeighbour(destId);
+    if (Util.nodeIdtoNode(destId, myPid).getKademliaProtocol().getKademliaNode().isServer())
+      this.routingTable.addNeighbour(destId);
     // int destpid;
 
     // Assert that message source and destination nodes are not null

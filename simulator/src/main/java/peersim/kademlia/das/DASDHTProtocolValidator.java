@@ -175,21 +175,10 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
   @Override
   public void missing(BigInteger sample, Operation op) {}
 
-  /*@Override
+  @Override
   public void putValueReceived(Object o) {
-    Sample s = (Sample) o;
-    logger.warning("Sample received put operation " + s.getId());
-
-    column[s.getColumn() - 1]++;
-    row[s.getRow() - 1]++;
-
-    if (!samplingStarted) {
-      logger.warning("Starting validator (rows and columns) sampling");
-      startRowsandColumnsSampling();
-      startRandomSampling();
-      samplingStarted = true;
-    }
-  }*/
+    logger.warning("validator Parcel received put operation ");
+  }
 
   @Override
   public void operationComplete(Operation op) {
