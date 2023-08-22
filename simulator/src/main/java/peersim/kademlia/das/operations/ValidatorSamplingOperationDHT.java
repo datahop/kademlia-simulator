@@ -68,6 +68,11 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
     return result.toArray(new BigInteger[0]);
   }
 
+  public void receivedParcel(BigInteger id) {
+    parcels.remove(id);
+    parcels.put(id, true);
+  }
+
   public void elaborateResponse(Sample[] sam) {
 
     this.available_requests++;

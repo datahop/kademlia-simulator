@@ -7,6 +7,7 @@ import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.das.operations.ValidatorSamplingOperationDHT;
+import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 
 public class DASDHTProtocolValidator extends DASDHTProtocol {
@@ -210,39 +211,44 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
   public void operationComplete(Operation op) {
     logger.warning("Operation complete " + op.getClass().getSimpleName());
 
-    /*if (op instanceof GetOperation) {
+    if (op instanceof GetOperation) {
       GetOperation get = (GetOperation) op;
-      Sample s = (Sample) get.getValue();
+      Parcel p = (Parcel) get.getValue();
       SamplingOperation sop = kadOps.get(get);
-      logger.warning("Get operation DASDHT " + s + " " + sop);
       kadOps.remove(get);
-      if (sop != null && s != null && !sop.completed()) {
-        Sample[] samples = {s};
-        sop.elaborateResponse(samples);
-        sop.addHops(get.getHops());
-        for (Long msg : get.getMessages()) {
-          sop.addMessage(msg);
-        }
-        logger.warning(
-            "Get operation completed "
-                + s.getId()
-                + " found "
-                + sop.samplesCount()
-                + " "
-                + sop.completed());
 
-        if (sop.completed()) {
-          KademliaObserver.reportOperation(sop);
+      if (sop instanceof ValidatorSamplingOperationDHT && p != null) {
+        ValidatorSamplingOperationDHT vop = (ValidatorSamplingOperationDHT) sop;
+        vop.receivedParcel(p.getId());
+        if (sop != null && !sop.completed()) {
+          logger.warning("Get operation DASDHT " + p.getId() + " " + sop);
+
+          sop.elaborateResponse(p.getSamples());
+          sop.addHops(get.getHops());
+          for (Long msg : get.getMessages()) {
+            sop.addMessage(msg);
+          }
           logger.warning(
-              "Sampling operation finished operationComplete "
-                  + sop.getId()
+              "Get operation completed "
+                  + p.getId()
+                  + " found "
+                  + sop.samplesCount()
                   + " "
-                  + CommonState.getTime()
-                  + " "
-                  + sop.getTimestamp());
-        } // else doSampling(sop);
+                  + sop.completed());
+
+          if (sop.completed()) {
+            KademliaObserver.reportOperation(sop);
+            logger.warning(
+                "Sampling operation finished operationComplete "
+                    + sop.getId()
+                    + " "
+                    + CommonState.getTime()
+                    + " "
+                    + sop.getTimestamp());
+          } else doSampling(sop);
+        }
       }
-    }*/
+    }
   }
 
   /**

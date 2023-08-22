@@ -207,24 +207,8 @@ public class DASDHTProtocol extends DASProtocol {
 
   @Override
   public void putValueReceived(Object o) {
-    Sample s = (Sample) o;
-    logger.warning("Sample received put operation " + s.getId());
-
-    column[s.getColumn()]++;
-    row[s.getRow()]++;
-
-    if (!samplingStarted) {
-      if (isValidator()) {
-        logger.warning("Starting validator (rows and columns) sampling");
-        startRowsandColumnsSampling();
-        startRandomSampling();
-
-      } else {
-        logger.warning("Starting non-validator random sampling");
-        startRandomSampling();
-      }
-      samplingStarted = true;
-    }
+    Parcel p = (Parcel) o;
+    logger.warning("Parcel received put operation " + p.getId());
   }
 
   @Override

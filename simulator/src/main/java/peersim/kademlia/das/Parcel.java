@@ -41,4 +41,8 @@ public class Parcel {
   public BigInteger getId() {
     return parcelId;
   }
+
+  public Sample[] getSamples() {
+    return samples.values().toArray(new Sample[0]);
+  }
 }
