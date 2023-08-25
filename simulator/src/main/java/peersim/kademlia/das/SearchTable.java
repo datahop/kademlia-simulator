@@ -170,8 +170,6 @@ public class SearchTable {
     return result;
   }
 
-  public 
-
   /*public BigInteger[] findKClosestValidators(BigInteger sampleId) {
 
     return routingTable.getNeighbours(sampleId, sampleId);
