@@ -44,12 +44,12 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.row = row;
     this.column = column;
     if (row > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, new FetchingSample(sample));
+      for (Sample sample : block.getSamplesByRow(row)) {
+        samples.put(sample.getId(), new FetchingSample(sample));
       }
     } else if (column > 0) {
-      for (BigInteger sample : block.getSamplesIdsByColumn(column)) {
-        samples.put(sample, new FetchingSample(sample));
+      for (Sample sample : block.getSamplesByColumn(column)) {
+        samples.put(sample.getIdByColumn(), new FetchingSample(sample));
       }
     }
     this.searchTable = searchTable;

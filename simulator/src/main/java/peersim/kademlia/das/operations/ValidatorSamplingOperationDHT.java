@@ -35,8 +35,8 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
     this.row = row;
     this.column = column;
     if (row > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, new FetchingSample(sample));
+      for (Sample sample : block.getSamplesByRow(row)) {
+        samples.put(sample.getId(), new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByRow(row);
@@ -44,8 +44,8 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
         parcels.put(p.getId(), false);
       }
     } else if (column > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(column)) {
-        samples.put(sample, new FetchingSample(sample));
+      for (Sample sample : block.getSamplesByColumn(column)) {
+        samples.put(sample.getIdByColumn(), new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByColumn(column);

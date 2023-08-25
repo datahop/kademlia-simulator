@@ -40,7 +40,7 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
     samples.clear();
     for (Sample rs : randomSamples) {
       // samples.put(rs.getId(), false);
-      samples.put(rs.getId(), new FetchingSample(rs.getId()));
+      samples.put(rs.getId(), new FetchingSample(rs));
       Parcel parcel = currentBlock.getParcel(rs.getId());
       parcels.put(parcel.getId(), false);
     }

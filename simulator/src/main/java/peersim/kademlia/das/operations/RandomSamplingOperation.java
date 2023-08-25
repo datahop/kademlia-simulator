@@ -1,7 +1,9 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -41,9 +43,9 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
-      FetchingSample s = new FetchingSample(rs.getIdByRow());
+      FetchingSample s = new FetchingSample(rs);
       samples.put(rs.getIdByRow(), s);
-      samples.put(rs.getIdByColumn(), s);
+      // samples.put(rs.getIdByColumn(), s);
     }
     createNodes();
   }
@@ -102,6 +104,66 @@ public class RandomSamplingOperation extends SamplingOperation {
     // System.out.println("Samples received " + samplesCount);
 
     // System.out.println("Samples received " + samples.size());
+  }
+
+  protected void createNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+
+        List<BigInteger> validatorsBySampleRow =
+            SearchTable.getNodesBySample(samples.get(sample).getId());
+        List<BigInteger> validatorsBySampleColumn =
+            SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+
+        List<BigInteger> validatorsBySample = new ArrayList<>();
+
+        validatorsBySample.addAll(validatorsBySampleRow);
+        validatorsBySample.addAll(validatorsBySampleColumn);
+
+        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
+        nonValidatorsBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
+        nonValidatorsBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusNonValidator));
+
+        boolean found = false;
+
+        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
+          for (BigInteger id : validatorsBySampleRow) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+
+        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+          for (BigInteger id : nonValidatorsBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+          for (BigInteger id : nonValidatorsBySample) {
+            if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
+
+            nodes.get(id).addSample(samples.get(sample));
+          }
+          found = true;
+        }*/
+        if (!found && callback != null) callback.missing(sample, this);
+      }
+    }
   }
 
   public Map<String, Object> toMap() {
