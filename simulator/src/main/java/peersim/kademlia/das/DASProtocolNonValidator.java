@@ -64,7 +64,6 @@ public class DASProtocolNonValidator extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    reqSamples.clear();
     logger.warning("Starting random sampling");
     startRandomSampling();
   }

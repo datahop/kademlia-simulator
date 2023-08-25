@@ -26,6 +26,8 @@ public class SearchTable {
 
   private RoutingTable routingTable;
 
+  private BigInteger builderAddress;
+
   public SearchTable(/*Block currentblock , BigInteger id*/ ) {
 
     // this.currentBlock = currentblock;
@@ -64,7 +66,9 @@ public class SearchTable {
   public void addNodes(BigInteger[] nodes) {
 
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id) && !validatorsIndexed.contains(id)) {
+      if (!blackList.contains(id)
+          && !validatorsIndexed.contains(id)
+          && !builderAddress.equals(id)) {
         nonValidatorsIndexed.add(id);
       }
     }
@@ -88,8 +92,12 @@ public class SearchTable {
     }
   }
 
+  public void setBuilderAddress(BigInteger builderAddress) {
+    this.builderAddress = builderAddress;
+  }
+
   public void removeNode(BigInteger node) {
-    this.blackList.add(node);
+    // this.blackList.add(node);
     this.nodesIndexed.remove(node);
     this.validatorsIndexed.remove(node);
     this.nonValidatorsIndexed.remove(node);
@@ -97,6 +105,10 @@ public class SearchTable {
 
   public TreeSet<BigInteger> nodesIndexed() {
     return nonValidatorsIndexed;
+  }
+
+  public TreeSet<BigInteger> getValidatorsIndexed() {
+    return validatorsIndexed;
   }
 
   /*public HashSet<BigInteger> samplesIndexed() {
@@ -109,6 +121,7 @@ public class SearchTable {
     if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
 
     BigInteger top = sampleId.add(radius);
+    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
 
     Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
@@ -123,7 +136,7 @@ public class SearchTable {
     if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
 
     BigInteger top = sampleId.add(radius);
-
+    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
     Collection<BigInteger> subSet = validatorsIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
 
@@ -137,6 +150,7 @@ public class SearchTable {
     if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
 
     BigInteger top = sampleId.add(radius);
+    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
 
     Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
@@ -155,6 +169,8 @@ public class SearchTable {
     }
     return result;
   }
+
+  public 
 
   /*public BigInteger[] findKClosestValidators(BigInteger sampleId) {
 

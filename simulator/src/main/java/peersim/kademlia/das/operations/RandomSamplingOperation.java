@@ -1,9 +1,7 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -47,6 +45,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       samples.put(rs.getIdByRow(), s);
       samples.put(rs.getIdByColumn(), s);
     }
+    createNodes();
   }
 
   public boolean completed() {
@@ -61,25 +60,6 @@ public class RandomSamplingOperation extends SamplingOperation {
     return completed;
   }
 
-  public BigInteger[] doSampling() {
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-
-    while (true) { // I can send a new find request
-
-      // get an available neighbour
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      } else {
-        break;
-      }
-    }
-
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    else return new BigInteger[0];
-  }
-
   public void elaborateResponse(Sample[] sam) {
 
     for (Sample s : sam) {
@@ -91,14 +71,22 @@ public class RandomSamplingOperation extends SamplingOperation {
         }
       }
     }
-    System.out.println("Samples received " + samplesCount);
+    // System.out.println("Samples received " + samplesCount);
   }
 
   public void elaborateResponse(Sample[] sam, BigInteger node) {
     this.available_requests--;
-    if (this.available_requests == 0) nodes.clear();
+    // if (this.available_requests == 0) nodes.clear();
+
+    Node n = nodes.get(node);
+    if (n != null) {
+      for (FetchingSample s : n.getSamples()) {
+        s.removeFetchingNode(n);
+      }
+    }
 
     for (Sample s : sam) {
+
       if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
         FetchingSample fs = samples.get(s.getId());
         if (!fs.isDownloaded()) {
@@ -110,7 +98,8 @@ public class RandomSamplingOperation extends SamplingOperation {
     }
 
     nodes.remove(node);
-    System.out.println("Samples received " + samplesCount);
+    askNodes.add(node);
+    // System.out.println("Samples received " + samplesCount);
 
     // System.out.println("Samples received " + samples.size());
   }

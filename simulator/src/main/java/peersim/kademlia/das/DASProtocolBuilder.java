@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import peersim.core.Node;
-import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
@@ -52,39 +51,45 @@ public class DASProtocolBuilder extends DASProtocol {
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;
     int samplesNonValidators = 0;
+    int timesMultiplied = 0;
+    int maxMultiplied = 0;
+    int totalMax = 0;
+
     while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       boolean inRegion = false;
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length);
-      BigInteger radiusNonValidator =
-          currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+      /*BigInteger radiusNonValidator =
+      currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);*/
+      maxMultiplied = 0;
       while (!inRegion) {
         List<BigInteger> idsValidatorsRows =
             searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
         List<BigInteger> idsValidatorsColumns =
             searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
 
-        List<BigInteger> idsNonValidatorsRows =
+        /*List<BigInteger> idsNonValidatorsRows =
             getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
         List<BigInteger> idsNonValidatorsColumns =
-            getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);
+            getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);*/
 
         List<BigInteger> idsValidators = new ArrayList<>();
         idsValidators.addAll(idsValidatorsRows);
         idsValidators.addAll(idsValidatorsColumns);
 
-        List<BigInteger> idsNonValidators = new ArrayList<>();
+        /*List<BigInteger> idsNonValidators = new ArrayList<>();
         idsNonValidators.addAll(idsNonValidatorsRows);
-        idsNonValidators.addAll(idsNonValidatorsColumns);
+        idsNonValidators.addAll(idsNonValidatorsColumns);*/
 
-        logger.warning(
-            "New sample " + s.getRow() + " " + s.getColumn() + " " + idsValidators.size());
         /*  + " "
         + +idsNonValidators.size());*/
 
         for (BigInteger id : idsValidators) {
+
+          logger.warning(
+              "Sending sample " + s.getIdByRow() + " " + s.getIdByColumn() + " to " + id);
           Node n = Util.nodeIdtoNode(id, kademliaId);
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
@@ -103,7 +108,7 @@ public class DASProtocolBuilder extends DASProtocol {
           }
         }
 
-        for (BigInteger id : idsNonValidators) {
+        /*for (BigInteger id : idsNonValidators) {
           Node n = Util.nodeIdtoNode(id, kademliaId);
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
@@ -119,11 +124,17 @@ public class DASProtocolBuilder extends DASProtocol {
                   2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
             }
           }
-        }
-        if (!inRegion) {
+        }*/
+        if (!inRegion && maxMultiplied < KademliaCommonConfigDas.multiplyRadiusLimit) {
           radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+          maxMultiplied++;
+          timesMultiplied++;
+          logger.warning("Multiplying radius " + maxMultiplied);
+
+          if (totalMax < maxMultiplied) totalMax = maxMultiplied;
           // radiusNonValidator = radiusNonValidator.multiply(BigInteger.valueOf(2));
         }
+        if (maxMultiplied == KademliaCommonConfigDas.multiplyRadiusLimit && !inRegion) break;
       }
       // searchTable.getV
       /*while (!inRegion) {
@@ -191,7 +202,11 @@ public class DASProtocolBuilder extends DASProtocol {
             + " "
             + samplesValidators
             + " "
-            + samplesNonValidators);
+            + samplesNonValidators
+            + " "
+            + timesMultiplied
+            + " "
+            + totalMax);
   }
 
   @Override

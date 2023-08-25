@@ -1,9 +1,7 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.MissingNode;
@@ -55,6 +53,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
+    createNodes();
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -85,14 +84,20 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   public void elaborateResponse(Sample[] sam, BigInteger n) {
 
     this.available_requests--;
-    if (this.available_requests == 0) nodes.clear();
+    // if (this.available_requests == 0) nodes.clear();
+
+    Node node = nodes.get(n);
+    if (node != null) {
+      for (FetchingSample s : node.getSamples()) {
+        s.removeFetchingNode(node);
+      }
+    }
     for (Sample s : sam) {
       if (row > 0) {
         if (samples.containsKey(s.getId())) {
           FetchingSample fs = samples.get(s.getId());
           if (!fs.isDownloaded()) {
             fs.setDownloaded();
-            fs.removeFetchingNode(nodes.get(n));
             samplesCount++;
           }
         }
@@ -101,7 +106,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           FetchingSample fs = samples.get(s.getIdByColumn());
           if (!fs.isDownloaded()) {
             fs.setDownloaded();
-            fs.removeFetchingNode(nodes.get(n));
             samplesCount++;
           }
         }
@@ -109,6 +113,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
+    askNodes.add(n);
 
     nodes.remove(n);
   }
@@ -116,25 +121,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     return completed;
-  }
-
-  public BigInteger[] doSampling() {
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-
-    while (true) { // I can send a new find request
-
-      // get an available neighbour
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      } else {
-        break;
-      }
-    }
-
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    else return new BigInteger[0];
   }
 
   public int getRow() {
