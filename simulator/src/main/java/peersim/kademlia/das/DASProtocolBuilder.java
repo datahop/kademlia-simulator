@@ -66,9 +66,11 @@ public class DASProtocolBuilder extends DASProtocol {
       maxMultiplied = 0;
       while (!inRegion) {
         List<BigInteger> idsValidatorsRows =
-            searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
+            // searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
+            SearchTable.getNodesBySample(s.getIdByRow());
         List<BigInteger> idsValidatorsColumns =
-            searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
+            // searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
+            SearchTable.getNodesBySample(s.getIdByColumn());
 
         /*List<BigInteger> idsNonValidatorsRows =
             getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);

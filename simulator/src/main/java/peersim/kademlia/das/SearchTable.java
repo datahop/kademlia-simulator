@@ -3,12 +3,13 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 // import peersim.kademlia.KademliaCommonConfig;
-import peersim.kademlia.RoutingTable;
 
 public class SearchTable {
 
@@ -18,14 +19,13 @@ public class SearchTable {
 
   private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
-  private TreeSet<BigInteger> validatorsIndexed; // , samplesIndexed;
+  private static TreeSet<BigInteger> validatorsIndexed = new TreeSet<>(); // , samplesIndexed;
 
   private TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
 
   private HashSet<BigInteger> blackList; // , samplesIndexed;
 
-  private RoutingTable routingTable;
-
+  private static HashMap<BigInteger, List<BigInteger>> sampleMap = new HashMap<>();
   private BigInteger builderAddress;
 
   public SearchTable(/*Block currentblock , BigInteger id*/ ) {
@@ -33,7 +33,6 @@ public class SearchTable {
     // this.currentBlock = currentblock;
     // this.sampleMap = new HashMap<>();
     this.nodesIndexed = new TreeSet<>();
-    this.validatorsIndexed = new TreeSet<>();
     this.nonValidatorsIndexed = new TreeSet<>();
 
     this.blackList = new HashSet<>();
@@ -99,7 +98,7 @@ public class SearchTable {
   public void removeNode(BigInteger node) {
     // this.blackList.add(node);
     this.nodesIndexed.remove(node);
-    this.validatorsIndexed.remove(node);
+    // this.validatorsIndexed.remove(node);
     this.nonValidatorsIndexed.remove(node);
   }
 
@@ -168,6 +167,116 @@ public class SearchTable {
       result.addAll(getNodesbySample(sample, radius));
     }
     return result;
+  }
+
+  public static void createSampleMap(Block currentBlock) {
+
+    int validatorParcelSize =
+        (currentBlock.getSize()
+                * currentBlock.getSize()
+                * KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)
+            / KademliaCommonConfigDas.validatorsSize;
+
+    if (validatorParcelSize == 0) validatorParcelSize = 1;
+    Random r = new Random();
+    List<BigInteger> list = new ArrayList<BigInteger>(validatorsIndexed);
+
+    List<BigInteger> sampleList = new ArrayList<>();
+
+    // Assigning samples to node by row
+    for (int h = 0; h < KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER; h++) {
+      for (int i = 0; i < currentBlock.getSize(); i++) {
+        for (int j = 0; j < currentBlock.getSize(); j++) {
+          sampleList.add(currentBlock.getSample(i, j).getIdByRow());
+          if (sampleList.size() == validatorParcelSize) {
+            BigInteger node = list.get(r.nextInt(list.size()));
+            // samples.put(node, sampleList);
+            for (BigInteger sample : sampleList) {
+              if (sampleMap.containsKey(sample)) {
+                /*System.out.println(
+                "assign samples to node " + node + " " + sampleMap.get(sample).size());*/
+                sampleMap.get(sample).add(node);
+              } else {
+                List<BigInteger> nList = new ArrayList<>();
+                nList.add(node);
+                sampleMap.put(sample, nList);
+              }
+            }
+            sampleList.clear();
+          }
+        }
+      }
+    }
+    if (sampleList.size() != 0) {
+      BigInteger node = list.get(r.nextInt(list.size()));
+      // samples.put(node, sampleList);
+      for (BigInteger sample : sampleList) {
+        if (sampleMap.containsKey(sample)) sampleMap.get(sample).add(node);
+        else {
+          List<BigInteger> nList = new ArrayList<>();
+          nList.add(node);
+          sampleMap.put(sample, nList);
+        }
+      }
+      sampleList.clear();
+    }
+
+    // Assigning samples to node by column
+    for (int h = 0; h < KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER; h++) {
+      for (int i = 0; i < currentBlock.getSize(); i++) {
+        for (int j = 0; j < currentBlock.getSize(); j++) {
+          sampleList.add(currentBlock.getSample(j, i).getIdByColumn());
+          if (sampleList.size() == validatorParcelSize) {
+            BigInteger node = list.get(r.nextInt(list.size()));
+            // samples.put(node, sampleList);
+            for (BigInteger sample : sampleList) {
+              // System.out.println("assign samples to node " + node + " " + nodeMap.size());
+              if (sampleMap.containsKey(sample)) {
+                /*System.out.println(
+                "assign samples to node " + node + " " + sampleMap.get(sample).size());*/
+                sampleMap.get(sample).add(node);
+              } else {
+                List<BigInteger> nList = new ArrayList<>();
+                nList.add(node);
+                sampleMap.put(sample, nList);
+              }
+            }
+            sampleList.clear();
+          }
+        }
+      }
+    }
+    if (sampleList.size() != 0) {
+      BigInteger node = list.get(r.nextInt(list.size()));
+      // samples.put(node, sampleList);
+      for (BigInteger sample : sampleList) {
+        if (sampleMap.containsKey(sample)) sampleMap.get(sample).add(node);
+        else {
+          List<BigInteger> nList = new ArrayList<>();
+          nList.add(node);
+          sampleMap.put(sample, nList);
+        }
+      }
+      sampleList.clear();
+    }
+
+    System.out.println(
+        "samples "
+            + validatorParcelSize
+            + " "
+            + sampleMap.size()
+            + " "
+            + sampleList.size()
+            + " "
+            + currentBlock.getSize());
+
+    /*for (List<BigInteger> l : sampleMap.values()) {
+      System.out.println("samples " + l.size());
+    }*/
+  }
+
+  public static List<BigInteger> getNodesBySample(BigInteger s) {
+    return sampleMap.get(s);
   }
 
   /*public BigInteger[] findKClosestValidators(BigInteger sampleId) {

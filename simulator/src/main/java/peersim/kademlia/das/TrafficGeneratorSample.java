@@ -129,6 +129,8 @@ public class TrafficGeneratorSample implements Control {
       first = false;
       second = true;
     } else /*if (second)*/ {
+
+      SearchTable.createSampleMap(b);
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();

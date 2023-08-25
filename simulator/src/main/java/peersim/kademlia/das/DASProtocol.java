@@ -608,8 +608,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             logger.warning("Increasing radius");
             if (!increase) {
               if (sop instanceof ValidatorSamplingOperation)
-                logger.warning("Sampling operation finished validator failed");
-              else logger.warning("Sampling operation finished random failed");
+                logger.warning("Sampling operation finished validator failed " + sop.getId());
+              else logger.warning("Sampling operation finished random failed " + sop.getId());
 
               samplingOp.remove(sop.getId());
               KademliaObserver.reportOperation(sop);

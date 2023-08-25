@@ -111,18 +111,20 @@ public abstract class SamplingOperation extends FindOperation {
       if (!samples.get(sample).isDownloaded()) {
         // System.out.println(
         //    this.srcNode + "creating nodes list " + searchTable.getValidatorsIndexed().size());
-        List<BigInteger> validatorsBySample =
-            searchTable.getValidatorNodesbySample(sample, radiusValidator);
+        // List<BigInteger> validatorsBySample =
+        //    searchTable.getValidatorNodesbySample(sample, radiusValidator);
 
+        List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
         /*List<BigInteger> nonValidatorsBySample =
         searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);*/
 
         boolean found = false;
         if (validatorsBySample != null && validatorsBySample.size() > 0) {
           for (BigInteger id : validatorsBySample) {
-
-            if (!nodes.containsKey(id) && !askNodes.contains(id)) {
+            if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
               nodes.get(id).addSample(samples.get(sample));
             }
           }
@@ -149,11 +151,11 @@ public abstract class SamplingOperation extends FindOperation {
     orderNodes();
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
-      /*System.out.println(
+      System.out.println(
           this.srcNode + "] Querying node " + n.getId() + " " + +n.getScore() + " " + this.getId());
-      for (FetchingSample fs : n.getSamples())
-        System.out.println(
-            this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());*/
+      // for (FetchingSample fs : n.getSamples())
+      //  System.out.println(
+      //      this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());
 
       if (n.getScore() == 0) break;
       n.setBeingAsked(true);
