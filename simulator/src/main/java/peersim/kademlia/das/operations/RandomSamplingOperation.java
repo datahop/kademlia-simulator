@@ -101,9 +101,6 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     nodes.remove(node);
     askNodes.add(node);
-    // System.out.println("Samples received " + samplesCount);
-
-    // System.out.println("Samples received " + samples.size());
   }
 
   protected void createNodes() {
@@ -153,14 +150,7 @@ public class RandomSamplingOperation extends SamplingOperation {
           }
           found = true;
         }
-        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
 
-            nodes.get(id).addSample(samples.get(sample));
-          }
-          found = true;
-        }*/
         if (!found && callback != null) callback.missing(sample, this);
       }
     }

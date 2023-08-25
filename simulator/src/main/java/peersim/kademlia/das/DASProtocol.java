@@ -574,48 +574,41 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       boolean success = false;
       if (sop.getAvailableRequests() == 0) {
         logger.warning("Doing sampling again " + sop.getId());
-        while (!success) {
-          BigInteger[] nextNodes = sop.doSampling();
-          for (BigInteger nextNode : nextNodes) {
-            BigInteger[] reqSamples = sop.getSamples();
-            logger.warning(
-                "sending to node "
-                    + nextNode
-                    + " "
-                    + reqSamples.length
-                    + " "
-                    + sop.getAvailableRequests()
-                    + " "
-                    + sop.getId());
+        BigInteger[] nextNodes = sop.doSampling();
+        for (BigInteger nextNode : nextNodes) {
+          BigInteger[] reqSamples = sop.getSamples();
+          logger.warning(
+              "sending to node "
+                  + nextNode
+                  + " "
+                  + reqSamples.length
+                  + " "
+                  + sop.getAvailableRequests()
+                  + " "
+                  + sop.getId());
 
-            Message msg = generateGetSampleMessage(reqSamples);
-            msg.operationId = sop.getId();
-            msg.src = this.kadProtocol.getKademliaNode();
-            success = true;
-            msg.dst =
-                Util.nodeIdtoNode(nextNode, kademliaId).getKademliaProtocol().getKademliaNode();
-            /*if (nextNode.compareTo(builderAddress) == 0) {
-              logger.warning("Error sending to builder or 0 samples assigned");
-              continue;
-            }*/
-            sop.addMessage(msg.id);
-            // logger.warning("Send message " + dasID + " " + this);
-            sendMessage(msg, nextNode, dasID);
-            sop.getMessages();
-          }
-          if (!success) {
-            boolean increase = sop.increaseRadius(2);
-            logger.warning("Increasing radius");
-            if (!increase) {
-              if (sop instanceof ValidatorSamplingOperation)
-                logger.warning("Sampling operation finished validator failed " + sop.getId());
-              else logger.warning("Sampling operation finished random failed " + sop.getId());
+          Message msg = generateGetSampleMessage(reqSamples);
+          msg.operationId = sop.getId();
+          msg.src = this.kadProtocol.getKademliaNode();
+          success = true;
+          msg.dst = Util.nodeIdtoNode(nextNode, kademliaId).getKademliaProtocol().getKademliaNode();
+          /*if (nextNode.compareTo(builderAddress) == 0) {
+            logger.warning("Error sending to builder or 0 samples assigned");
+            continue;
+          }*/
+          sop.addMessage(msg.id);
+          // logger.warning("Send message " + dasID + " " + this);
+          sendMessage(msg, nextNode, dasID);
+          sop.getMessages();
+        }
+        if (!success) {
 
-              samplingOp.remove(sop.getId());
-              KademliaObserver.reportOperation(sop);
-              break;
-            }
-          }
+          if (sop instanceof ValidatorSamplingOperation)
+            logger.warning("Sampling operation finished validator failed " + sop.getId());
+          else logger.warning("Sampling operation finished random failed " + sop.getId());
+
+          samplingOp.remove(sop.getId());
+          KademliaObserver.reportOperation(sop);
         }
       }
       return success;
@@ -710,21 +703,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     for (BigInteger id : ids) {
       logger.warning("Found id " + id + " for sample " + sample);
     }
-    /*if (!queried.contains(sample) && kadOps.size() < 3) {
-      Message lookup = Util.generateFindNodeMessage(sample);
-      Operation lop = this.kadProtocol.handleInit(lookup, kademliaId);
-      kadOps.put(lop, (SamplingOperation) op);
-      queried.add(sample);
-      logger.warning("Sent lookup operation " + op);
-    } else {
-          logger.warning("All queried " + kadOps.size());
-        }
-      if (((SamplingOperation) op).getAvailableRequests() >= KademliaCommonConfig.ALPHA
-          && kadOps.size() == 0) {
-        samplingOp.remove(op.getId());
-        logger.warning("Sampling operation finished");
-        KademliaObserver.reportOperation(op);
-      }*/
   }
 
   // ______________________________________________________________________________________________
