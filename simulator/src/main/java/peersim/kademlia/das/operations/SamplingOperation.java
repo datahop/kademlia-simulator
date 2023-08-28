@@ -147,8 +147,9 @@ public abstract class SamplingOperation extends FindOperation {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-    //System.out.println(
-    //    this.srcNode + "] Do sampling " + aggressiveness + " " + this.getId() + " " + nodes.size());
+    // System.out.println(
+    //    this.srcNode + "] Do sampling " + aggressiveness + " " + this.getId() + " " +
+    // nodes.size());
     // orderNodes();
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {

@@ -1,9 +1,10 @@
 package peersim.kademlia;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -47,12 +48,12 @@ public class KademliaObserver implements Control {
   public static IncrementalStats find_ok = new IncrementalStats();
 
   /** Messages exchanged in the Kademlia network */
-  private static HashMap<Long, Map<String, Object>> messages =
-      new HashMap<Long, Map<String, Object>>();
+  private static Multimap<Long, Map<String, Object>> messages = ArrayListMultimap.create();
+  // new Multimap<Long, Map<String, Object>>();
 
   /** Log of operations in the Kademlia network */
-  private static HashMap<Long, Map<String, Object>> operations =
-      new HashMap<Long, Map<String, Object>>();
+  private static Multimap<Long, Map<String, Object>> operations = ArrayListMultimap.create();
+  // new Multimap<Long, Map<String, Object>>();
 
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
@@ -73,7 +74,7 @@ public class KademliaObserver implements Control {
     System.out.println("Logfolder: " + logFolderName);
   }
 
-  private static void writeLogs(Map<Long, Map<String, Object>> map, String filename) {
+  private static void writeLogs(Multimap<Long, Map<String, Object>> map, String filename) {
     try (FileWriter writer = new FileWriter(filename)) {
       Set<String> keySet = new HashSet<String>();
       for (Map<String, Object> m : map.values())
@@ -177,7 +178,7 @@ public class KademliaObserver implements Control {
     if (m.src == null) return;
 
     // Add the message to the message log, but first check if it hasn't already been added
-    assert (!messages.keySet().contains(m.id));
+    // assert (!messages.keySet().contains(m.id));
     messages.put(m.id, m.toMap(sent));
   }
 

@@ -422,6 +422,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     assert m.src != null;
     assert m.dst != null;
 
+    KademliaObserver.reportMsg(m, true);
     Node src = this.kadProtocol.getNode();
     Node dest = Util.nodeIdtoNode(destId, kademliaId);
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);

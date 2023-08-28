@@ -2,6 +2,15 @@ package peersim.kademlia;
 
 import java.util.HashMap;
 import java.util.Map;
+import peersim.kademlia.das.DASDHTProtocolBuilder;
+import peersim.kademlia.das.DASDHTProtocolNonValidator;
+import peersim.kademlia.das.DASDHTProtocolValidator;
+import peersim.kademlia.das.DASProtocol;
+import peersim.kademlia.das.DASProtocolBuilder;
+import peersim.kademlia.das.DASProtocolNonValidator;
+import peersim.kademlia.das.DASProtocolValidator;
+import peersim.kademlia.das.Parcel;
+import peersim.kademlia.das.Sample;
 
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
@@ -301,11 +310,34 @@ public class Message extends SimpleEvent {
     result.put("src", this.src.getId());
     result.put("dst", this.dst.getId());
     if (sent) {
+      DASProtocol das =
+          Util.nodeIdtoNode(this.src.getId(), this.src.getProtocolId()).getDASProtocol();
+      if (das != null) {
+        if (das instanceof DASDHTProtocolBuilder || das instanceof DASProtocolBuilder)
+          result.put("node_type", "builder");
+        if (das instanceof DASDHTProtocolValidator || das instanceof DASProtocolValidator)
+          result.put("node_type", "validator");
+        if (das instanceof DASDHTProtocolNonValidator || das instanceof DASProtocolNonValidator)
+          result.put("node_type", "non-validator");
+      }
       result.put("status", "sent");
     } else {
+      DASProtocol das =
+          Util.nodeIdtoNode(this.dst.getId(), this.dst.getProtocolId()).getDASProtocol();
+      if (das != null) {
+        if (das instanceof DASDHTProtocolBuilder || das instanceof DASProtocolBuilder)
+          result.put("node_type", "builder");
+        if (das instanceof DASDHTProtocolValidator || das instanceof DASProtocolValidator)
+          result.put("node_type", "validator");
+        if (das instanceof DASDHTProtocolNonValidator || das instanceof DASProtocolNonValidator)
+          result.put("node_type", "non-validator");
+      }
       result.put("status", "received");
     }
     result.put("time", this.timestamp);
+    if (this.body instanceof Sample[]) result.put("size", ((Sample[]) this.body).length * 512);
+    else if (this.value instanceof Parcel)
+      result.put("size", ((Parcel) this.value).getSize() * 512);
     return result;
   }
 }

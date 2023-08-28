@@ -14,6 +14,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
   /** all the topics the node registers for */
   String myTopic = "";
 
+  private int protocolId;
   private boolean server;
   // private List<String> topicList;
 
@@ -203,5 +204,13 @@ public class KademliaNode implements Comparable<KademliaNode> {
 
   public void setServer(boolean server) {
     this.server = server;
+  }
+
+  public void setProtocolId(int protocol) {
+    this.protocolId = protocol;
+  }
+
+  public int getProtocolId() {
+    return this.protocolId;
   }
 }

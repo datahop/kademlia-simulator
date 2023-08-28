@@ -517,6 +517,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     Node src = Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
     Node dest = Util.nodeIdtoNode(destId, kademliaid);
 
+    KademliaObserver.reportMsg(m, true);
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
     // Get the transport protocol
@@ -683,6 +684,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   public void setNode(KademliaNode node) {
     this.node = node;
+    this.node.setProtocolId(kademliaid);
+
     // Set the node ID in the routing table
     this.routingTable.setNodeId(node.getId());
 
