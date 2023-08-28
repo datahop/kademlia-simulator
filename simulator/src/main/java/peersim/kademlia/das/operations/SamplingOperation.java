@@ -109,10 +109,6 @@ public abstract class SamplingOperation extends FindOperation {
   protected void createNodes() {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
-        // System.out.println(
-        //    this.srcNode + "creating nodes list " + searchTable.getValidatorsIndexed().size());
-        // List<BigInteger> validatorsBySample =
-        //    searchTable.getValidatorNodesbySample(sample, radiusValidator);
 
         List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
         List<BigInteger> nonValidatorsBySample =
@@ -141,14 +137,7 @@ public abstract class SamplingOperation extends FindOperation {
           }
           found = true;
         }
-        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) nodes.put(id, new Node(id));
 
-            nodes.get(id).addSample(samples.get(sample));
-          }
-          found = true;
-        }*/
         if (!found && callback != null) callback.missing(sample, this);
       }
     }
@@ -157,30 +146,32 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
-    System.out.println(
-        this.srcNode + "] Do sampling " + aggressiveness + " " + this.getId() + " " + nodes.size());
-    orderNodes();
+    for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
+    //System.out.println(
+    //    this.srcNode + "] Do sampling " + aggressiveness + " " + this.getId() + " " + nodes.size());
+    // orderNodes();
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
-      System.out.println(
+      /*System.out.println(
           this.srcNode + "] Querying node " + n.getId() + " " + +n.getScore() + " " + this.getId());
-      // for (FetchingSample fs : n.getSamples())
-      //  System.out.println(
-      //      this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());
+      for (FetchingSample fs : n.getSamples())
+        System.out.println(
+            this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());*/
 
-      if (n.getScore() == 0) break;
-      n.setBeingAsked(true);
-      this.available_requests++;
-      for (FetchingSample s : n.getSamples()) {
-        s.addFetchingNode(n);
+      if (!n.isBeingAsked() && n.getScore() > 0) { // break;
+        n.setBeingAsked(true);
+        this.available_requests++;
+        for (FetchingSample s : n.getSamples()) {
+          s.addFetchingNode(n);
+        }
+        result.add(n.getId());
       }
-      result.add(n.getId());
     }
 
     return result.toArray(new BigInteger[0]);
   }
 
-  public boolean increaseRadius(int multiplier) {
+  /*public boolean increaseRadius(int multiplier) {
     if (timesIncreased == KademliaCommonConfigDas.multiplyRadiusLimit) return false;
     radiusValidator = radiusValidator.multiply(BigInteger.valueOf(multiplier));
     if (Block.MAX_KEY.compareTo(radiusValidator) <= 0) {
@@ -189,7 +180,7 @@ public abstract class SamplingOperation extends FindOperation {
     }
     createNodes();
     return true;
-  }
+  }*/
 
   private void orderNodes() {
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
