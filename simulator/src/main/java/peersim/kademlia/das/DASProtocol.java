@@ -21,7 +21,6 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
-import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaEvents;
 import peersim.kademlia.KademliaObserver;
@@ -38,7 +37,7 @@ import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
-public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
+public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, MissingNode {
 
   protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
