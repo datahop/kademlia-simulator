@@ -150,8 +150,11 @@ public class RandomSamplingOperation extends SamplingOperation {
               nodes.get(id).addSample(samples.get(sample));
             }
           }
+
           found = true;
         }
+        // System.out.println("Non-validator node map " + nonValidatorsBySample.size() + " " +
+        // sample);
 
         if (!found && callback != null) callback.missing(sample, this);
       }

@@ -285,7 +285,9 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    if (!this.isValidator())
+      logger.warning(
+          "non-validator received " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     // samples to return
@@ -323,7 +325,8 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
               .toArray(new BigInteger[0]);
     else returnedNodes = nodes.toArray(new BigInteger[0]);
 
-    logger.info("Get sample request responding with " + s.size() + " samples");
+    if (!this.isValidator())
+      logger.warning("non-validator Get sample request responding with " + s.size() + " samples");
 
     Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
     response.operationId = m.operationId;
@@ -362,6 +365,11 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
 
     Sample[] samples = (Sample[]) m.body;
     searchTable.addNodes((BigInteger[]) m.value);
+
+    if (!this.isValidator())
+      logger.warning(
+          "non-validator received " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+
     for (Sample s : samples) {
 
       kv.add((BigInteger) s.getIdByRow(), s);
@@ -528,7 +536,9 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
   }*/
 
   public void setNonValidators(List<BigInteger> nonValidators) {
-    // searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
+
+    // logger.warning("Adding non-validators " + isValidator + " " + nonValidators.size());
+    searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
     for (BigInteger id : nonValidators) {
       nonValidatorsIndexed.add(id);
     }

@@ -85,7 +85,7 @@ public class RandomSamplingOperationGossip extends RandomSamplingOperation {
         validatorsBySampleRow.remove(builder);
         validatorsBySampleColumn.remove(builder);
 
-        System.out.println(
+        /*System.out.println(
             "Node Row"
                 + samples.get(sample).getRow()
                 + " "
@@ -95,7 +95,7 @@ public class RandomSamplingOperationGossip extends RandomSamplingOperation {
             "Node column"
                 + samples.get(sample).getRow()
                 + " "
-                + peers.getPeers("Column" + samples.get(sample).getColumn()).size());
+                + peers.getPeers("Column" + samples.get(sample).getColumn()).size());*/
         boolean found = false;
         List<BigInteger> validatorsBySample = new ArrayList<>();
 

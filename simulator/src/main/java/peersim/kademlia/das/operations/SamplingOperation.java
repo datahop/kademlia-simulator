@@ -132,6 +132,8 @@ public abstract class SamplingOperation extends FindOperation {
             }
             found = true;
           }
+          // System.out.println(
+          //     "Non-validator node map " + nonValidatorsBySample.size() + " " + sample);
         }
 
         if (!found && callback != null) callback.missing(sample, this);

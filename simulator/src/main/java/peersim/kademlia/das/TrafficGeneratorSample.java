@@ -131,6 +131,35 @@ public class TrafficGeneratorSample implements Control {
     } else /*if (second)*/ {
 
       SearchTable.createSampleMap(b);
+
+      while (b.hasNext()) {
+        Sample s = b.next();
+        BigInteger radius =
+            b.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+        for (int i = 0; i < Network.size(); i++) {
+
+          Node n = Network.get(i);
+          if (!n.getDASProtocol().isValidator() && !n.getDASProtocol().isBuilder()) {
+            if (s.isInRegionByRow(n.getDASProtocol().getKademliaId(), radius)) {
+              // totalSamples++;
+              EDSimulator.add(
+                  1,
+                  generateNewSampleMessage(s.getIdByRow()),
+                  n,
+                  n.getDASProtocol().getDASProtocolID());
+            }
+            if (s.isInRegionByColumn(n.getDASProtocol().getKademliaId(), radius)) {
+              // totalSamples++;
+              EDSimulator.add(
+                  1,
+                  generateNewSampleMessage(s.getIdByColumn()),
+                  n,
+                  n.getDASProtocol().getDASProtocolID());
+            }
+          }
+        }
+      }
+      b.initIterator();
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();
@@ -147,6 +176,19 @@ public class TrafficGeneratorSample implements Control {
     return false;
   }
 
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  private Message generateNewSampleMessage(BigInteger s) {
+
+    Message m = Message.makeInitGetSample(s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
   // ______________________________________________________________________________________________
 
 } // End of class
