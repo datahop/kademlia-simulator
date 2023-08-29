@@ -52,7 +52,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   /** Logging handler. */
   protected Logger logger;
 
-  private PeerTable peers;
+  protected PeerTable peers;
 
   protected HashMap<String, HashSet<BigInteger>> mesh;
 
@@ -322,11 +322,12 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     if (event instanceof Message) {
       m = (Message) event;
       // KademliaObserver.reportMsg(m, false);
-      /*if (m.src != null)
-        logger.warning("Message received " + m.getType() + " from " + m.src.getId());
-      else logger.warning("Message src null " + m.getType());*/
 
-      // GossipObserver.reportMsg(m, false);
+      if (m.src != null)
+        logger.warning("Message received " + m.getType() + " from " + m.src.getId());
+      else logger.warning("Message src null " + m.getType());
+
+      GossipObserver.reportMsg(m, false);
     }
 
     // Handle the event based on its type.
@@ -450,7 +451,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     }
   }
 
-  private void handleJoin(Message m, int myPid) {
+  protected void handleJoin(Message m, int myPid) {
     String topic = (String) m.body;
     logger.warning("Handlejoin received " + topic);
 
@@ -566,7 +567,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     //
   }
 
-  private void handlePublish(Message m, int myPid) {
+  protected void handlePublish(Message m, int myPid) {
 
     String topic = (String) m.body;
     Sample s = (Sample) m.value;
@@ -587,6 +588,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     seen.get(topic).add(cid);
     mCache.put(cid, s);
 
+    mCache.put(s.getIdByColumn(), s);
     if (mesh.get(topic) != null) {
       HashSet<BigInteger> nodesToSend = mesh.get(topic);
       nodesToSend.remove(this.node.getId());
@@ -612,6 +614,8 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     Sample s = (Sample) m.value;
     BigInteger cid = s.getId();
     mCache.put(cid, s);
+
+    mCache.put(s.getIdByColumn(), s);
     logger.warning(
         "handleMessage received "
             + topic

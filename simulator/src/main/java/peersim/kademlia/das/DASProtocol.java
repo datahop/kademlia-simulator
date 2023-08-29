@@ -21,6 +21,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaEvents;
 import peersim.kademlia.KademliaObserver;
@@ -37,7 +38,7 @@ import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
-public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, MissingNode {
+public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEvents, MissingNode {
 
   protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
@@ -80,7 +81,7 @@ public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, Mis
 
   // protected int samplesRequested;
 
-  protected BigInteger[] validatorsList;
+  // protected BigInteger[] validatorsList;
 
   protected HashSet<BigInteger> queried;
 
@@ -520,11 +521,11 @@ public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, Mis
     return max;
   }
 
-  public void addKnownValidator(BigInteger[] ids) {
+  /*public void addKnownValidator(BigInteger[] ids) {
     logger.info("Adding validator list " + ids.length);
     validatorsList = ids;
     if (validatorsList != null) searchTable.addValidatorNodes(validatorsList);
-  }
+  }*/
 
   public void setNonValidators(List<BigInteger> nonValidators) {
     // searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
@@ -549,7 +550,7 @@ public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, Mis
             currentBlock,
             searchTable,
             this.isValidator,
-            validatorsList.length,
+            // validatorsList.length,
             this);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
@@ -695,14 +696,14 @@ public abstract class DASProtocol implements DAS, Cloneable, KademliaEvents, Mis
 
     logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
 
-    List<BigInteger> ids =
+    /*List<BigInteger> ids =
         searchTable.getValidatorNodesbySample(
             sample,
             currentBlock.computeRegionRadius(
                 KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length));
     for (BigInteger id : ids) {
       logger.warning("Found id " + id + " for sample " + sample);
-    }
+    }*/
   }
 
   // ______________________________________________________________________________________________

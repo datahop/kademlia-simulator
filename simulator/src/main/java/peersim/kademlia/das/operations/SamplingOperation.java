@@ -27,7 +27,7 @@ public abstract class SamplingOperation extends FindOperation {
   // protected HashSet<BigInteger> queried;
 
   protected int timesIncreased;
-  protected BigInteger radiusValidator, radiusNonValidator;
+  protected BigInteger radiusNonValidator;
 
   protected LinkedHashMap<BigInteger, Node> nodes;
   protected HashMap<BigInteger, FetchingSample> samples;
@@ -35,19 +35,12 @@ public abstract class SamplingOperation extends FindOperation {
   protected List<BigInteger> askNodes;
 
   public SamplingOperation(
-      BigInteger srcNode,
-      BigInteger destNode,
-      long timestamp,
-      Block block,
-      boolean isValidator,
-      int numValidators) {
+      BigInteger srcNode, BigInteger destNode, long timestamp, Block block, boolean isValidator) {
     super(srcNode, destNode, timestamp);
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-    radiusValidator =
-        currentBlock.computeRegionRadius(
-            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
@@ -64,7 +57,7 @@ public abstract class SamplingOperation extends FindOperation {
       long timestamp,
       Block block,
       boolean isValidator,
-      int numValidators,
+      // int numValidators,
       MissingNode callback) {
     super(srcNode, destNode, timestamp);
     samples = new HashMap<>();
@@ -75,9 +68,9 @@ public abstract class SamplingOperation extends FindOperation {
     currentBlock = block;
     this.available_requests = 0;
     aggressiveness = 0;
-    radiusValidator =
-        currentBlock.computeRegionRadius(
-            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+    // radiusValidator =
+    //    currentBlock.computeRegionRadius(
+    //        KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     askNodes = new ArrayList<>();
@@ -98,9 +91,9 @@ public abstract class SamplingOperation extends FindOperation {
     return result.toArray(new BigInteger[0]);
   }
 
-  public BigInteger getRadiusValidator() {
+  /*public BigInteger getRadiusValidator() {
     return radiusValidator;
-  }
+  }*/
 
   public BigInteger getRadiusNonValidator() {
     return radiusNonValidator;
@@ -111,8 +104,6 @@ public abstract class SamplingOperation extends FindOperation {
       if (!samples.get(sample).isDownloaded()) {
 
         List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
-        List<BigInteger> nonValidatorsBySample =
-            searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
 
         boolean found = false;
         if (validatorsBySample != null && validatorsBySample.size() > 0) {
@@ -126,16 +117,21 @@ public abstract class SamplingOperation extends FindOperation {
           }
           found = true;
         }
-        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
+
+        if (searchTable != null) {
+          List<BigInteger> nonValidatorsBySample =
+              searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
+          if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+            for (BigInteger id : nonValidatorsBySample) {
+              if (!nodes.containsKey(id)) {
+                nodes.put(id, new Node(id));
+                nodes.get(id).addSample(samples.get(sample));
+              } else {
+                nodes.get(id).addSample(samples.get(sample));
+              }
             }
+            found = true;
           }
-          found = true;
         }
 
         if (!found && callback != null) callback.missing(sample, this);
@@ -172,16 +168,16 @@ public abstract class SamplingOperation extends FindOperation {
     return result.toArray(new BigInteger[0]);
   }
 
-  /*public boolean increaseRadius(int multiplier) {
-    if (timesIncreased == KademliaCommonConfigDas.multiplyRadiusLimit) return false;
+  public boolean increaseRadius(int multiplier) {
+    /* if (timesIncreased == KademliaCommonConfigDas.multiplyRadiusLimit) return false;
     radiusValidator = radiusValidator.multiply(BigInteger.valueOf(multiplier));
     if (Block.MAX_KEY.compareTo(radiusValidator) <= 0) {
       radiusValidator = Block.MAX_KEY;
       return false;
-    }
+    }*/
     createNodes();
     return true;
-  }*/
+  }
 
   private void orderNodes() {
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);

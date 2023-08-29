@@ -22,11 +22,12 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       int row,
       int column,
       boolean isValidator,
-      int numValidators,
+      // int numValidators,
       MissingNode callback) {
-    super(
-        srcNode, timestamp, block, searchTable, row, column, isValidator, numValidators, callback);
-
+    // super(
+    //    srcNode, timestamp, block, searchTable, row, column, isValidator, numValidators,
+    // callback);
+    super(srcNode, timestamp, block, searchTable, row, column, isValidator, callback);
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
     assert (!(row == 0 && column == 0)) : "Both row or column are set";

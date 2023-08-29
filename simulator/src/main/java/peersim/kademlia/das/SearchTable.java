@@ -82,11 +82,11 @@ public class SearchTable {
     }
   }*/
 
-  public void addValidatorNodes(BigInteger[] nodes) {
+  public static void addValidatorNodes(BigInteger[] nodes) {
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id)) {
-        validatorsIndexed.add(id);
-      }
+      // if (!blackList.contains(id)) {
+      validatorsIndexed.add(id);
+      // }
       // routingTable.addNeighbour(id);
     }
   }
@@ -106,7 +106,7 @@ public class SearchTable {
     return nonValidatorsIndexed;
   }
 
-  public TreeSet<BigInteger> getValidatorsIndexed() {
+  public static TreeSet<BigInteger> getValidatorsIndexed() {
     return validatorsIndexed;
   }
 

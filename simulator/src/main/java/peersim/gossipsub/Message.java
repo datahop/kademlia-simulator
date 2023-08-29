@@ -54,6 +54,10 @@ public class Message extends SimpleEvent {
 
   public static final int MSG_INIT_NEW_BLOCK = 10;
 
+  public static final int MSG_GET_SAMPLE = 11;
+
+  public static final int MSG_GET_SAMPLE_RESPONSE = 12;
+
   // ______________________________________________________________________________________________
   /** This Object contains the body of the message, no matter what it contains */
   public Object body = null;

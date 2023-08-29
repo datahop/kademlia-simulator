@@ -22,7 +22,7 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
       Block currentBlock,
       SearchTable searchTable,
       boolean isValidator,
-      int numValidators,
+      // int numValidators,
       MissingNode callback) {
     super(
         srcNode,
@@ -31,7 +31,7 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
         currentBlock,
         searchTable,
         isValidator,
-        numValidators,
+        // numValidators,
         callback);
 
     this.parcels = new HashMap<>();

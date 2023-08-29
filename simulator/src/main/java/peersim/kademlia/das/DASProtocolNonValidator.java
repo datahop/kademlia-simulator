@@ -45,7 +45,8 @@ public class DASProtocolNonValidator extends DASProtocol {
     BigInteger[] samples = {(BigInteger) m.body};
     BigInteger radius =
         currentBlock.computeRegionRadius(
-            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length);
+            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
+            SearchTable.getValidatorsIndexed().size());
     for (BigInteger sample : samples) {
       if (!reqSamples.contains(sample)) {
         for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {

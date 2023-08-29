@@ -35,9 +35,10 @@ public class RandomSamplingOperation extends SamplingOperation {
       Block currentBlock,
       SearchTable searchTable,
       boolean isValidator,
-      int numValidators,
+      // int numValidators,
       MissingNode callback) {
-    super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
+    // super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
+    super(srcNode, destNode, timestamp, currentBlock, isValidator, callback);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
@@ -113,22 +114,23 @@ public class RandomSamplingOperation extends SamplingOperation {
             SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
 
         List<BigInteger> validatorsBySample = new ArrayList<>();
+        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
 
         validatorsBySample.addAll(validatorsBySampleRow);
         validatorsBySample.addAll(validatorsBySampleColumn);
 
-        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));
-
+        if (searchTable != null) {
+          nonValidatorsBySample.addAll(
+              searchTable.getNonValidatorNodesbySample(
+                  samples.get(sample).getId(), radiusNonValidator));
+          nonValidatorsBySample.addAll(
+              searchTable.getNonValidatorNodesbySample(
+                  samples.get(sample).getIdByColumn(), radiusNonValidator));
+        }
         boolean found = false;
 
-        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
-          for (BigInteger id : validatorsBySampleRow) {
+        if (validatorsBySample != null && validatorsBySample.size() > 0) {
+          for (BigInteger id : validatorsBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
               nodes.get(id).addSample(samples.get(sample));

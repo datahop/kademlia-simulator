@@ -121,5 +121,9 @@ public abstract class Operation {
     this.stopTime = time;
   }
 
+  public long getStopTime() {
+    return this.stopTime;
+  }
+
   public abstract Map<String, Object> toMap();
 }

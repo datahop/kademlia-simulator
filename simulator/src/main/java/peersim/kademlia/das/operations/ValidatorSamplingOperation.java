@@ -33,9 +33,10 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int row,
       int column,
       boolean isValidator,
-      int numValidators,
+      // int numValidators,
       MissingNode callback) {
-    super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
+    // super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
+    super(srcNode, null, timestamp, block, isValidator, callback);
 
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";

@@ -168,7 +168,9 @@ public class TurbulenceDasValidator implements Control {
     BigInteger builderAddress = builder.getKademliaProtocol().getKademliaNode().getId();
     dasProt.setBuilderAddress(builderAddress);
     // dasProt.setValidator(true);
-    dasProt.addKnownValidator(validatorList.toArray(new BigInteger[0]));
+    // dasProt.addKnownValidator(validatorList.toArray(new BigInteger[0]));
+    SearchTable.addValidatorNodes(validatorList.toArray(new BigInteger[0]));
+
     return false;
   }
 
