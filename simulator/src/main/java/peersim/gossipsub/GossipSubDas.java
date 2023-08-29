@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import peersim.core.CommonState;
+import peersim.core.Network;
 import peersim.core.Node;
+import peersim.edsim.EDSimulator;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
@@ -16,6 +18,7 @@ import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.operations.RandomSamplingOperation;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.operations.Operation;
+import peersim.transport.UnreliableTransport;
 
 public abstract class GossipSubDas extends GossipSubProtocol implements MissingNode {
 
@@ -25,6 +28,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
 
   protected Block currentBlock;
 
+  protected BigInteger builderAddress;
   protected boolean isValidator;
 
   protected int row1;
@@ -35,6 +39,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
   protected static HashMap<String, List<BigInteger>> nodeMap;
   protected boolean started;
   protected boolean isBuilder;
+  private long uploadInterfaceBusyUntil;
 
   public GossipSubDas(String prefix) {
     super(prefix);
@@ -43,6 +48,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
     // TODO Auto-generated constructor stub
     isValidator = false;
     isBuilder = false;
+    uploadInterfaceBusyUntil = 0;
   }
   /**
    * Replicate this object by returning an identical copy. It is called by the initializer and do
@@ -122,6 +128,86 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
   }
 
   /**
+   * Sends a message using the current transport layer and starts the timeout timer if the message
+   * is a request.
+   *
+   * @param m the message to send
+   * @param destId the ID of the destination node
+   * @param myPid the sender process ID (Todo: verify what myPid stand for!!!)
+   */
+  protected void sendMessage(Message m, BigInteger destId, int myPid) {
+
+    // Assert that message source and destination nodes are not null
+    assert m.src != null;
+    assert m.dst != null;
+
+    // Get source and destination nodes
+    Node src = nodeIdtoNode(this.getGossipNode().getId());
+    Node dest = nodeIdtoNode(destId);
+
+    // destpid = dest.getKademliaProtocol().getProtocolID();
+
+    /*logger.warning(
+    "Sending message "
+        + m.getType()
+        + " to "
+        + destId
+        + " "
+        + ((GossipSubProtocol) dest.getProtocol(myPid)).getGossipNode().getId()
+        + " from "
+        + this.getGossipNode().getId()
+        + " "
+        + ((GossipSubProtocol) src.getProtocol(myPid)).getGossipNode().getId()
+        + " "
+        + m.getType());*/
+    // Get the transport protocol
+    m.nrHops++;
+    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+
+    if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_MESSAGE) {
+      // Send the message
+      transport.send(src, dest, m, gossipid);
+    } else {
+      Sample[] samples;
+      if (m.getType() == Message.MSG_MESSAGE) samples = new Sample[] {(Sample) m.value};
+      else {
+        samples = (Sample[]) m.body;
+      }
+      double samplesSize = 0.0;
+      if (samples != null) samplesSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
+      double msgSize = samplesSize;
+      long propagationLatency = transport.getLatency(src, dest);
+      // Add the transmission time of the message (upload)
+      double transDelay = 0.0;
+      if (this.isValidator) {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE;
+      } else if (isBuilder()) {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.BUILDER_UPLOAD_RATE;
+      } else {
+        transDelay = 1000 * msgSize / KademliaCommonConfigDas.NON_VALIDATOR_UPLOAD_RATE;
+      }
+      // If the interface is busy, incorporate the additional delay
+      // also update the time when interface is available again
+      long timeNow = CommonState.getTime();
+      long latency = propagationLatency;
+      logger.info("Transmission propagationLatency " + latency);
+      latency += (long) transDelay; // truncated value
+      logger.info("Transmission total latency " + latency);
+      if (this.uploadInterfaceBusyUntil > timeNow) {
+        latency += this.uploadInterfaceBusyUntil - timeNow;
+        this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
+
+      } else {
+        this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
+      }
+      logger.info("Transmission " + latency + " " + transDelay);
+      // add to sent msg
+      // this.sentMsg.put(m.id, m.timestamp);
+      EDSimulator.add(latency, m, dest, myPid);
+    }
+  }
+
+  /**
    * Starts the random sampling operation
    *
    * @param m initial message
@@ -146,7 +232,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
     /*while (!doSampling(op)) {
       op.increaseRadius(2);
     }*/
-    op.createNodes(peers);
+    op.createNodes(peers, builderAddress);
     doSampling(op);
   }
 
@@ -194,13 +280,16 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
           }
           if (!success) {
             // sop.increaseRadius(2);
-            ((RandomSamplingOperationGossip) sop).createNodes(peers);
+            success = ((RandomSamplingOperationGossip) sop).createNodes(peers, builderAddress);
             logger.warning("Retrying sampling");
-            /*logger.warning(
-                "Sampling operation finished random failed " + sop.getId() + ". no more nodes");
+            if (!success) {
+              logger.warning(
+                  "Sampling operation finished random failed " + sop.getId() + ". no more nodes");
 
-            samplingOp.remove(sop.getId());
-            GossipObserver.reportOperation(sop);*/
+              samplingOp.remove(sop.getId());
+              GossipObserver.reportOperation(sop);
+              success = true;
+            }
           }
         }
       }
@@ -247,6 +336,9 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     // We continue an existing operation
     if (op != null) {
+      op.increaseHops();
+      op.addMessage(m.id);
+
       // keeping track of received samples
       op.elaborateResponse(samples, m.src.getId());
       logger.warning(
@@ -287,6 +379,10 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
     m.timestamp = CommonState.getTime();
 
     return m;
+  }
+
+  public void setBuilderAddress(BigInteger addr) {
+    this.builderAddress = addr;
   }
 
   @Override

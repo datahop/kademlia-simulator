@@ -30,7 +30,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   protected static String prefix = null;
 
   /** UnreliableTransport object used for communication. */
-  private UnreliableTransport transport;
+  protected UnreliableTransport transport;
 
   /** The parameter name for transport. */
   private static final String PAR_TRANSPORT = "transport";
@@ -38,7 +38,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   private static final String PAR_HEARTBEAT = "heartbeat";
 
   /** Identifier for the tranport protocol (used in the sendMessage method) */
-  private int tid;
+  protected int tid;
 
   /** Unique ID for this Kademlia node/network */
   protected int gossipid;
@@ -100,6 +100,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     fanout = new HashMap<>();
 
     mCache = new MCache();
+
     // System.out.println("New kademliaprotocol");
   }
 
@@ -200,6 +201,25 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     m.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
     sendMessage(m, id, gossipid);
   }
+
+  /**
+   * Get the current KademliaNode object.
+   *
+   * @return The current KademliaNode object.
+   */
+  public GossipNode getGossipNode() {
+    return this.node;
+  }
+
+  /**
+   * Set the protocol ID for this node.
+   *
+   * @param protocolID The protocol ID to set.
+   */
+  public void setProtocolID(int protocolID) {
+    this.gossipid = protocolID;
+  }
+
   /**
    * Sends a message using the current transport layer and starts the timeout timer if the message
    * is a request.
@@ -239,24 +259,6 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
     // Send the message
     transport.send(src, dest, m, gossipid);
-  }
-
-  /**
-   * Get the current KademliaNode object.
-   *
-   * @return The current KademliaNode object.
-   */
-  public GossipNode getGossipNode() {
-    return this.node;
-  }
-
-  /**
-   * Set the protocol ID for this node.
-   *
-   * @param protocolID The protocol ID to set.
-   */
-  public void setProtocolID(int protocolID) {
-    this.gossipid = protocolID;
   }
 
   /**

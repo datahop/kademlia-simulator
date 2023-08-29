@@ -95,10 +95,11 @@ public class CustomDistributionDas implements peersim.core.Control {
       if (i == 0) {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolDasBuilderID)));
         dasProt.setNode(node);
-
+        builderAddress = node.getId();
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolEvilDasID)));
         dasProt.setNode(node);
+
       } else if (i >= (numEvilValidatorNodes + numEvilNonValidatorNodes + 1)
           && i
               < (numEvilValidatorNodes
@@ -121,7 +122,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       // kadProt.setEventsCallback(dasProt);
 
       // if (i == 0) builderAddress = dasProt.getKademliaProtocol().getKademliaNode().getId();
-      // dasProt.setBuilderAddress(builderAddress);
+      dasProt.setBuilderAddress(builderAddress);
 
       /*System.out.println(
       "Dasprot id "

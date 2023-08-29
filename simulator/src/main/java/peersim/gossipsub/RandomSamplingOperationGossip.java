@@ -74,7 +74,7 @@ public class RandomSamplingOperationGossip extends RandomSamplingOperation {
   }*/
   protected void createNodes() {}
 
-  protected void createNodes(PeerTable peers) {
+  protected boolean createNodes(PeerTable peers, BigInteger builder) {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
@@ -82,15 +82,30 @@ public class RandomSamplingOperationGossip extends RandomSamplingOperation {
             new ArrayList(peers.getPeers("Row" + samples.get(sample).getRow()));
         List<BigInteger> validatorsBySampleColumn =
             new ArrayList(peers.getPeers("Column" + samples.get(sample).getColumn()));
+        validatorsBySampleRow.remove(builder);
+        validatorsBySampleColumn.remove(builder);
 
+        System.out.println(
+            "Node Row"
+                + samples.get(sample).getRow()
+                + " "
+                + peers.getPeers("Row" + samples.get(sample).getRow()).size());
+
+        System.out.println(
+            "Node column"
+                + samples.get(sample).getRow()
+                + " "
+                + peers.getPeers("Column" + samples.get(sample).getColumn()).size());
         boolean found = false;
         List<BigInteger> validatorsBySample = new ArrayList<>();
 
         validatorsBySample.addAll(validatorsBySampleRow);
         validatorsBySample.addAll(validatorsBySampleColumn);
 
-        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
-          for (BigInteger id : validatorsBySampleRow) {
+        validatorsBySample.remove(builder);
+
+        if (validatorsBySample != null && validatorsBySample.size() > 0) {
+          for (BigInteger id : validatorsBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
               nodes.get(id).addSample(samples.get(sample));
@@ -100,10 +115,12 @@ public class RandomSamplingOperationGossip extends RandomSamplingOperation {
           }
           found = true;
         }
-
+        if (!found) return found;
         if (!found && callback != null) callback.missing(sample, this);
       }
     }
+    return true;
+    // System.out.println("Builder " + builder);
     // for (BigInteger n : nodes.keySet()) System.out.println("Node crated " + n);
   }
 }
