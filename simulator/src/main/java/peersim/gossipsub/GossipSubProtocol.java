@@ -124,7 +124,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    * @param searchNodeId the ID of the node to search for
    * @return the node with the given ID, or null if not found
    */
-  protected Node nodeIdtoNode(BigInteger searchNodeId) {
+  protected static Node nodeIdtoNode(BigInteger searchNodeId, int myPid) {
     // If the given searchNodeId is null, return null
     if (searchNodeId == null) return null;
 
@@ -140,7 +140,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
       // Get the ID of the node at the midpoint
       BigInteger mId =
-          ((GossipSubProtocol) Network.get(m).getProtocol(gossipid)).getGossipNode().getId();
+          ((GossipSubProtocol) Network.get(m).getProtocol(myPid)).getGossipNode().getId();
 
       // If the midpoint node has the desired ID, return it
       if (mId.equals(searchNodeId)) return Network.get(m);
@@ -156,7 +156,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     // through the network
     BigInteger mId;
     for (int i = Network.size() - 1; i >= 0; i--) {
-      mId = ((GossipSubProtocol) Network.get(i).getProtocol(gossipid)).getGossipNode().getId();
+      mId = ((GossipSubProtocol) Network.get(i).getProtocol(myPid)).getGossipNode().getId();
       if (mId.equals(searchNodeId)) return Network.get(i);
     }
 
@@ -171,34 +171,34 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    * @return the node associated with this Kademlia protocol instance,
    */
   public Node getNode() {
-    return nodeIdtoNode(this.getGossipNode().getId());
+    return nodeIdtoNode(this.getGossipNode().getId(), gossipid);
   }
 
   protected void sendGraftMessage(BigInteger id, String topic) {
     Message m = Message.makeGraftMessage(topic);
     m.src = this.node;
-    m.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
+    m.dst = ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(gossipid)).getGossipNode();
     sendMessage(m, id, gossipid);
   }
 
   protected void sendIHaveMessage(String topic, BigInteger id, List<BigInteger> ids) {
     Message m = Message.makeIHaveMessage(topic, ids);
     m.src = this.node;
-    m.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
+    m.dst = ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(gossipid)).getGossipNode();
     sendMessage(m, id, gossipid);
   }
 
   protected void sendPruneMessage(BigInteger id, String topic) {
     Message m = Message.makePruneMessage(topic);
     m.src = this.node;
-    m.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
+    m.dst = ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(gossipid)).getGossipNode();
     sendMessage(m, id, gossipid);
   }
 
   protected void sendIWantMessage(String topic, BigInteger id, List<BigInteger> ids) {
     Message m = Message.makeIWantMessage(topic, ids);
     m.src = this.node;
-    m.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
+    m.dst = ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(gossipid)).getGossipNode();
     sendMessage(m, id, gossipid);
   }
 
@@ -235,8 +235,8 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     assert m.dst != null;
 
     // Get source and destination nodes
-    Node src = nodeIdtoNode(this.getGossipNode().getId());
-    Node dest = nodeIdtoNode(destId);
+    Node src = nodeIdtoNode(this.getGossipNode().getId(), gossipid);
+    Node dest = nodeIdtoNode(destId, gossipid);
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
@@ -277,6 +277,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    */
   public void setNode(GossipNode node) {
     this.node = node;
+    this.node.setProtocolId(gossipid);
 
     // Initialize the logger with the node ID as its name
     logger = Logger.getLogger(node.getId().toString());
@@ -328,8 +329,6 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       if (m.src != null)
         logger.warning("Message received " + m.getType() + " from " + m.src.getId());
       else logger.warning("Message src null " + m.getType());
-
-      GossipObserver.reportMsg(m, false);
     }
 
     // Handle the event based on its type.
@@ -351,6 +350,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       case Message.MSG_MESSAGE:
         m = (Message) event;
         handleMessage(m, pid);
+        GossipObserver.reportMsg(m, false);
         break;
       case Message.MSG_GRAFT:
         m = (Message) event;
@@ -598,7 +598,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
         Message msg = Message.makeMessage(topic, s);
         msg.src = this.node;
-        msg.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(gossipid)).getGossipNode();
+        msg.dst = nodeIdtoNode(id, gossipid).getGossipProtocol().getGossipNode();
         sendMessage(msg, id, gossipid);
       }
     }
@@ -641,7 +641,8 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       nodesToSend.remove(this.node.getId());
       for (BigInteger id : nodesToSend) {
         Message mbis = m.copy();
-        mbis.dst = ((GossipSubProtocol) nodeIdtoNode(id).getProtocol(myPid)).getGossipNode();
+        mbis.dst =
+            ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(myPid)).getGossipNode();
         mbis.src = this.node;
         logger.warning(
             "handleMessage resending " + cid + " " + m.id + " to " + id + " " + m.dst.getId());

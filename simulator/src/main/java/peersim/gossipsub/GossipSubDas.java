@@ -103,6 +103,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
         break;
       case Message.MSG_GET_SAMPLE_RESPONSE:
         m = (Message) event;
+        GossipObserver.reportMsg(m, false);
         handleGetSampleResponse(m, pid);
         break;
       default:
@@ -142,8 +143,8 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
     assert m.dst != null;
 
     // Get source and destination nodes
-    Node src = nodeIdtoNode(this.getGossipNode().getId());
-    Node dest = nodeIdtoNode(destId);
+    Node src = nodeIdtoNode(this.getGossipNode().getId(), gossipid);
+    Node dest = nodeIdtoNode(destId, gossipid);
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
@@ -168,6 +169,7 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
       // Send the message
       transport.send(src, dest, m, gossipid);
     } else {
+      GossipObserver.reportMsg(m, true);
       Sample[] samples;
       if (m.getType() == Message.MSG_MESSAGE) samples = new Sample[] {(Sample) m.value};
       else {
@@ -267,7 +269,8 @@ public abstract class GossipSubDas extends GossipSubProtocol implements MissingN
             msg.src = this.node;
             success = true;
             msg.dst =
-                ((GossipSubProtocol) nodeIdtoNode(nextNode).getProtocol(gossipid)).getGossipNode();
+                ((GossipSubProtocol) nodeIdtoNode(nextNode, gossipid).getProtocol(gossipid))
+                    .getGossipNode();
             // msg.dst = Util.nodeIdtoNode(nextNode, gossipid).getGossipProtocol().getGossipNode();
             /*if (nextNode.compareTo(builderAddress) == 0) {
               logger.warning("Error sending to builder or 0 samples assigned");

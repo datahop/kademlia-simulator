@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.SimpleEvent;
+import peersim.kademlia.das.Sample;
 
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
@@ -224,22 +225,47 @@ public class Message extends SimpleEvent {
         return "MSG_MESSAGE";
       case MSG_LEAVE:
         return "MSG_LEAVE";
+      case MSG_GET_SAMPLE:
+        return "MSG_GET_SAMPLE";
+      case MSG_GET_SAMPLE_RESPONSE:
+        return "MSG_GET_SAMPLE_RESPONSE";
       default:
         return "UNKNOW:" + type;
     }
   }
 
   public Map<String, Object> toMap(boolean sent) {
+
+    // System.out.println("Gossipid " + this.src.getProtocolId());
     Map<String, Object> result = new HashMap<String, Object>();
     result.put("id", this.id);
     result.put("type", this.typeToString());
     result.put("src", this.src.getId());
     result.put("dst", this.dst.getId());
     if (sent) {
+      GossipSubDas das =
+          GossipSubProtocol.nodeIdtoNode(this.src.getId(), this.src.getProtocolId())
+              .getGossipProtocol();
+      if (das != null) {
+        if (das instanceof GossipSubDasBuilder) result.put("node_type", "builder");
+        if (das instanceof GossipSubDasValidator) result.put("node_type", "validator");
+        if (das instanceof GossipSubDasNonValidator) result.put("node_type", "non-validator");
+      }
       result.put("status", "sent");
     } else {
+      GossipSubDas das =
+          GossipSubProtocol.nodeIdtoNode(this.dst.getId(), this.dst.getProtocolId())
+              .getGossipProtocol();
+      if (das != null) {
+        if (das instanceof GossipSubDasBuilder) result.put("node_type", "builder");
+        if (das instanceof GossipSubDasValidator) result.put("node_type", "validator");
+        if (das instanceof GossipSubDasNonValidator) result.put("node_type", "non-validator");
+      }
       result.put("status", "received");
     }
+    if (this.body instanceof Sample[]) result.put("size", ((Sample[]) this.body).length * 512);
+    if (this.value instanceof Sample) result.put("size", 512);
+
     result.put("time", this.timestamp);
     return result;
   }

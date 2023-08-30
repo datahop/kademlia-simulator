@@ -336,8 +336,7 @@ public class Message extends SimpleEvent {
     }
     result.put("time", this.timestamp);
     if (this.body instanceof Sample[]) result.put("size", ((Sample[]) this.body).length * 512);
-    else if (this.value instanceof Parcel)
-      result.put("size", ((Parcel) this.value).getSize() * 512);
+    if (this.value instanceof Parcel) result.put("size", ((Parcel) this.value).getSize() * 512);
     return result;
   }
 }

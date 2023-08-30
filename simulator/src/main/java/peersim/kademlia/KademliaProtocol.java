@@ -22,6 +22,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
+import peersim.kademlia.das.Parcel;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
@@ -517,7 +518,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     Node src = Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
     Node dest = Util.nodeIdtoNode(destId, kademliaid);
 
-    KademliaObserver.reportMsg(m, true);
+    if (m.value instanceof Parcel) KademliaObserver.reportMsg(m, true);
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
     // Get the transport protocol
@@ -558,7 +559,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // If the event is a message, report the message to the Kademlia observer.
     if (event instanceof Message) {
       m = (Message) event;
-      KademliaObserver.reportMsg(m, false);
+      if (m.value instanceof Parcel) KademliaObserver.reportMsg(m, false);
     }
 
     // Handle the event based on its type.

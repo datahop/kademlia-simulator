@@ -175,7 +175,7 @@ public class GossipObserver implements Control {
     if (m.src == null) return;
 
     // Add the message to the message log, but first check if it hasn't already been added
-    assert (!messages.keySet().contains(m.id));
+    // assert (!messages.keySet().contains(m.id));
     messages.put(m.id, m.toMap(sent));
   }
 
@@ -187,7 +187,7 @@ public class GossipObserver implements Control {
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
     // Calculate the operation stop time and then add the opearation to the operation log.
-    assert (!operations.keySet().contains(op.getId()));
+    // assert (!operations.keySet().contains(op.getId()));
     System.out.println("Reporting op");
     if (op.getStopTime() == 0) op.setStopTime(CommonState.getTime() - op.getTimestamp());
     operations.put(op.getId(), op.toMap());

@@ -94,10 +94,12 @@ public class CustomDistributionDas implements peersim.core.Control {
 
       if (i == 0) {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolDasBuilderID)));
+        dasProt.setProtocolID(protocolDasBuilderID);
         dasProt.setNode(node);
         builderAddress = node.getId();
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolEvilDasID)));
+        dasProt.setProtocolID(protocolDasBuilderID);
         dasProt.setNode(node);
 
       } else if (i >= (numEvilValidatorNodes + numEvilNonValidatorNodes + 1)
@@ -107,12 +109,14 @@ public class CustomDistributionDas implements peersim.core.Control {
                   + (numValidators - numEvilValidatorNodes)
                   + 1)) {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolDasValidatorID)));
+        dasProt.setProtocolID(protocolDasBuilderID);
         dasProt.setNode(node);
         // validatorsIds.add(kadProt.getKademliaNode().getId());
         validatorsIds.add(dasProt.getGossipNode().getId());
 
       } else {
         dasProt = ((GossipSubDas) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
+        dasProt.setProtocolID(protocolDasBuilderID);
         dasProt.setNode(node);
         // nonValidatorsIds.add(kadProt.getKademliaNode().getId());
         // node.setServer(false);
@@ -138,8 +142,8 @@ public class CustomDistributionDas implements peersim.core.Control {
       // generalNode.setKademliaProtocol(kadProt);
       generalNode.setGossipProtocol(dasProt);
       // dasProt.setDASProtocolID(protocolDasBuilderID);
-      dasProt.setProtocolID(protocolDasBuilderID);
 
+      System.out.println("Gossipid " + protocolDasBuilderID);
       generalNode.setProtocol(protocolDasBuilderID, dasProt);
       generalNode.setProtocol(protocolEvilDasID, null);
       generalNode.setProtocol(protocolDasValidatorID, null);

@@ -160,7 +160,6 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
     if (s instanceof Message) {
       m = (Message) event;
       // m.dst = this.kadProtocol.getKademliaNode();
-      KademliaObserver.reportMsg(m, false);
     }
 
     switch (((SimpleEvent) event).getType()) {
@@ -179,9 +178,11 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
       case Message.MSG_SEED_SAMPLE:
         m = (Message) event;
         handleSeedSample(m, myPid);
+        KademliaObserver.reportMsg(m, false);
         break;
       case Message.MSG_GET_SAMPLE_RESPONSE:
         m = (Message) event;
+        KademliaObserver.reportMsg(m, false);
         // logger.warning("Send message removed " + m.ackId);
         sentMsg.remove(m.ackId);
         handleGetSampleResponse(m, myPid);
@@ -430,7 +431,6 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
     assert m.src != null;
     assert m.dst != null;
 
-    KademliaObserver.reportMsg(m, true);
     Node src = this.kadProtocol.getNode();
     Node dest = Util.nodeIdtoNode(destId, kademliaId);
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
@@ -438,6 +438,8 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
     if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
       transport.send(src, dest, m, myPid);
     } else {
+      KademliaObserver.reportMsg(m, true);
+
       // Send message taking into account the transmission delay and the availability of upload
       // interface
       // Timeout t = new Timeout(destId, m.id, m.operationId);

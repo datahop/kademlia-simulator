@@ -6,6 +6,7 @@ import java.math.BigInteger;
 public class GossipNode implements Comparable<GossipNode> {
 
   private BigInteger id;
+  private int protocolId;
 
   public GossipNode(BigInteger id) {
     this.id = id;
@@ -57,5 +58,13 @@ public class GossipNode implements Comparable<GossipNode> {
     }
 
     return 0;
+  }
+
+  public void setProtocolId(int protocol) {
+    this.protocolId = protocol;
+  }
+
+  public int getProtocolId() {
+    return this.protocolId;
   }
 }
