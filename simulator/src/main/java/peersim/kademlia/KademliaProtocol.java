@@ -538,8 +538,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       // Timeout t = new Timeout(destId, m.id, m.operationId);
       Parcel samples = (Parcel) m.value;
       double samplesSize = 0.0;
-      if (samples != null)
-        samplesSize = KademliaCommonConfigDas.PARCEL_SIZE * KademliaCommonConfigDas.SAMPLE_SIZE;
+      if (samples != null) samplesSize = KademliaCommonConfigDas.PARCEL_SIZE * 512;
       double msgSize = samplesSize;
       long propagationLatency = transport.getLatency(src, dest);
       // Add the transmission time of the message (upload)
@@ -565,6 +564,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);
     } else {
+      // if (m.getType() == Message.MSG_RESPONSE && m.value instanceof Parcel)
+      //  EDSimulator.add(transport.getLatency(src, dest) + CommonState.r.nextInt(100), m, dest,
+      // myPid);
       transport.send(src, dest, m, myPid);
     }
 
@@ -580,7 +582,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       this.sentMsg.put(m.id, m.timestamp);
 
       // Schedule the timeout timer with a delay equal to 4 times the network latency
-      EDSimulator.add(4 * latency, t, src, myPid); // set delay = 4*RTT
+      EDSimulator.add(40 * latency, t, src, myPid); // set delay = 4*RTT
     }
   }
 
