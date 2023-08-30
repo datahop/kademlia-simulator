@@ -74,6 +74,7 @@ public class TrafficGenerator implements Control {
       // we add 1 ms delay to be sure the builder starts before validators.
       EDSimulator.add(1, generateNewBlockMessage(b), n, n.getGossipProtocol().getDASProtocolID());
     }
+    ID_GENERATOR++;
     return false;
   }
   // ______________________________________________________________________________________________
