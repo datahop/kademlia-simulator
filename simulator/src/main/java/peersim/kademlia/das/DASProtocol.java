@@ -384,6 +384,7 @@ public abstract class DASProtocol implements EDProtocol, Cloneable, KademliaEven
     if (op != null) {
       // keeping track of received samples
       op.elaborateResponse(samples, m.src.getId());
+      op.increaseHops();
       logger.warning(
           "Continue operation "
               + op.getId()
