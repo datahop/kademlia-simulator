@@ -22,6 +22,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
+import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.Parcel;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
@@ -88,6 +89,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** Callback for Kademlia events. */
   private KademliaEvents callback;
 
+  private long uploadInterfaceBusyUntil;
+
   /**
    * Replicate this object by returning an identical copy. It is called by the initializer and do
    * not fill any particular field.
@@ -123,6 +126,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();
+
+    uploadInterfaceBusyUntil = 0;
 
     // System.out.println("New kademliaprotocol");
   }
@@ -518,7 +523,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     Node src = Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
     Node dest = Util.nodeIdtoNode(destId, kademliaid);
 
-    if (m.value instanceof Parcel) KademliaObserver.reportMsg(m, true);
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
     // Get the transport protocol
@@ -526,6 +530,43 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
     // Send the message
     transport.send(src, dest, m, kademliaid);
+
+    if (m.getType() == Message.MSG_RESPONSE && m.value instanceof Parcel) {
+      KademliaObserver.reportMsg(m, true);
+      // Send message taking into account the transmission delay and the availability of upload
+      // interface
+      // Timeout t = new Timeout(destId, m.id, m.operationId);
+      Parcel samples = (Parcel) m.value;
+      double samplesSize = 0.0;
+      if (samples != null)
+        samplesSize = KademliaCommonConfigDas.PARCEL_SIZE * KademliaCommonConfigDas.SAMPLE_SIZE;
+      double msgSize = samplesSize;
+      long propagationLatency = transport.getLatency(src, dest);
+      // Add the transmission time of the message (upload)
+      double transDelay = 0.0;
+      transDelay = 1000 * msgSize / KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE;
+
+      // If the interface is busy, incorporate the additional delay
+      // also update the time when interface is available again
+      long timeNow = CommonState.getTime();
+      long latency = propagationLatency;
+      logger.info("Transmission propagationLatency " + latency);
+      latency += (long) transDelay; // truncated value
+      logger.info("Transmission total latency " + latency);
+      if (this.uploadInterfaceBusyUntil > timeNow) {
+        latency += this.uploadInterfaceBusyUntil - timeNow;
+        this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
+
+      } else {
+        this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
+      }
+      logger.info("Transmission " + latency + " " + transDelay);
+      // add to sent msg
+      this.sentMsg.put(m.id, m.timestamp);
+      EDSimulator.add(latency, m, dest, myPid);
+    } else {
+      transport.send(src, dest, m, myPid);
+    }
 
     // If the message is a request, start the timeout timer
     if (m.getType() == Message.MSG_FIND || m.getType() == Message.MSG_FIND_DIST) {
@@ -559,7 +600,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // If the event is a message, report the message to the Kademlia observer.
     if (event instanceof Message) {
       m = (Message) event;
-      if (m.value instanceof Parcel) KademliaObserver.reportMsg(m, false);
+      if (m.value instanceof Parcel) {
+        logger.info("reporting rcvd msg");
+        KademliaObserver.reportMsg(m, false);
+      }
     }
 
     // Handle the event based on its type.

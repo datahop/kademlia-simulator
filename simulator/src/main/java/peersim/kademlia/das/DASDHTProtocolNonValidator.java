@@ -151,7 +151,7 @@ public class DASDHTProtocolNonValidator extends DASDHTProtocol {
 
   @Override
   public void operationComplete(Operation op) {
-    logger.warning("Operation complete " + op.getClass().getSimpleName());
+    logger.warning("Operation complete non-validator " + op.getClass().getSimpleName());
 
     if (op instanceof GetOperation) {
       GetOperation get = (GetOperation) op;

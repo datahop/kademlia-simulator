@@ -175,6 +175,8 @@ public class KademliaObserver implements Control {
   public static void reportMsg(Message m, boolean sent) {
     // Messages without a source are control messages sent by the traffic control,
     // so we don't want to log them.
+
+    // System.out.println("Src " + m.src.getId() + " " + m.dst.getId() + " " + sent);
     if (m.src == null) return;
 
     // Add the message to the message log, but first check if it hasn't already been added
