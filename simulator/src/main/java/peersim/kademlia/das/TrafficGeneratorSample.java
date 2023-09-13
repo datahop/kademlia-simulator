@@ -89,6 +89,20 @@ public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   /**
+   * generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateFindNodeMessage(BigInteger id) {
+
+    Message m = Message.makeInitFindNode(id);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
    * every call of this control generates and send a random find node message
    *
    * @return boolean
@@ -105,6 +119,11 @@ public class TrafficGeneratorSample implements Control {
             EDSimulator.add(
                 CommonState.r.nextInt(300000), generateFindNodeMessage(), start, kadpid);
           }
+          EDSimulator.add(
+              0,
+              generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
+              start,
+              kadpid);
         }
       }
       first = false;
@@ -113,6 +132,7 @@ public class TrafficGeneratorSample implements Control {
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();
+        // we add 1 ms delay to be sure the builder starts before validators.
         if (n.getDASProtocol().isBuilder())
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
         else

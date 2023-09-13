@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -43,7 +44,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
   protected static final String PAR_KADEMLIA = "kademlia";
   protected static final String PAR_ALPHA = "alpha";
-
+  protected static final String PAR_PARCEL = "parcelSize";
   private static String prefix = null;
   private UnreliableTransport transport;
   /** Store the time until which this node's uplink is busy sending data */
@@ -91,6 +92,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected long time;
 
+  protected TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -116,16 +119,20 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     KademliaCommonConfigDas.ALPHA =
         Configuration.getInt(prefix + "." + PAR_ALPHA, KademliaCommonConfigDas.ALPHA);
 
+    KademliaCommonConfigDas.PARCEL_SIZE =
+        Configuration.getInt(prefix + "." + PAR_PARCEL, KademliaCommonConfigDas.PARCEL_SIZE);
     kv = new KeyValueStore();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
-    searchTable = new SearchTable(currentBlock);
 
     queried = new HashSet<BigInteger>();
     uploadInterfaceBusyUntil = 0;
 
     sentMsg = new TreeMap<Long, Long>();
+
+    searchTable = new SearchTable();
+    nonValidatorsIndexed = new TreeSet<>();
   }
 
   /**
@@ -209,6 +216,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void setKademliaProtocol(KademliaProtocol prot) {
     this.kadProtocol = prot;
     this.logger = prot.getLogger();
+    /*searchTable = new SearchTable(currentBlock, this.getKademliaId());*/
   }
 
   /**
@@ -426,7 +434,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                   + op.getSamples().length);
           if (op.getAvailableRequests() == KademliaCommonConfigDas.ALPHA) {
             for (BigInteger sample : op.getSamples()) logger.warning("Missing sample " + sample);
-            /*while (!doSampling(op)) {
+            while (!doSampling(op)) {
               if (!op.increaseRadius(2)) {
                 logger.warning("Operation completed max increase");
                 samplingOp.remove(m.operationId);
@@ -436,8 +444,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               }
               logger.warning(
                   "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
-            }*/
-            doSampling(op);
+            }
+            // doSampling(op);
           }
         }
       } else {
@@ -569,6 +577,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (validatorsList != null) searchTable.addValidatorNodes(validatorsList);
   }
 
+  public void setNonValidators(List<BigInteger> nonValidators) {
+    for (BigInteger id : nonValidators) {
+      nonValidatorsIndexed.add(id);
+    }
+  }
   /**
    * Starts the random sampling operation
    *
@@ -701,7 +714,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       return;
     }
     searchTable.addNodes(list.toArray(new BigInteger[0]));
-    logger.warning(
+    logger.info(
         "Search table nodes found "
             // + searchTable.samplesIndexed().size()
             // + " "
@@ -736,5 +749,33 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         logger.warning("Sampling operation finished");
         KademliaObserver.reportOperation(op);
       }*/
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for a specific sample.
+   *
+   * @return Message
+   */
+  protected Message generateSeedSampleMessage(Sample[] s) {
+
+    Message m = new Message(Message.MSG_SEED_SAMPLE, s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  // ______________________________________________________________________________________________
+  /**
+   * generates a GET message for t1 key.
+   *
+   * @return Message
+   */
+  protected Message generateNewSampleMessage(BigInteger s) {
+
+    Message m = Message.makeInitGetSample(s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
   }
 }

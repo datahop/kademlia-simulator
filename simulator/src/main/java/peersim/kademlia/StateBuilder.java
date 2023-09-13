@@ -75,6 +75,7 @@ public class StateBuilder implements peersim.core.Control {
    * @return always false
    */
   public boolean execute() {
+    System.out.println("Building state");
 
     // Sort the network by nodeId (Ascending)
     Network.sort(
@@ -105,7 +106,9 @@ public class StateBuilder implements peersim.core.Control {
       for (int k = 0; k < 100; k++) {
         KademliaProtocol jKad =
             (KademliaProtocol) (Network.get(CommonState.r.nextInt(sz)).getProtocol(kademliaid));
-        iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+        if (jKad.getKademliaNode().isServer()) {
+          iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+        }
       }
     }
 
@@ -125,7 +128,7 @@ public class StateBuilder implements peersim.core.Control {
         if (start > 0 && start < sz) {
           KademliaProtocol jKad = (KademliaProtocol) (Network.get(start).getProtocol(kademliaid));
           BigInteger jNodeId = jKad.getKademliaNode().getId();
-          if (!jNodeId.equals(iNodeId)) {
+          if (!jNodeId.equals(iNodeId) && jKad.getKademliaNode().isServer()) {
             iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
           }
         }

@@ -25,6 +25,7 @@ public class KademliaCommonConfigDas {
   /** Number of samples retrieved for the random sampling */
   public static int N_SAMPLES = 75;
 
+  public static int PARCEL_SIZE = 128;
   /**
    * Size of a node record (a single neighbor information returned alongside samples in
    * GET_SAMPLE_RESPONSE) in Mbits - I used ENR size for this, which is 300 bytes

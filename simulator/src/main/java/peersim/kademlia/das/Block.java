@@ -1,8 +1,12 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Stack;
 import java.util.TreeSet;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -37,7 +41,10 @@ public class Block implements Iterator<Sample>, Cloneable {
   // private TreeSet<BigInteger> samples;
   private TreeSet<BigInteger> samplesByRow;
   private TreeSet<BigInteger> samplesByColumn;
-  // private HashMap<BigInteger, BigInteger> sampleMap;
+  private HashMap<BigInteger, Parcel> parcelMap;
+  private HashMap<Integer, List<Parcel>> parcelByRow;
+  private HashMap<Integer, List<Parcel>> parcelByColumn;
+
   // Constructor with block id
   public Block(long id) {
 
@@ -53,6 +60,9 @@ public class Block implements Iterator<Sample>, Cloneable {
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
 
+    parcelMap = new HashMap<>();
+    parcelByRow = new HashMap<>();
+    parcelByColumn = new HashMap<>();
     for (int i = 1; i <= blockSamples.length; i++) {
       for (int j = 1; j <= blockSamples[0].length; j++) {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
@@ -76,6 +86,10 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
+
+    parcelMap = new HashMap<>();
+    parcelByRow = new HashMap<>();
+    parcelByColumn = new HashMap<>();
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {
@@ -109,6 +123,68 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
   }
 
+  public void generateRowParcels(int parcelSize) {
+    int samplesNum = 0;
+    Stack<Sample> samples = new Stack<>();
+    for (int i = 0; i < blockSamples.length; i++) {
+      List<Parcel> l = new ArrayList<>();
+      for (int j = 0; j < blockSamples.length; j++) {
+        samples.push(blockSamples[i][j]);
+        samplesNum++;
+        // System.out.println("Samples size " + samples.size() + " " + parcelSize);
+        if (samplesNum == parcelSize) {
+          Parcel p = new Parcel(parcelSize);
+          for (Sample s : samples) {
+            p.addSample(s);
+            parcelMap.put(s.getId(), p);
+          }
+          samplesNum = 0;
+          samples.clear();
+          l.add(p);
+          // System.out.println("Column " + i + " parcel " + l.size());
+        }
+      }
+      // System.out.println("New parcel row " + i);
+      parcelByRow.put(i, l);
+    }
+  }
+
+  public void generateColumnParcels(int parcelSize) {
+    int samplesNum = 0;
+    Stack<Sample> samples = new Stack<>();
+    Parcel p;
+    for (int i = 0; i < blockSamples.length; i++) {
+      List<Parcel> l = new ArrayList<>();
+      for (int j = 0; j < blockSamples.length; j++) {
+        samples.push(blockSamples[j][i]);
+        samplesNum++;
+        if (samplesNum == parcelSize) {
+          p = new Parcel(parcelSize);
+          for (Sample s : samples) {
+            p.addSample(s);
+            parcelMap.put(s.getIdByColumn(), p);
+          }
+          samplesNum = 0;
+          samples.clear();
+          l.add(p);
+        }
+      }
+      // System.out.println("New parcel column " + i);
+      parcelByColumn.put(i, l);
+    }
+  }
+
+  public Parcel getParcel(BigInteger sampleId) {
+    return parcelMap.get(sampleId);
+  }
+
+  public List<Parcel> getParcelByRow(int i) {
+    return parcelByRow.get(i - 1);
+  }
+
+  public List<Parcel> getParcelByColumn(int i) {
+    return parcelByColumn.get(i - 1);
+  }
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -226,6 +302,11 @@ public class Block implements Iterator<Sample>, Cloneable {
 
     if (column > SIZE - 1) return null;
     return s;
+  }
+
+  public boolean hasNextByColumn() {
+    if (column < SIZE) return true;
+    return false;
   }
 
   /*Resets the iterator pointers */

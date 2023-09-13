@@ -4,10 +4,7 @@ import java.math.BigInteger;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
-import peersim.kademlia.Util;
-import peersim.kademlia.das.operations.RandomSamplingOperationDHT;
 import peersim.kademlia.das.operations.SamplingOperation;
-import peersim.kademlia.das.operations.ValidatorSamplingOperationDHT;
 import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 
@@ -38,51 +35,12 @@ public class DASDHTProtocol extends DASProtocol {
     // samplesRequested = 0;
     row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
-    if (isBuilder()) {
-
-      logger.warning("Builder new block:" + currentBlock.getBlockId());
-      while (currentBlock.hasNext()) {
-        Sample s = currentBlock.next();
-        Message msg = generatePutMessageSample(s);
-        this.kadProtocol.handleInit(msg, kademliaId);
-      }
-    } else {
-      for (int i = 0; i < row.length; i++) {
-        row[i] = 0;
-      }
-      for (int i = 0; i < column.length; i++) {
-        column[i] = 0;
-      }
-      samplingStarted = false;
-      for (int i = 0; i < 3; i++) {
-        Message lookup = Util.generateFindNodeMessage();
-        this.kadProtocol.handleInit(lookup, kademliaId);
-      }
-      Message lookup = Util.generateFindNodeMessage(this.getKademliaId());
-      this.kadProtocol.handleInit(lookup, kademliaId);
-
-      for (SamplingOperation sop : samplingOp.values()) {
-        KademliaObserver.reportOperation(sop);
-        logger.warning(
-            "Sampling operation finished init "
-                + sop.getId()
-                + " "
-                + CommonState.getTime()
-                + " "
-                + sop.getTimestamp());
-      }
-      samplingOp.clear();
-      kadOps.clear();
-      queried.clear();
-    }
   }
 
+  @Override
   protected void handleInitGetSample(Message m, int myPid) {
-
-    if (isBuilder()) return;
-    BigInteger[] sampleId = new BigInteger[1];
-    sampleId[0] = ((BigInteger) m.body);
-    logger.info("Getting sample  " + sampleId[0]);
+    logger.warning("Error. Init block  getting samples dht node. do nothing " + this);
+    // super.handleInitGetSample(m, myPid);
   }
 
   /**
@@ -93,7 +51,7 @@ public class DASDHTProtocol extends DASProtocol {
    */
   protected void startRandomSampling() {
 
-    logger.warning("Starting random sampling");
+    /*logger.warning("Starting random sampling");
     SamplingOperation op =
         new RandomSamplingOperationDHT(
             this.getKademliaId(),
@@ -108,7 +66,7 @@ public class DASDHTProtocol extends DASProtocol {
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random");
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    doSampling(op);*/
   }
 
   /**
@@ -118,7 +76,7 @@ public class DASDHTProtocol extends DASProtocol {
    * @param myPid protocol pid
    */
   protected void startRowsandColumnsSampling() {
-    logger.warning(
+    /*logger.warning(
         "Starting rows and columns fetch "
             + rowWithHighestNumSamples()
             + " "
@@ -135,7 +93,7 @@ public class DASDHTProtocol extends DASProtocol {
     createValidatorSamplingOperation(
         CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
     createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);*/
   }
 
   /**
@@ -146,7 +104,7 @@ public class DASDHTProtocol extends DASProtocol {
    */
   private void createValidatorSamplingOperation(int row, int column, long timestamp) {
 
-    ValidatorSamplingOperationDHT op =
+    /*ValidatorSamplingOperationDHT op =
         new ValidatorSamplingOperationDHT(
             this.getKademliaId(),
             timestamp,
@@ -169,12 +127,12 @@ public class DASDHTProtocol extends DASProtocol {
             + timestamp);
 
     op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    doSampling(op);
+    doSampling(op);*/
   }
 
   protected boolean doSampling(SamplingOperation sop) {
 
-    if (sop.completed()) {
+    /*if (sop.completed()) {
       samplingOp.remove(sop.getId());
       KademliaObserver.reportOperation(sop);
       logger.warning(
@@ -203,7 +161,8 @@ public class DASDHTProtocol extends DASProtocol {
       }
 
       return success;
-    }
+    }*/
+    return false;
   }
 
   @Override
@@ -248,24 +207,8 @@ public class DASDHTProtocol extends DASProtocol {
 
   @Override
   public void putValueReceived(Object o) {
-    Sample s = (Sample) o;
-    logger.warning("Sample received put operation " + s.getId());
-
-    column[s.getColumn()]++;
-    row[s.getRow()]++;
-
-    if (!samplingStarted) {
-      if (isValidator()) {
-        logger.warning("Starting validator (rows and columns) sampling");
-        startRowsandColumnsSampling();
-        startRandomSampling();
-
-      } else {
-        logger.warning("Starting non-validator random sampling");
-        startRandomSampling();
-      }
-      samplingStarted = true;
-    }
+    Parcel p = (Parcel) o;
+    logger.warning("Parcel received put operation " + p.getId());
   }
 
   @Override
@@ -280,10 +223,10 @@ public class DASDHTProtocol extends DASProtocol {
    *
    * @return Message
    */
-  private Message generatePutMessageSample(Sample s) {
+  protected Message generatePutMessageSample(Parcel p) {
 
     // Existing active destination node
-    Message m = Message.makeInitPutValue(s.getId(), s);
+    Message m = Message.makeInitPutValue(p.getId(), p);
     m.timestamp = CommonState.getTime();
 
     return m;
