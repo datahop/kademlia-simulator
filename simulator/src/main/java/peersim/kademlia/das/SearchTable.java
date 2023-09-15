@@ -167,6 +167,10 @@ public class SearchTable {
     return result;
   }
 
+  public void refresh() {
+
+  }
+
   /*public static void createSampleMap(Block currentBlock) {
 
     int validatorParcelSize =
