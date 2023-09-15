@@ -549,7 +549,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             currentBlock,
             searchTable,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
@@ -699,7 +699,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         searchTable.getValidatorNodesbySample(
             sample,
             currentBlock.computeRegionRadius(
-                KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length));
+                KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
+                KademliaCommonConfigDas.validatorsSize));
     for (BigInteger id : ids) {
       logger.warning("Found id " + id + " for sample " + sample);
     }

@@ -108,9 +108,12 @@ public class RandomSamplingOperation extends SamplingOperation {
       if (!samples.get(sample).isDownloaded()) {
 
         List<BigInteger> validatorsBySampleRow =
-            SearchTable.getNodesBySample(samples.get(sample).getId());
+            // SearchTable.getNodesBySample(samples.get(sample).getId());
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator);
         List<BigInteger> validatorsBySampleColumn =
-            SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+            // SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+            searchTable.getValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusValidator);
 
         List<BigInteger> validatorsBySample = new ArrayList<>();
 
