@@ -150,11 +150,6 @@ public class DASProtocolBuilder extends DASProtocol {
     logger.warning("Received sample builder node: do nothing");
   }
 
-  public void setNonValidators(List<BigInteger> nonValidators) {
-    for (BigInteger id : nonValidators) {
-      nonValidatorsIndexed.add(id);
-    }
-  }
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
