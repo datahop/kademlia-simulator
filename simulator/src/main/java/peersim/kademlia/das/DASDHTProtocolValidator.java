@@ -73,7 +73,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             row,
             column,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
 
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
@@ -158,7 +158,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             currentBlock,
             searchTable,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
