@@ -76,7 +76,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             KademliaCommonConfigDas.validatorsSize,
             this);
 
-    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
+    // op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
