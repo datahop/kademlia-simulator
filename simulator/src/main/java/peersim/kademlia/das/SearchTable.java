@@ -3,10 +3,8 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 // import peersim.kademlia.KademliaCommonConfig;
@@ -25,7 +23,7 @@ public class SearchTable {
 
   private HashSet<BigInteger> blackList; // , samplesIndexed;
 
-  private static HashMap<BigInteger, List<BigInteger>> sampleMap = new HashMap<>();
+  // private static HashMap<BigInteger, List<BigInteger>> sampleMap = new HashMap<>();
   private BigInteger builderAddress;
 
   public SearchTable(/*Block currentblock , BigInteger id*/ ) {
@@ -169,7 +167,7 @@ public class SearchTable {
     return result;
   }
 
-  public static void createSampleMap(Block currentBlock) {
+  /*public static void createSampleMap(Block currentBlock) {
 
     int validatorParcelSize =
         (currentBlock.getSize()
@@ -193,8 +191,7 @@ public class SearchTable {
             // samples.put(node, sampleList);
             for (BigInteger sample : sampleList) {
               if (sampleMap.containsKey(sample)) {
-                /*System.out.println(
-                "assign samples to node " + node + " " + sampleMap.get(sample).size());*/
+
                 sampleMap.get(sample).add(node);
               } else {
                 List<BigInteger> nList = new ArrayList<>();
@@ -232,8 +229,7 @@ public class SearchTable {
             for (BigInteger sample : sampleList) {
               // System.out.println("assign samples to node " + node + " " + nodeMap.size());
               if (sampleMap.containsKey(sample)) {
-                /*System.out.println(
-                "assign samples to node " + node + " " + sampleMap.get(sample).size());*/
+
                 sampleMap.get(sample).add(node);
               } else {
                 List<BigInteger> nList = new ArrayList<>();
@@ -270,16 +266,16 @@ public class SearchTable {
             + " "
             + currentBlock.getSize());
 
-    /*for (List<BigInteger> l : sampleMap.values()) {
-      System.out.println("samples " + l.size());
-    }*/
-  }
+    //for (List<BigInteger> l : sampleMap.values()) {
+    //  System.out.println("samples " + l.size());
+    //}
+  }*/
 
-  public static List<BigInteger> getNodesBySample(BigInteger s) {
+  /*public static List<BigInteger> getNodesBySample(BigInteger s) {
     return sampleMap.get(s);
   }
 
-  /*public BigInteger[] findKClosestValidators(BigInteger sampleId) {
+  public BigInteger[] findKClosestValidators(BigInteger sampleId) {
 
     return routingTable.getNeighbours(sampleId, sampleId);
   }*/

@@ -35,13 +35,11 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning(
-        "Builder new block:"
-            + currentBlock.getBlockId()
-            + " "
-            + validatorsList.length
-            + " "
-            + nonValidatorsIndexed.size());
+    logger.warning("Builder new block:" + currentBlock.getBlockId());
+    /*+ " "
+    + validatorsList.length
+    + " "
+    + nonValidatorsIndexed.size());*/
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;
@@ -50,14 +48,18 @@ public class DASProtocolBuilder extends DASProtocol {
     while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
       boolean inRegion = false;
-
+      BigInteger radiusValidator =
+          currentBlock.computeRegionRadius(
+              KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, validatorsList.length);
       BigInteger radiusNonValidator =
           currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
-      List<BigInteger> idsValidatorsRows = SearchTable.getNodesBySample(s.getIdByRow());
+      // List<BigInteger> idsValidatorsRows = SearchTable.getNodesBySample(s.getIdByRow());
+      List<BigInteger> idsValidatorsRows =
+          searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
       List<BigInteger> idsValidatorsColumns =
-          // searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
-          SearchTable.getNodesBySample(s.getIdByColumn());
+          searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
+      // SearchTable.getNodesBySample(s.getIdByColumn());
 
       List<BigInteger> idsNonValidatorsRows =
           getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);

@@ -97,7 +97,7 @@ public class DASProtocolValidator extends DASProtocol {
             row,
             column,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId());

@@ -107,7 +107,9 @@ public abstract class SamplingOperation extends FindOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
-        List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
+        // List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
+        List<BigInteger> validatorsBySample =
+            searchTable.getValidatorNodesbySample(sample, radiusValidator);
         List<BigInteger> nonValidatorsBySample =
             searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
 
@@ -144,7 +146,6 @@ public abstract class SamplingOperation extends FindOperation {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
       /*System.out.println(
