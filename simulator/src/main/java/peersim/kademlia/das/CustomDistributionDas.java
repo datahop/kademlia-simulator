@@ -148,7 +148,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
       if (i == 0) // generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
-        generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
+      generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }
     KademliaCommonConfigDas.networkSize = Network.size();
     KademliaCommonConfigDas.validatorsSize = numValidators;

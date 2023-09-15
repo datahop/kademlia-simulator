@@ -119,7 +119,7 @@ public class DASDHTProtocolNonValidator extends DASDHTProtocol {
             currentBlock,
             searchTable,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
