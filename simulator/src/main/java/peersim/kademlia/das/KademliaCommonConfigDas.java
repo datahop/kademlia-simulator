@@ -1,5 +1,7 @@
 package peersim.kademlia.das;
 
+import peersim.kademlia.KademliaCommonConfig;
+
 /**
  * Fixed Parameters for the DAS protocol.
  *
@@ -40,7 +42,7 @@ public class KademliaCommonConfigDas {
   /** Number of samples returned by a single node */
   public static int MAX_SAMPLES_RETURNED = 1000;
 
-  public static int MAX_NODES_RETURNED = 15;
+  public static int MAX_NODES_RETURNED = KademliaCommonConfig.K;
 
   /** Number of max hops during a sampling operation */
   public static int MAX_HOPS = 5000;

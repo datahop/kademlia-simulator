@@ -740,4 +740,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     return m;
   }
+
+  public void refreshSearchTable() {
+    searchTable.refresh();
+  }
 }
