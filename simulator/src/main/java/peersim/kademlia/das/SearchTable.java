@@ -3,6 +3,7 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,8 @@ public class SearchTable {
   // private HashMap<BigInteger, List<BigInteger>> sampleMap;
 
   // private Block currentBlock;
+
+  private List<Neighbour> neighbours;
 
   private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
@@ -34,7 +37,7 @@ public class SearchTable {
     this.nonValidatorsIndexed = new TreeSet<>();
 
     this.blackList = new HashSet<>();
-
+    this.neighbours = new ArrayList<>();
     // routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
     // routingTable.setNodeId(id);
   }
@@ -59,6 +62,10 @@ public class SearchTable {
 
     return result.toArray(new BigInteger[0]);
   }*/
+
+  public void addNeighbour(Neighbour neigh) {
+    neighbours.add(neigh);
+  }
 
   public void addNodes(BigInteger[] nodes) {
 
@@ -167,8 +174,26 @@ public class SearchTable {
     return result;
   }
 
+  public Neighbour[] getNeighbours() {
+
+    List<Neighbour> result = new ArrayList<>();
+    Collections.sort(neighbours);
+
+    for (Neighbour neigh : neighbours) {
+      if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
+      else break;
+    }
+    return result.toArray(new Neighbour[0]);
+  }
+
   public void refresh() {
 
+    List<Neighbour> toRemove = new ArrayList<>();
+    for (Neighbour neigh : neighbours) {
+      neigh.updateLastSeen();
+      if (neigh.expired()) toRemove.add(neigh);
+    }
+    neighbours.removeAll(toRemove);
   }
 
   /*public static void createSampleMap(Block currentBlock) {
