@@ -11,6 +11,8 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
+import peersim.kademlia.das.Neighbour;
+import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.Operation;
 import peersim.util.IncrementalStats;
 
@@ -52,6 +54,10 @@ public class KademliaObserver implements Control {
 
   /** Log of operations in the Kademlia network */
   private static HashMap<Long, Map<String, Object>> operations =
+      new HashMap<Long, Map<String, Object>>();
+
+  /** Log of operations in the Kademlia network */
+  private static HashMap<Long, Map<String, Object>> peerDiscoveries =
       new HashMap<Long, Map<String, Object>>();
 
   /** Name of the folder where experiment logs are written */
@@ -124,6 +130,9 @@ public class KademliaObserver implements Control {
     if (!operations.isEmpty()) {
       writeLogs(operations, logFolderName + "/" + "operation.csv");
     }
+    if (!peerDiscoveries.isEmpty()) {
+      writeLogs(peerDiscoveries, logFolderName + "/" + "peerDiscoveries.csv");
+    }
   }
 
   /**
@@ -192,5 +201,27 @@ public class KademliaObserver implements Control {
     assert (!operations.keySet().contains(op.getId()));
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     operations.put(op.getId(), op.toMap());
+  }
+
+  public static void reportPeerDiscovery(Message m, SearchTable st) {
+
+    if (m.src == null) return;
+    // Add the message to the message log, but first check if it hasn't already been added
+    assert (!messages.keySet().contains(m.id));
+    Map<String, Object> result = new HashMap<String, Object>();
+    Neighbour[] neighs = (Neighbour[])m.value;
+
+    int notKnown=0;
+    for(Neighbour n : neighs){
+      if(!st.isNeighbourKnown(n))notKnown++;
+    }
+    result.put("message_id", m.id);
+    result.put("dst_id",m.dst.getId());
+    result.put("src_id",m.src.getId());
+    result.put("total_peers", st.getAllNeighboursCount());
+    result.put("peers_in_message", neighs.length);
+    result.put("peers_not_known", notKnown);
+
+    messages.put(m.id, result);
   }
 }

@@ -94,6 +94,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
 
+  protected boolean isEvil;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -111,6 +113,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public DASProtocol(String prefix) {
 
     DASProtocol.prefix = prefix;
+    isEvil = false;
     _init();
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
     // samplesRequested = 0;
@@ -234,6 +237,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   public boolean isValidator() {
     return this.isValidator;
+  }
+
+  public boolean isEvil() {
+    return this.isEvil;
   }
 
   public void setBuilderAddress(BigInteger address) {
@@ -422,7 +429,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       // interface
       // Timeout t = new Timeout(destId, m.id, m.operationId);
       Sample[] samples = (Sample[]) m.body;
-      BigInteger[] nghbrs = (BigInteger[]) m.value;
+      Neighbour[] nghbrs = (Neighbour[]) m.value;
       double samplesSize = 0.0;
       if (samples != null) samplesSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
       double nghbrsSize = 0.0;
@@ -630,7 +637,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       list.remove(builderAddress);
       // searchTable.addNodes(list.toArray(new BigInteger[0]));
       for (BigInteger id : list) {
-        searchTable.addNeighbour(new Neighbour(id));
+        Node n = Util.nodeIdtoNode(id, kademliaId);
+        searchTable.addNeighbour(new Neighbour(id, n, n.getDASProtocol().isEvil()));
       }
       logger.warning(
           "Search table operation complete"
@@ -672,7 +680,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
     // searchTable.addNodes(list.toArray(new BigInteger[0]));
     for (BigInteger id : list) {
-      searchTable.addNeighbour(new Neighbour(id));
+      Node n = Util.nodeIdtoNode(id, kademliaId);
+      searchTable.addNeighbour(new Neighbour(id, n, n.getDASProtocol().isEvil()));
     }
     logger.info(
         "Search table nodes found "

@@ -9,6 +9,7 @@ public class EvilDASProtocol extends DASProtocol {
   public EvilDASProtocol(String prefix) {
     super(prefix);
     EvilDASProtocol.prefix = prefix;
+    isEvil = true;
   }
 
   @Override
