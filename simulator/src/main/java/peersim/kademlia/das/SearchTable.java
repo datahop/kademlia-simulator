@@ -186,6 +186,30 @@ public class SearchTable {
     return result.toArray(new Neighbour[0]);
   }
 
+  public int getAllNeighboursCount() {
+    return neighbours.size();
+  }
+
+  public int getAllAliveNeighboursCount() {
+    int count = 0;
+    for (Neighbour neigh : neighbours) {
+      if (neigh.getNode().isUp()) count++;
+    }
+    return count;
+  }
+
+  public int getMaliciousNeighboursCount() {
+    int count = 0;
+    for (Neighbour neigh : neighbours) {
+      if (neigh.isEvil()) count++;
+    }
+    return count;
+  }
+
+  public boolean isNeighbourKnown(Neighbour neighbour){
+    return neighbours.contains(neighbour);
+  }
+
   public void refresh() {
 
     List<Neighbour> toRemove = new ArrayList<>();
