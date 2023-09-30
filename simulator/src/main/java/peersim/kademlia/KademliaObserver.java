@@ -207,21 +207,23 @@ public class KademliaObserver implements Control {
 
     if (m.src == null) return;
     // Add the message to the message log, but first check if it hasn't already been added
-    assert (!messages.keySet().contains(m.id));
+    assert (!peerDiscoveries.keySet().contains(m.id));
     Map<String, Object> result = new HashMap<String, Object>();
-    Neighbour[] neighs = (Neighbour[])m.value;
+    Neighbour[] neighs = (Neighbour[]) m.value;
 
-    int notKnown=0;
-    for(Neighbour n : neighs){
-      if(!st.isNeighbourKnown(n))notKnown++;
+    int notKnown = 0;
+    for (Neighbour n : neighs) {
+      if (!st.isNeighbourKnown(n)) notKnown++;
     }
+    result.put("time", CommonState.getTime());
     result.put("message_id", m.id);
-    result.put("dst_id",m.dst.getId());
-    result.put("src_id",m.src.getId());
+    result.put("dst_id", m.dst.getId());
+    result.put("src_id", m.src.getId());
     result.put("total_peers", st.getAllNeighboursCount());
+    result.put("total_peers_alive", st.getAllAliveNeighboursCount());
     result.put("peers_in_message", neighs.length);
     result.put("peers_not_known", notKnown);
 
-    messages.put(m.id, result);
+    peerDiscoveries.put(m.id, result);
   }
 }

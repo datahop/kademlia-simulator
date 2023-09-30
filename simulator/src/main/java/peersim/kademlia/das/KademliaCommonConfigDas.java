@@ -64,5 +64,5 @@ public class KademliaCommonConfigDas {
   public static int validatorsSize = 0;
   public static int networkSize = 0;
 
-  public static int TTL = 10;
+  public static long TTL = 100000;
 }

@@ -64,7 +64,12 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    neighbours.add(neigh);
+    if (!neighbours.contains(neigh)) neighbours.add(neigh);
+    else {
+      neighbours.remove(neigh);
+      // neigh.updateLastSeen(CommonState.getTime());
+      neighbours.add(neigh);
+    }
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -206,7 +211,7 @@ public class SearchTable {
     return count;
   }
 
-  public boolean isNeighbourKnown(Neighbour neighbour){
+  public boolean isNeighbourKnown(Neighbour neighbour) {
     return neighbours.contains(neighbour);
   }
 
@@ -214,7 +219,6 @@ public class SearchTable {
 
     List<Neighbour> toRemove = new ArrayList<>();
     for (Neighbour neigh : neighbours) {
-      neigh.updateLastSeen();
       if (neigh.expired()) toRemove.add(neigh);
     }
     neighbours.removeAll(toRemove);
