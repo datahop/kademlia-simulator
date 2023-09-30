@@ -1,28 +1,29 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import peersim.core.CommonState;
 import peersim.core.Node;
 
 public class Neighbour implements Comparable<Neighbour> {
 
   BigInteger id;
-  int last_seen;
+  long last_seen;
   Node n;
   boolean isEvil;
 
   Neighbour(BigInteger id, Node n, boolean isEvil) {
     this.id = id;
-    this.last_seen = 0;
+    this.last_seen = CommonState.getTime();
     this.n = n;
     this.isEvil = isEvil;
   }
 
-  public void updateLastSeen() {
-    last_seen++;
+  public void updateLastSeen(long time) {
+    last_seen = time;
   }
 
   public boolean expired() {
-    if (last_seen >= KademliaCommonConfigDas.TTL) return true;
+    if (CommonState.getTime() - last_seen >= KademliaCommonConfigDas.TTL) return true;
     else return false;
   }
 
@@ -45,15 +46,13 @@ public class Neighbour implements Comparable<Neighbour> {
   }
 
   @Override
-  public boolean equals(Object object)
-  {
-      boolean sameSame = false;
+  public boolean equals(Object object) {
+    boolean sameSame = false;
 
-      if (object != null && object instanceof Neighbour)
-      {
-          sameSame = this.id.compareTo(((Neighbour) object).id)==0;
-      }
+    if (object != null && object instanceof Neighbour) {
+      sameSame = this.id.compareTo(((Neighbour) object).id) == 0;
+    }
 
-      return sameSame;
+    return sameSame;
   }
 }
