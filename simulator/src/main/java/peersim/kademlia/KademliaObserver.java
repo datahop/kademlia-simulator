@@ -223,7 +223,7 @@ public class KademliaObserver implements Control {
     result.put("total_peers_alive", st.getAllAliveNeighboursCount());
     result.put("peers_in_message", neighs.length);
     result.put("peers_not_known", notKnown);
-
+    result.put("validators_discovered", st.getValidatorsNeighboursCount());
     peerDiscoveries.put(m.id, result);
   }
 }

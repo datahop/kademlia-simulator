@@ -195,6 +195,22 @@ public class SearchTable {
     return neighbours.size();
   }
 
+  public int getValidatorsNeighboursCount() {
+    int count = 0;
+    for (Neighbour neigh : neighbours) {
+      if (neigh.getNode().getDASProtocol().isValidator()) count++;
+    }
+    return count;
+  }
+
+  public int getNonValidatorsNeighboursCount() {
+    int count = 0;
+    for (Neighbour neigh : neighbours) {
+      if (!neigh.getNode().getDASProtocol().isValidator()) count++;
+    }
+    return count;
+  }
+
   public int getAllAliveNeighboursCount() {
     int count = 0;
     for (Neighbour neigh : neighbours) {

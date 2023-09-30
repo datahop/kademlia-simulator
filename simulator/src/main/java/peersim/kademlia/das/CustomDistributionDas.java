@@ -114,7 +114,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
         nonValidatorsIds.add(kadProt.getKademliaNode().getId());
-        node.setServer(false);
+        // node.setServer(false);
       }
 
       dasProt.setKademliaProtocol(kadProt);
