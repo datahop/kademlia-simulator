@@ -2,12 +2,9 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -147,9 +144,7 @@ public abstract class SamplingOperation extends FindOperation {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-    //System.out.println(
-    //    this.srcNode + "] Do sampling " + aggressiveness + " " + this.getId() + " " + nodes.size());
-    // orderNodes();
+
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
       /*System.out.println(
@@ -169,44 +164,6 @@ public abstract class SamplingOperation extends FindOperation {
     }
 
     return result.toArray(new BigInteger[0]);
-  }
-
-  /*public boolean increaseRadius(int multiplier) {
-    if (timesIncreased == KademliaCommonConfigDas.multiplyRadiusLimit) return false;
-    radiusValidator = radiusValidator.multiply(BigInteger.valueOf(multiplier));
-    if (Block.MAX_KEY.compareTo(radiusValidator) <= 0) {
-      radiusValidator = Block.MAX_KEY;
-      return false;
-    }
-    createNodes();
-    return true;
-  }*/
-
-  private void orderNodes() {
-    for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-
-    Comparator<Entry<BigInteger, Node>> valueComparator =
-        new Comparator<Entry<BigInteger, Node>>() {
-
-          @Override
-          public int compare(Entry<BigInteger, Node> e1, Entry<BigInteger, Node> e2) {
-            Node v1 = e1.getValue();
-            Node v2 = e2.getValue();
-            return v1.compareTo(v2);
-          }
-        };
-    List<Entry<BigInteger, Node>> nodeEntries =
-        new ArrayList<Entry<BigInteger, Node>>(nodes.entrySet());
-    Collections.sort(nodeEntries, valueComparator);
-
-    nodes.clear();
-    for (Entry<BigInteger, Node> entry : nodeEntries) {
-      nodes.put(entry.getKey(), entry.getValue());
-    }
-
-    /*for (Node n : nodes.values()) {
-      System.out.println(this.srcNode + "] Node created " + n.getId() + " " + n.getScore());
-    }*/
   }
 
   public abstract void elaborateResponse(Sample[] sam, BigInteger node);

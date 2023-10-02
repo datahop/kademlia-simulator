@@ -182,7 +182,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
       fop.elaborateResponse((BigInteger[]) m.body);
       fop.addMessage(m.id);
 
-      // Save received neighbour in the closest Set of fin operation
+      // Save received neighbour in the closest Set of find operation
       BigInteger[] neighbours = (BigInteger[]) m.body;
       if (callback != null) callback.nodesFound(fop, neighbours);
       for (BigInteger neighbour : neighbours)

@@ -14,7 +14,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
   /** all the topics the node registers for */
   String myTopic = "";
 
-  private boolean server;
+  private boolean is_server;
   // private List<String> topicList;
 
   /**
@@ -30,7 +30,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
     this.addr = addr;
     this.port = port;
     this.is_evil = false;
-    this.server = true;
+    this.is_server = true;
   }
 
   /**
@@ -47,7 +47,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
     this.addr = addr;
     this.port = port;
     this.is_evil = true;
-    this.server = true;
+    this.is_server = true;
   }
 
   /**
@@ -61,7 +61,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
     this.port = 666;
     this.attackerID = null;
     this.is_evil = false;
-    this.server = true;
+    this.is_server = true;
   }
 
   /**
@@ -75,7 +75,7 @@ public class KademliaNode implements Comparable<KademliaNode> {
     this.port = n.port;
     this.is_evil = n.is_evil;
     this.attackerID = n.attackerID;
-    this.server = true;
+    this.is_server = true;
   }
 
   /**
@@ -198,10 +198,10 @@ public class KademliaNode implements Comparable<KademliaNode> {
   }
 
   public boolean isServer() {
-    return server;
+    return is_server;
   }
 
   public void setServer(boolean server) {
-    this.server = server;
+    this.is_server = server;
   }
 }
