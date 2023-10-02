@@ -44,13 +44,19 @@ public class KademliaCommonConfigDas {
   public static int MAX_HOPS = 5000;
 
   /** Default upload bandwith of a validator in Mbits/sec */
-  public static int VALIDATOR_UPLOAD_RATE = 100;
+  public static int VALIDATOR_UPLOAD_RATE = 10000;
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
-  public static int NON_VALIDATOR_UPLOAD_RATE = 100;
+  public static int NON_VALIDATOR_UPLOAD_RATE = 10000;
 
   public static int BUILDER_UPLOAD_RATE = 10000;
 
   public static int VALIDATOR_DEADLINE = 4000;
   public static int RANDOM_SAMPLING_DEADLINE = 12000;
+
+  public static int aggressiveness_step = 1;
+  public static int multiplyRadiusLimit = 0;
+
+  public static int validatorsSize = 0;
+  public static int networkSize = 0;
 }

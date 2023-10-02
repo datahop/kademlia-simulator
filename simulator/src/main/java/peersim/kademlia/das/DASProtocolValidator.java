@@ -2,7 +2,6 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
-import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
@@ -24,7 +23,17 @@ public class DASProtocolValidator extends DASProtocol {
 
     Sample[] samples = (Sample[]) m.body;
     for (Sample s : samples) {
-      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
+      logger.warning(
+          "Received sample:"
+              + kv.occupancy()
+              + " "
+              + s.getRow()
+              + " "
+              + s.getColumn()
+              + " "
+              + s.getIdByRow()
+              + " "
+              + s.getIdByColumn());
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
@@ -94,19 +103,7 @@ public class DASProtocolValidator extends DASProtocol {
     logger.warning("Sampling operation started validator " + op.getId());
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
-    op.setAvailableRequests(KademliaCommonConfigDas.ALPHA);
-    while (!doSampling(op)) {
-      if (!op.increaseRadius(2)) {
-        logger.warning("Operation completed max increase");
-        samplingOp.remove(op.getId());
-        logger.warning("Sampling operation finished");
-        KademliaObserver.reportOperation(op);
-        break;
-      }
-      logger.warning(
-          "Increasing " + op.getRadiusValidator() + " " + op.getClass().getCanonicalName());
-    }
-    // doSampling(op);
+    doSampling(op);
   }
 
   /**

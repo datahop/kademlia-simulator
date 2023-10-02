@@ -38,22 +38,23 @@ public class RandomSamplingOperation extends SamplingOperation {
       int numValidators,
       MissingNode callback) {
     super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
 
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
-      samples.put(rs.getId(), false);
-      samples.put(rs.getIdByColumn(), false);
+      FetchingSample s = new FetchingSample(rs);
+      samples.put(rs.getIdByRow(), s);
+      // samples.put(rs.getIdByColumn(), s);
     }
+    createNodes();
   }
 
   public boolean completed() {
 
     boolean completed = true;
-    for (BigInteger id : samples.keySet()) {
-      if (!samples.get(id)) {
+    for (FetchingSample s : samples.values()) {
+      if (!s.isDownloaded()) {
         completed = false;
         break;
       }
@@ -61,40 +62,98 @@ public class RandomSamplingOperation extends SamplingOperation {
     return completed;
   }
 
-  public BigInteger[] doSampling() {
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-
-    while ((getAvailableRequests() > 0)) { // I can send a new find request
-
-      // get an available neighbour
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      } else {
-        break;
-      }
-    }
-
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    else return new BigInteger[0];
-  }
-
   public void elaborateResponse(Sample[] sam) {
 
-    this.available_requests++;
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId()) && samples.containsKey(s.getIdByColumn())) {
-        if (!samples.get(s.getId()) && !samples.get(s.getIdByColumn())) {
-          samples.remove(s.getId());
-          samples.remove(s.getIdByColumn());
-          samples.put(s.getIdByColumn(), true);
-          samples.put(s.getId(), true);
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
           samplesCount++;
+          fs.setDownloaded();
         }
       }
     }
-    // System.out.println("Samples received " + samples.size());
+    // System.out.println("Samples received " + samplesCount);
+  }
+
+  public void elaborateResponse(Sample[] sam, BigInteger node) {
+    this.available_requests--;
+    // if (this.available_requests == 0) nodes.clear();
+
+    Node n = nodes.get(node);
+    if (n != null) {
+      for (FetchingSample s : n.getSamples()) {
+        s.removeFetchingNode(n);
+      }
+    }
+
+    for (Sample s : sam) {
+
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+          fs.removeFetchingNode(nodes.get(node));
+        }
+      }
+    }
+
+    nodes.remove(node);
+    askNodes.add(node);
+  }
+
+  protected void createNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+
+        List<BigInteger> validatorsBySampleRow =
+            SearchTable.getNodesBySample(samples.get(sample).getId());
+        List<BigInteger> validatorsBySampleColumn =
+            SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+
+        List<BigInteger> validatorsBySample = new ArrayList<>();
+
+        validatorsBySample.addAll(validatorsBySampleRow);
+        validatorsBySample.addAll(validatorsBySampleColumn);
+
+        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
+        nonValidatorsBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
+        nonValidatorsBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusNonValidator));
+
+        boolean found = false;
+
+        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
+          for (BigInteger id : validatorsBySampleRow) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+
+        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+          for (BigInteger id : nonValidatorsBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+
+        if (!found && callback != null) callback.missing(sample, this);
+      }
+    }
   }
 
   public Map<String, Object> toMap() {

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import peersim.kademlia.das.Block;
-import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Parcel;
 import peersim.kademlia.das.Sample;
@@ -36,8 +35,8 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
     this.row = row;
     this.column = column;
     if (row > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, false);
+      for (Sample sample : block.getSamplesByRow(row)) {
+        samples.put(sample.getId(), new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByRow(row);
@@ -45,8 +44,8 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
         parcels.put(p.getId(), false);
       }
     } else if (column > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(column)) {
-        samples.put(sample, false);
+      for (Sample sample : block.getSamplesByColumn(column)) {
+        samples.put(sample.getIdByColumn(), new FetchingSample(sample));
         // System.out.println(srcNode + " " + sample);
       }
       List<Parcel> list = block.getParcelByColumn(column);
@@ -55,7 +54,6 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
   }
 
   public BigInteger[] getParcels() {
@@ -76,11 +74,12 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
   public void elaborateResponse(Sample[] sam) {
 
     this.available_requests++;
+
     for (Sample s : sam) {
       if (samples.containsKey(s.getId())) {
-        if (!samples.get(s.getId())) {
-          samples.remove(s.getId());
-          samples.put(s.getId(), true);
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          fs.setDownloaded();
           samplesCount++;
         }
       }

@@ -39,7 +39,8 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     samples.clear();
     for (Sample rs : randomSamples) {
-      samples.put(rs.getId(), false);
+      // samples.put(rs.getId(), false);
+      samples.put(rs.getId(), new FetchingSample(rs));
       Parcel parcel = currentBlock.getParcel(rs.getId());
       parcels.put(parcel.getId(), false);
     }
@@ -65,9 +66,9 @@ public class RandomSamplingOperationDHT extends RandomSamplingOperation {
     this.available_requests++;
     for (Sample s : sam) {
       if (samples.containsKey(s.getId())) {
-        if (!samples.get(s.getId())) {
-          samples.remove(s.getId());
-          samples.put(s.getId(), true);
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          fs.setDownloaded();
           samplesCount++;
         }
       }

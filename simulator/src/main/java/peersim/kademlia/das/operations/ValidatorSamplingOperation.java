@@ -1,12 +1,9 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
-import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -47,36 +44,35 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.row = row;
     this.column = column;
     if (row > 0) {
-      for (BigInteger sample : block.getSamplesIdsByRow(row)) {
-        samples.put(sample, false);
+      for (Sample sample : block.getSamplesByRow(row)) {
+        samples.put(sample.getId(), new FetchingSample(sample));
       }
     } else if (column > 0) {
-      for (BigInteger sample : block.getSamplesIdsByColumn(column)) {
-        samples.put(sample, false);
+      for (Sample sample : block.getSamplesByColumn(column)) {
+        samples.put(sample.getIdByColumn(), new FetchingSample(sample));
       }
     }
     this.searchTable = searchTable;
-    setAvailableRequests(KademliaCommonConfigDas.ALPHA);
+    createNodes();
   }
 
   public void elaborateResponse(Sample[] sam) {
 
-    this.available_requests++;
     for (Sample s : sam) {
       if (row > 0) {
-        if (samples.containsKey(s.getIdByRow())) {
-          if (!samples.get(s.getIdByRow())) {
+        if (samples.containsKey(s.getId())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
             samplesCount++;
-            samples.remove(s.getIdByRow());
-            samples.put(s.getIdByRow(), true);
           }
         }
       } else {
         if (samples.containsKey(s.getIdByColumn())) {
-          if (!samples.get(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getIdByColumn());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
             samplesCount++;
-            samples.remove(s.getIdByColumn());
-            samples.put(s.getIdByColumn(), true);
           }
         }
       }
@@ -85,28 +81,46 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
+  public void elaborateResponse(Sample[] sam, BigInteger n) {
+
+    this.available_requests--;
+    // if (this.available_requests == 0) nodes.clear();
+
+    Node node = nodes.get(n);
+    if (node != null) {
+      for (FetchingSample s : node.getSamples()) {
+        s.removeFetchingNode(node);
+      }
+    }
+    for (Sample s : sam) {
+      if (row > 0) {
+        if (samples.containsKey(s.getId())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
+            samplesCount++;
+          }
+        }
+      } else {
+        if (samples.containsKey(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getIdByColumn());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
+            samplesCount++;
+          }
+        }
+      }
+    }
+    // System.out.println("Row " + samplesCount + " " + samples.size());
+    if (samplesCount >= samples.size() / 2) completed = true;
+    askNodes.add(n);
+
+    nodes.remove(n);
+  }
+
   public boolean completed() {
 
     return completed;
-  }
-
-  public BigInteger[] doSampling() {
-
-    List<BigInteger> nextNodes = new ArrayList<>();
-
-    while ((getAvailableRequests() > 0)) { // I can send a new find request
-
-      // get an available neighbour
-      BigInteger nextNode = getNeighbour();
-      if (nextNode != null) {
-        nextNodes.add(nextNode);
-      } else {
-        break;
-      }
-    }
-
-    if (nextNodes.size() > 0) return nextNodes.toArray(new BigInteger[0]);
-    else return new BigInteger[0];
   }
 
   public int getRow() {
