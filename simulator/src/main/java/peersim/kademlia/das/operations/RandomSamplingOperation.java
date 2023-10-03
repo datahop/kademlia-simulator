@@ -9,7 +9,6 @@ import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
-// import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.das.SearchTable;
 
 /**
@@ -53,10 +52,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     boolean completed = true;
+    int failed = 0;
     for (FetchingSample s : samples.values()) {
       if (!s.isDownloaded()) {
-        completed = false;
-        break;
+        failed++;
+        if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
+          completed = false;
+          break;
+        }
       }
     }
     return completed;
