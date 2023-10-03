@@ -135,9 +135,18 @@ public class TrafficGeneratorSample implements Control {
         Node n = Network.get(i);
         // b.initIterator();
         // we add 1 ms delay to be sure the builder starts before validators.
-        if (n.getDASProtocol().isBuilder())
+        if (n.getDASProtocol() instanceof DASProtocolBuilder
+            && n.getDASProtocol()
+                .getBuilderAddress()
+                .equals(n.getKademliaProtocol().getKademliaNode().getId())) {
+          System.out.println(
+              CommonState.getTime()
+                  + " New block Builder "
+                  + n.getKademliaProtocol().getKademliaNode().getId()
+                  + " "
+                  + i);
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        else
+        } else if (!(n.getDASProtocol() instanceof DASProtocolBuilder))
           EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
       ID_GENERATOR++;

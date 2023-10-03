@@ -133,6 +133,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     searchTable = new SearchTable();
     nonValidatorsIndexed = new TreeSet<>();
+    isBuilder = false;
   }
 
   /**
@@ -531,6 +532,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     for (BigInteger id : nonValidators) {
       nonValidatorsIndexed.add(id);
     }
+    searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
   }
   /**
    * Starts the random sampling operation

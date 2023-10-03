@@ -79,7 +79,13 @@ public class DASProtocolBuilder extends DASProtocol {
 
       for (BigInteger id : idsValidators) {
 
-        logger.warning("Sending sample " + s.getIdByRow() + " " + s.getIdByColumn() + " to " + id);
+        logger.warning(
+            "Sending sample to validator "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " to "
+                + id);
         Node n = Util.nodeIdtoNode(id, kademliaId);
         DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
         if (dasProt.isBuilder()) continue;
@@ -99,6 +105,13 @@ public class DASProtocolBuilder extends DASProtocol {
       }
 
       for (BigInteger id : idsNonValidators) {
+        logger.warning(
+            "Sending sample to non-validator "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " to "
+                + id);
         Node n = Util.nodeIdtoNode(id, kademliaId);
         DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
         if (dasProt.isBuilder()) continue;
