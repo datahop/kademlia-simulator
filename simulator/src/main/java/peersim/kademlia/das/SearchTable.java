@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,7 @@ public class SearchTable {
 
   // private Block currentBlock;
 
-  private List<Neighbour> neighbours;
+  private HashMap<BigInteger, Neighbour> neighbours;
 
   private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
 
@@ -37,7 +38,7 @@ public class SearchTable {
     this.nonValidatorsIndexed = new TreeSet<>();
 
     this.blackList = new HashSet<>();
-    this.neighbours = new ArrayList<>();
+    this.neighbours = new HashMap<>();
     // routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
     // routingTable.setNodeId(id);
   }
@@ -64,12 +65,9 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    if (!neighbours.contains(neigh)) neighbours.add(neigh);
-    else {
-      neighbours.remove(neigh);
-      // neigh.updateLastSeen(CommonState.getTime());
-      neighbours.add(neigh);
-    }
+    neighbours.remove(neigh.getId());
+    neighbours.put(neigh.getId(), neigh);
+    nodesIndexed.add(neigh.id);
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -113,7 +111,7 @@ public class SearchTable {
   }
 
   public TreeSet<BigInteger> nodesIndexed() {
-    return nonValidatorsIndexed;
+    return nodesIndexed;
   }
 
   public TreeSet<BigInteger> getValidatorsIndexed() {
@@ -182,9 +180,30 @@ public class SearchTable {
   public Neighbour[] getNeighbours() {
 
     List<Neighbour> result = new ArrayList<>();
-    Collections.sort(neighbours);
+    List<Neighbour> neighs = new ArrayList<>();
+    for (Neighbour n : neighbours.values()) {
+      neighs.add(n);
+    }
+    Collections.sort(neighs);
 
-    for (Neighbour neigh : neighbours) {
+    for (Neighbour neigh : neighs) {
+      if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
+      else break;
+    }
+    return result.toArray(new Neighbour[0]);
+  }
+
+  public Neighbour[] getNeighbours(BigInteger id, BigInteger radius) {
+
+    List<BigInteger> nodes = getNodesbySample(id, radius);
+    List<Neighbour> neighs = new ArrayList<>();
+    List<Neighbour> result = new ArrayList<>();
+    for (BigInteger n : nodes) {
+      neighs.add(neighbours.get(n));
+    }
+    Collections.sort(neighs);
+
+    for (Neighbour neigh : neighs) {
       if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
       else break;
     }
@@ -197,7 +216,7 @@ public class SearchTable {
 
   public int getValidatorsNeighboursCount() {
     int count = 0;
-    for (Neighbour neigh : neighbours) {
+    for (Neighbour neigh : neighbours.values()) {
       if (neigh.getNode().getDASProtocol().isValidator()) count++;
     }
     return count;
@@ -205,7 +224,7 @@ public class SearchTable {
 
   public int getNonValidatorsNeighboursCount() {
     int count = 0;
-    for (Neighbour neigh : neighbours) {
+    for (Neighbour neigh : neighbours.values()) {
       if (!neigh.getNode().getDASProtocol().isValidator()) count++;
     }
     return count;
@@ -213,7 +232,7 @@ public class SearchTable {
 
   public int getAllAliveNeighboursCount() {
     int count = 0;
-    for (Neighbour neigh : neighbours) {
+    for (Neighbour neigh : neighbours.values()) {
       if (neigh.getNode().isUp()) count++;
     }
     return count;
@@ -221,23 +240,26 @@ public class SearchTable {
 
   public int getMaliciousNeighboursCount() {
     int count = 0;
-    for (Neighbour neigh : neighbours) {
+    for (Neighbour neigh : neighbours.values()) {
       if (neigh.isEvil()) count++;
     }
     return count;
   }
 
   public boolean isNeighbourKnown(Neighbour neighbour) {
-    return neighbours.contains(neighbour);
+    return neighbours.containsKey(neighbour.getId());
   }
 
   public void refresh() {
 
     List<Neighbour> toRemove = new ArrayList<>();
-    for (Neighbour neigh : neighbours) {
-      if (neigh.expired()) toRemove.add(neigh);
+    for (Neighbour neigh : neighbours.values()) {
+      if (neigh.expired()) {
+        toRemove.add(neigh);
+        nodesIndexed.remove(neigh.getId());
+      }
     }
-    neighbours.removeAll(toRemove);
+    for (Neighbour n : toRemove) neighbours.remove(n.getId());
   }
 
   /*public static void createSampleMap(Block currentBlock) {

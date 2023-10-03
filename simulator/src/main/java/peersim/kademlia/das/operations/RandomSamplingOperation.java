@@ -158,7 +158,13 @@ public class RandomSamplingOperation extends SamplingOperation {
             }
           }
           found = true;
-        }
+        }*/
+        List<BigInteger> nodesBySampleRow =
+            // SearchTable.getNodesBySample(samples.get(sample).getId());
+            searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+        List<BigInteger> nodesBySampleColumn =
+            // SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+            searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusValidator);
 
         if (!found && callback != null) {
           callback.missing(sample, this);
