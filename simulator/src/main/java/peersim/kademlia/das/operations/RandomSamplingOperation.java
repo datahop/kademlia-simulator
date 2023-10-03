@@ -45,7 +45,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (Sample rs : randomSamples) {
       FetchingSample s = new FetchingSample(rs);
       samples.put(rs.getIdByRow(), s);
-      // samples.put(rs.getIdByColumn(), s);
+      samples.put(rs.getIdByColumn(), s);
     }
     createNodes();
   }
@@ -89,7 +89,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     for (Sample s : sam) {
 
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+      if (samples.containsKey(s.getId())) {
         FetchingSample fs = samples.get(s.getId());
         if (!fs.isDownloaded()) {
           samplesCount++;
@@ -97,6 +97,14 @@ public class RandomSamplingOperation extends SamplingOperation {
           fs.removeFetchingNode(nodes.get(node));
         }
       }
+      /*if (samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getIdByColumn());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+          fs.removeFetchingNode(nodes.get(node));
+        }
+      }*/
     }
 
     nodes.remove(node);
@@ -154,7 +162,9 @@ public class RandomSamplingOperation extends SamplingOperation {
           found = true;
         }
 
-        if (!found && callback != null) callback.missing(sample, this);
+        if (!found && callback != null) {
+          callback.missing(sample, this);
+        }
       }
     }
   }
