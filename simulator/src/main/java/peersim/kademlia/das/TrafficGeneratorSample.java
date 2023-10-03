@@ -116,8 +116,7 @@ public class TrafficGeneratorSample implements Control {
         if (start.isUp()) {
           for (int j = 0; j < 3; j++) {
             // send message
-            EDSimulator.add(
-                CommonState.r.nextInt(300000), generateFindNodeMessage(), start, kadpid);
+            EDSimulator.add(CommonState.r.nextInt(12000), generateFindNodeMessage(), start, kadpid);
           }
           EDSimulator.add(
               0,

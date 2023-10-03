@@ -45,7 +45,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (Sample rs : randomSamples) {
       FetchingSample s = new FetchingSample(rs);
       samples.put(rs.getIdByRow(), s);
-      samples.put(rs.getIdByColumn(), s);
+      // samples.put(rs.getIdByColumn(), s);
     }
     createNodes();
   }
@@ -89,7 +89,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     for (Sample s : sam) {
 
-      if (samples.containsKey(s.getId())) {
+      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
         FetchingSample fs = samples.get(s.getId());
         if (!fs.isDownloaded()) {
           samplesCount++;
@@ -115,18 +115,13 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
-        List<BigInteger> validatorsBySampleRow =
-            // SearchTable.getNodesBySample(samples.get(sample).getId());
-            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator);
-        List<BigInteger> validatorsBySampleColumn =
-            // SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
-            searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator);
-
         List<BigInteger> validatorsBySample = new ArrayList<>();
 
-        validatorsBySample.addAll(validatorsBySampleRow);
-        validatorsBySample.addAll(validatorsBySampleColumn);
+        validatorsBySample.addAll(
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        validatorsBySample.addAll(
+            searchTable.getValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusValidator));
 
         List<BigInteger> nonValidatorsBySample = new ArrayList<>();
         nonValidatorsBySample.addAll(
@@ -138,8 +133,8 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         boolean found = false;
 
-        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
-          for (BigInteger id : validatorsBySampleRow) {
+        if (validatorsBySample != null && validatorsBySample.size() > 0) {
+          for (BigInteger id : validatorsBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
               nodes.get(id).addSample(samples.get(sample));

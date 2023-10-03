@@ -2,7 +2,6 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
@@ -62,9 +61,9 @@ public class DASProtocolBuilder extends DASProtocol {
       // SearchTable.getNodesBySample(s.getIdByColumn());
 
       List<BigInteger> idsNonValidatorsRows =
-          getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
+          searchTable.getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
       List<BigInteger> idsNonValidatorsColumns =
-          getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);
+          searchTable.getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator);
 
       List<BigInteger> idsValidators = new ArrayList<>();
       idsValidators.addAll(idsValidatorsRows);
@@ -165,19 +164,5 @@ public class DASProtocolBuilder extends DASProtocol {
   public Object clone() {
     DASProtocolBuilder dolly = new DASProtocolBuilder(DASProtocolBuilder.prefix);
     return dolly;
-  }
-
-  private List<BigInteger> getNonValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = sampleId.add(radius);
-
-    Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
-    return new ArrayList<BigInteger>(subSet);
-
-    // return sampleMap.get(sampleId);
-
   }
 }

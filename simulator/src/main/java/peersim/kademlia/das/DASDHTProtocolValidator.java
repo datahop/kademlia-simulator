@@ -23,7 +23,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("seed sample receveived");
+    logger.warning("seed sample received");
     if (m.body == null) return;
   }
 

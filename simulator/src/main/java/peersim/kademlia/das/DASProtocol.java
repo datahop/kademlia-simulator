@@ -607,7 +607,12 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
           if (sop instanceof ValidatorSamplingOperation)
             logger.warning("Sampling operation finished validator failed " + sop.getId());
-          else logger.warning("Sampling operation finished random failed " + sop.getId());
+          else {
+            logger.warning("Sampling operation finished random failed " + sop.getId());
+            for (BigInteger id : sop.getSamples()) {
+              logger.warning("Missing sample " + id + " for op " + sop.getId());
+            }
+          }
 
           samplingOp.remove(sop.getId());
           KademliaObserver.reportOperation(sop);
