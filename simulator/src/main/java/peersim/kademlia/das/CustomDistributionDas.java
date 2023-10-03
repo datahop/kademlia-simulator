@@ -144,11 +144,13 @@ public class CustomDistributionDas implements peersim.core.Control {
       generalNode.setProtocol(protocolDasNonValidatorID, null);
     }
 
-    // System.out.println("Validators " + validatorsIds.size());
+    System.out.println("Validators " + validatorsIds.size());
+    System.out.println("Non-Validators " + nonValidatorsIds.size());
+
     // for (DASProtocol validator : validators) {
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
-      if (i == 0) //
+      // if (i == 0) //
       generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
       generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
     }
