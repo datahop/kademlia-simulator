@@ -6,16 +6,20 @@ import peersim.core.Node;
 
 public class Neighbour implements Comparable<Neighbour> {
 
-  BigInteger id;
-  long last_seen;
-  Node n;
-  boolean isEvil;
+  protected BigInteger id;
+  protected long last_seen;
+  protected Node n;
+  protected boolean isEvil;
 
   Neighbour(BigInteger id, Node n, boolean isEvil) {
     this.id = id;
     this.last_seen = CommonState.getTime();
     this.n = n;
     this.isEvil = isEvil;
+  }
+
+  public BigInteger getId() {
+    return id;
   }
 
   public void updateLastSeen(long time) {
