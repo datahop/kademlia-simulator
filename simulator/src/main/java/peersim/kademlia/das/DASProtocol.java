@@ -81,7 +81,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   // protected int samplesRequested;
 
-  protected BigInteger[] validatorsList;
+  // protected BigInteger[] validatorsList;
 
   protected HashSet<BigInteger> queried;
 
@@ -166,7 +166,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       m = (Message) event;
       // m.dst = this.kadProtocol.getKademliaNode();
       KademliaObserver.reportMsg(m, false);
-      searchTable.seenNeighbour(m.src.getId(), Util.nodeIdtoNode(m.src.getId(), myPid));
+      if (m.src != null)
+        searchTable.seenNeighbour(m.src.getId(), Util.nodeIdtoNode(m.src.getId(), kademliaId));
     }
 
     switch (((SimpleEvent) event).getType()) {
@@ -553,8 +554,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   public void addKnownValidator(BigInteger[] ids) {
     logger.info("Adding validator list " + ids.length);
-    validatorsList = ids;
-    if (validatorsList != null && isBuilder()) searchTable.addValidatorNodes(validatorsList);
+    // validatorsList = ids;
+    // if (validatorsList != null && isBuilder()) searchTable.addValidatorNodes(validatorsList);
+    if (isBuilder()) searchTable.addValidatorNodes(ids);
   }
 
   public void setNonValidators(List<BigInteger> nonValidators) {
