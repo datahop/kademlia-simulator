@@ -1,8 +1,6 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -36,9 +34,11 @@ import peersim.kademlia.UniformRandomGenerator;
  */
 public class TurbulenceDasValidator implements Control {
 
-  private static final String PAR_PROT = "protocol";
-  private static final String PAR_PROT_DAS = "protocoldas";
-  private static final String PAR_PROT_EVIL_DAS = "protocolevildas";
+  private static final String PAR_PROT = "protocolkad";
+  private static final String PAR_PROT_DAS_BUILDER = "protocoldasbuilder";
+  private static final String PAR_PROT_DAS_VAL = "protocoldasvalidator";
+  private static final String PAR_PROT_DAS_NONVAL = "protocoldasnonvalidator";
+  private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
   private static final String PAR_TRANSPORT = "transport";
   private static final String PAR_INIT = "init";
 
@@ -66,7 +66,9 @@ public class TurbulenceDasValidator implements Control {
 
   private String prefix;
   private int kademliaid;
-  private int dasprotid;
+  private int dasprotbuildid;
+  private int dasprotvalid;
+  private int dasprotnonvalid;
   private int dasevilprotid;
   private int transportid;
   private int maxsize;
@@ -79,9 +81,11 @@ public class TurbulenceDasValidator implements Control {
   public TurbulenceDasValidator(String prefix) {
     this.prefix = prefix;
     kademliaid = Configuration.getPid(this.prefix + "." + PAR_PROT);
-    dasprotid = Configuration.getPid(this.prefix + "." + PAR_PROT_DAS);
-    dasevilprotid = Configuration.getPid(this.prefix + "." + PAR_PROT_EVIL_DAS);
+    dasprotbuildid = Configuration.getPid(this.prefix + "." + PAR_PROT_DAS_BUILDER);
+    dasprotvalid = Configuration.getPid(this.prefix + "." + PAR_PROT_DAS_VAL);
+    dasprotnonvalid = Configuration.getPid(this.prefix + "." + PAR_PROT_DAS_NONVAL);
 
+    dasevilprotid = Configuration.getPid(this.prefix + "." + PAR_PROT_EVIL_DAS);
     transportid = Configuration.getPid(this.prefix + "." + PAR_TRANSPORT);
 
     minsize = Configuration.getInt(this.prefix + "." + PAR_MINSIZE, 1);
@@ -124,21 +128,10 @@ public class TurbulenceDasValidator implements Control {
   // ______________________________________________________________________________________________
   public boolean add() {
 
-    int count = 0;
-    List<BigInteger> validatorList = new ArrayList<>();
-    for (int i = 0; i < Network.size(); ++i) {
-      if (Network.get(i).isUp()) {
-        DASProtocol dasprot = Network.get(i).getDASProtocol();
-        if (dasprot.isValidator()) validatorList.add(dasprot.getKademliaId());
-        count++;
-      }
-    }
     // Add Node
     Node newNode = (Node) Network.prototype.clone();
     for (int j = 0; j < inits.length; ++j) inits[j].initialize(newNode);
     Network.add(newNode);
-
-    System.out.println("Adding validator " + count);
 
     // Get kademlia protocol of new node
     KademliaProtocol newKad = (KademliaProtocol) (newNode.getProtocol(kademliaid));
@@ -151,24 +144,33 @@ public class TurbulenceDasValidator implements Control {
     KademliaNode node = new KademliaNode(urg.generate(), "127.0.0.1", 0);
     ((KademliaProtocol) (newNode.getProtocol(kademliaid))).setNode(node);
 
-    DASProtocol dasProt = ((DASProtocol) (newNode.getProtocol(dasprotid)));
+    DASProtocol dasProt = ((DASProtocol) (newNode.getProtocol(dasprotvalid)));
 
-    newNode.setProtocol(dasprotid, dasProt);
+    newNode.setProtocol(dasprotbuildid, dasProt);
     newKad.setNode(node);
 
     dasProt.setKademliaProtocol(newKad);
-    dasProt.setDASProtocolID(dasprotid);
+    dasProt.setDASProtocolID(dasprotbuildid);
     newKad.setEventsCallback(dasProt);
     newNode.setDASProtocol(dasProt);
-    newNode.setProtocol(dasprotid, dasProt);
-    newNode.setProtocol(dasevilprotid, dasProt);
+    newNode.setProtocol(dasprotvalid, null);
+    newNode.setProtocol(dasevilprotid, null);
+    newNode.setProtocol(dasprotnonvalid, null);
 
-    DASProtocol builder = ((DASProtocol) (Network.get(0).getProtocol(dasprotid)));
-    // dasProt.setBuilder(false);
-    BigInteger builderAddress = builder.getKademliaProtocol().getKademliaNode().getId();
-    dasProt.setBuilderAddress(builderAddress);
-    // dasProt.setValidator(true);
-    dasProt.addKnownValidator(validatorList.toArray(new BigInteger[0]));
+    int count = 0;
+    BigInteger builderAddress;
+    for (int i = 0; i < Network.size(); ++i) {
+      if (Network.get(i).isUp()) count++;
+      if (Network.get(i).getDASProtocol().isBuilder()) {
+        builderAddress = Network.get(i).getDASProtocol().getKademliaId();
+        dasProt.setBuilderAddress(builderAddress);
+        Network.get(i)
+            .getDASProtocol()
+            .addKnownValidator(new BigInteger[] {dasProt.getKademliaId()});
+      }
+    }
+    System.out.println("Adding validator node " + count + " " + dasProt.getBuilderAddress());
+
     return false;
   }
 
@@ -180,7 +182,7 @@ public class TurbulenceDasValidator implements Control {
     int i = Network.size();
     do {
       remove = Network.get(CommonState.r.nextInt(Network.size()));
-      dasProt = ((DASProtocol) (remove).getProtocol(dasprotid));
+      dasProt = ((DASProtocol) (remove).getProtocol(dasprotbuildid));
       // } while ((remove == null) || dasProt.isBuilder() || dasProt.isValidator() ||
       // (!remove.isUp()));
       i--;

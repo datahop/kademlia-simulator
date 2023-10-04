@@ -120,20 +120,22 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         List<BigInteger> validatorsBySample = new ArrayList<>();
 
-        validatorsBySample.addAll(
+        /*validatorsBySample.addAll(
             searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
         validatorsBySample.addAll(
             searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator));
+                samples.get(sample).getIdByColumn(), radiusValidator));*/
+        validatorsBySample.addAll(
+            searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
 
-        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));
-
+        /*  List<BigInteger> nonValidatorsBySample = new ArrayList<>();
+                nonValidatorsBySample.addAll(
+                    searchTable.getNonValidatorNodesbySample(
+                        samples.get(sample).getId(), radiusNonValidator));
+                nonValidatorsBySample.addAll(
+                    searchTable.getNonValidatorNodesbySample(
+                        samples.get(sample).getIdByColumn(), radiusNonValidator));
+        */
         boolean found = false;
 
         if (validatorsBySample != null && validatorsBySample.size() > 0) {
@@ -148,7 +150,7 @@ public class RandomSamplingOperation extends SamplingOperation {
           found = true;
         }
 
-        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
+        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
           for (BigInteger id : nonValidatorsBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
@@ -158,7 +160,7 @@ public class RandomSamplingOperation extends SamplingOperation {
             }
           }
           found = true;
-        }
+        }*/
 
         if (!found && callback != null) {
           callback.missing(sample, this);

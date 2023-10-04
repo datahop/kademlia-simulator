@@ -67,8 +67,9 @@ public class SearchTable {
 
   public void addNeighbour(Neighbour neigh) {
     neighbours.remove(neigh.getId());
+    nodesIndexed.remove(neigh.getId());
     neighbours.put(neigh.getId(), neigh);
-    nodesIndexed.add(neigh.id);
+    nodesIndexed.add(neigh.getId());
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -83,7 +84,11 @@ public class SearchTable {
   }
 
   public void seenNeighbour(BigInteger id, Node n) {
-    if (neighbours.get(id) != null) neighbours.remove(id);
+    if (neighbours.get(id) != null) {
+      neighbours.remove(id);
+      nodesIndexed.remove(id);
+    }
+    nodesIndexed.add(id);
     neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
   }
 
