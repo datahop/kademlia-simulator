@@ -36,6 +36,8 @@ public class TrafficGeneratorSample implements Control {
 
   final String PAR_BLK_DIM_SIZE = "block_dim_size";
 
+  final String PAR_NUM_SAMPLES = "num_samples";
+
   int mapfn;
 
   Block b;
@@ -53,6 +55,8 @@ public class TrafficGeneratorSample implements Control {
     KademliaCommonConfigDas.BLOCK_DIM_SIZE =
         Configuration.getInt(
             prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfigDas.BLOCK_DIM_SIZE);
+    KademliaCommonConfigDas.N_SAMPLES =
+        Configuration.getInt(prefix + "." + PAR_NUM_SAMPLES, KademliaCommonConfigDas.N_SAMPLES);
   }
 
   // ______________________________________________________________________________________________
