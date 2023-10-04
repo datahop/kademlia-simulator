@@ -108,7 +108,7 @@ public abstract class SamplingOperation extends FindOperation {
       if (!samples.get(sample).isDownloaded()) {
 
         // List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
-        /*List<BigInteger> validatorsBySample =
+        List<BigInteger> validatorsBySample =
             searchTable.getValidatorNodesbySample(sample, radiusValidator);
         List<BigInteger> nonValidatorsBySample =
             searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
@@ -135,8 +135,8 @@ public abstract class SamplingOperation extends FindOperation {
             }
           }
           found = true;
-        }*/
-        List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radiusValidator);
+        }
+        /*List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radiusValidator);
         boolean found = false;
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {
@@ -148,7 +148,7 @@ public abstract class SamplingOperation extends FindOperation {
             }
           }
           found = true;
-        }
+        }*/
 
         if (!found && callback != null) callback.missing(sample, this);
       }
