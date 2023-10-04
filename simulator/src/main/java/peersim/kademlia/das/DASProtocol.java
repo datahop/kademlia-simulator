@@ -166,6 +166,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       m = (Message) event;
       // m.dst = this.kadProtocol.getKademliaNode();
       KademliaObserver.reportMsg(m, false);
+      searchTable.seenNeighbour(m.src.getId(), Util.nodeIdtoNode(m.src.getId(), myPid));
     }
 
     switch (((SimpleEvent) event).getType()) {
@@ -334,8 +335,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             searchTable.getNeighbours(
                 smpls[i],
                 currentBlock.computeRegionRadius(
-                    KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
-                    KademliaCommonConfigDas.validatorsSize));
+                    KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER));
         for (Neighbour n : neighs) {
           neigh.add(n);
           if (neigh.size() >= KademliaCommonConfigDas.MAX_NODES_RETURNED) break;
@@ -343,7 +343,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         if (neigh.size() >= KademliaCommonConfigDas.MAX_NODES_RETURNED) break;
       }
       response.value = neigh.toArray(new Neighbour[0]);
-      logger.warning("targeted sample request " + neigh.size());
+      // logger.warning("targeted sample request " + neigh.size());
     } else {
       response.value = searchTable.getNeighbours();
     }

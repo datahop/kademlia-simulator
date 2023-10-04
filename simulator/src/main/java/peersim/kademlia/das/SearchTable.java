@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 // import peersim.kademlia.KademliaCommonConfig;
+import peersim.core.Node;
 
 public class SearchTable {
 
@@ -79,6 +80,11 @@ public class SearchTable {
         nonValidatorsIndexed.add(id);
       }
     }
+  }
+
+  public void seenNeighbour(BigInteger id, Node n) {
+    if (neighbours.get(id) != null) neighbours.remove(id);
+    neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
   }
 
   /*public void addNonValidatorNodes(BigInteger[] nodes) {
