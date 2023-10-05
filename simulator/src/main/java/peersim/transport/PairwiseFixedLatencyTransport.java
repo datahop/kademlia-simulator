@@ -30,7 +30,7 @@ public final class PairwiseFixedLatencyTransport extends UniformRandomTransport 
     pairwise_lat = new long[size][];
     // symmetric latency assumption so only need to allocate half of the matrix
     for (int i = 0; i < size; i++) {
-      pairwise_lat[i] = new long[i];
+      pairwise_lat[i] = new long[i + 1];
     }
   }
 
