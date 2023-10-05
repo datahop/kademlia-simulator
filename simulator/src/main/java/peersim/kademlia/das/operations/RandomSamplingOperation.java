@@ -120,21 +120,21 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         List<BigInteger> validatorsBySample = new ArrayList<>();
 
-        validatorsBySample.addAll(
+        /*validatorsBySample.addAll(
             searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
         validatorsBySample.addAll(
             searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator));
-        // validatorsBySample.addAll(
-        //    searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
+                samples.get(sample).getIdByColumn(), radiusValidator));*/
+        validatorsBySample.addAll(
+            searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
 
-        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
+        /*List<BigInteger> nonValidatorsBySample = new ArrayList<>();
         nonValidatorsBySample.addAll(
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getId(), radiusNonValidator));
         nonValidatorsBySample.addAll(
             searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));
+                samples.get(sample).getIdByColumn(), radiusNonValidator));*/
 
         boolean found = false;
 
