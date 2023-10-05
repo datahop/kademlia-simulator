@@ -49,7 +49,8 @@ public class DASProtocolNonValidator extends DASProtocol {
             searchTable.getValidatorsIndexed().size());
     for (BigInteger sample : samples) {
       if (!reqSamples.contains(sample)) {
-        for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
+        // for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
+        for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
           Message msg = generateGetSampleMessage(samples);
           msg.operationId = -1;
           msg.src = this.kadProtocol.getKademliaNode();
