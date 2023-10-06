@@ -382,7 +382,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
-      searchTable.addNeighbour(neigh);
+      if(neigh.getId().compareTo(builderAddress)!=0)
+        searchTable.addNeighbour(neigh);
     }
     for (Sample s : samples) {
 
@@ -741,7 +742,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
     missing = true;
-    List<BigInteger> ids =
+    /*List<BigInteger> ids =
         searchTable.getValidatorNodesbySample(
             sample,
             currentBlock.computeRegionRadius(
@@ -749,7 +750,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                 KademliaCommonConfigDas.validatorsSize));
     for (BigInteger id : ids) {
       logger.warning("Found id " + id + " for sample " + sample);
-    }
+    }*/
   }
 
   // ______________________________________________________________________________________________
