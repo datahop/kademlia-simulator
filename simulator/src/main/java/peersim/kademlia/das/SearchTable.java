@@ -66,10 +66,12 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    neighbours.remove(neigh.getId());
-    nodesIndexed.remove(neigh.getId());
-    neighbours.put(neigh.getId(), neigh);
-    nodesIndexed.add(neigh.getId());
+    if (builderAddress.compareTo(neigh.getId()) != 0) {
+      neighbours.remove(neigh.getId());
+      nodesIndexed.remove(neigh.getId());
+      neighbours.put(neigh.getId(), neigh);
+      nodesIndexed.add(neigh.getId());
+    }
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -84,12 +86,14 @@ public class SearchTable {
   }
 
   public void seenNeighbour(BigInteger id, Node n) {
-    if (neighbours.get(id) != null) {
-      neighbours.remove(id);
-      nodesIndexed.remove(id);
+    if (builderAddress.compareTo(id) != 0) {
+      if (neighbours.get(id) != null) {
+        neighbours.remove(id);
+        nodesIndexed.remove(id);
+      }
+      nodesIndexed.add(id);
+      neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
     }
-    nodesIndexed.add(id);
-    neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
   }
 
   /*public void addNonValidatorNodes(BigInteger[] nodes) {
@@ -103,7 +107,7 @@ public class SearchTable {
 
   public void addValidatorNodes(BigInteger[] nodes) {
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id)) {
+      if (!blackList.contains(id) && !builderAddress.equals(id)) {
         validatorsIndexed.add(id);
       }
       // routingTable.addNeighbour(id);

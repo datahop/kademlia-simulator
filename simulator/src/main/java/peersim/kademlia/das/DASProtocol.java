@@ -249,6 +249,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void setBuilderAddress(BigInteger address) {
     this.builderAddress = address;
     searchTable.setBuilderAddress(address);
+    logger.warning("Set builderAddress " + address);
   }
 
   public BigInteger getBuilderAddress() {
@@ -382,8 +383,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
-      if(neigh.getId().compareTo(builderAddress)!=0)
-        searchTable.addNeighbour(neigh);
+      if (neigh.getId().compareTo(builderAddress) != 0) searchTable.addNeighbour(neigh);
     }
     for (Sample s : samples) {
 
@@ -396,7 +396,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     // We continue an existing operation
 
-    logger.warning(
+    logger.info(
         "Nodes discovered "
             + ((Neighbour[]) m.value).length
             + " "
@@ -501,6 +501,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);
     }
+    logger.warning("Sending message to " + m.dst.getId());
 
     // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
