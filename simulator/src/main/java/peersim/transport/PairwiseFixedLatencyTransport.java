@@ -49,8 +49,8 @@ public final class PairwiseFixedLatencyTransport extends UniformRandomTransport 
    * Returns the assigned delay to the specific src and dest peers that was previously generated.
    */
   public long getLatency(Node src, Node dest) {
-    int sender = src.getIndex() % size;
-    int receiver = dest.getIndex() % size;
+    int sender = ((int) src.getID()) % size;
+    int receiver = ((int) dest.getID()) % size;
     if (sender < receiver) {
       int tmp = sender;
       sender = receiver;
