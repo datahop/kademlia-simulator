@@ -20,6 +20,7 @@ package peersim.core;
 
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.das.DASProtocol;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /**
  * Class that represents one node with a network address. An {@link Network} is made of a set of
@@ -107,4 +108,16 @@ public interface Node extends Fallible, Cloneable {
    * Protocols.
    */
   public void setDASProtocol(DASProtocol proto);
+
+  /**
+   * Returns the DAS Protocol used by the node. This is useful when nodes use different types of DAS
+   * Protocols and saves the caller from determining which protocol ID to use for each node.
+   */
+  public GossipSubProtocol getGossipSubProtocol();
+
+  /**
+   * Sets the DAS Protocol used by the node. This is useful when nodes use different types of DAS
+   * Protocols.
+   */
+  public void setGossipSubProtocol(GossipSubProtocol proto);
 }

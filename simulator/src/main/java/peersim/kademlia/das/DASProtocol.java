@@ -249,7 +249,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void setBuilderAddress(BigInteger address) {
     this.builderAddress = address;
     searchTable.setBuilderAddress(address);
-    logger.warning("Set builderAddress " + address);
+    logger.info("Set builderAddress " + address);
   }
 
   public BigInteger getBuilderAddress() {
@@ -501,7 +501,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);
     }
-    logger.warning("Sending message to " + m.dst.getId());
+    // logger.warning("Sending message to " + m.dst.getId());
 
     // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
@@ -783,6 +783,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   }
 
   public void refreshSearchTable() {
+    // logger.warning("RefreshSearchTable");
     searchTable.refresh();
   }
 }
