@@ -34,11 +34,13 @@ import peersim.kademlia.Util;
 import peersim.kademlia.das.operations.RandomSamplingOperation;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.transport.UnreliableTransport;
 
-public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
+public abstract class DASProtocol extends GossipSubProtocol
+    implements Cloneable, EDProtocol, KademliaEvents, MissingNode {
 
   protected static final String PAR_TRANSPORT = "transport";
   // private static final String PAR_DASPROTOCOL = "dasprotocol";
@@ -112,6 +114,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
    * @param prefix String
    */
   public DASProtocol(String prefix) {
+    super(prefix);
 
     DASProtocol.prefix = prefix;
     isEvil = false;
@@ -210,6 +213,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             }
           }
         }
+        break;
+      default:
+        super.processEvent(myNode, myPid, event);
         break;
     }
   }
@@ -785,5 +791,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   public void refreshSearchTable() {
     // logger.warning("RefreshSearchTable");
     searchTable.refresh();
+  }
+
+  protected void handleMessage(Message m, int myPid) {
+
+    logger.warning("handleMessage");
+    super.handleMessage(m, myPid);
   }
 }

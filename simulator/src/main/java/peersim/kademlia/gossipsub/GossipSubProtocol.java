@@ -370,6 +370,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   }
 
   public void heartBeat() {
+    logger.warning("heartbeat execute");
     for (String topic : mesh.keySet()) {
       logger.warning("heartbeat execute " + mesh.get(topic).size() + " " + topic);
       if (mesh.get(topic).size() < GossipCommonConfig.D_low) {

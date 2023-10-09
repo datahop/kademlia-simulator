@@ -10,6 +10,7 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /**
  * This control generates samples every 5 min that are stored in a single node (builder) and starts
@@ -128,6 +129,17 @@ public class TrafficGeneratorSample implements Control {
               start,
               kadpid);
         }
+        for (int l = 1; l < Network.size(); l++) {
+          Node n2 = Network.get(l);
+          GossipSubProtocol prot2 = (GossipSubProtocol) n2.getDASProtocol();
+          prot2.getTable().addPeer("disc", start.getDASProtocol().getKademliaId());
+        }
+
+        EDSimulator.add(
+            0,
+            Message.makeInitJoinMessage("disc"),
+            start,
+            start.getDASProtocol().getDASProtocolID());
       }
       first = false;
       second = true;
