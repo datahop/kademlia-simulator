@@ -6,13 +6,10 @@ import peersim.edsim.*;
 
 public final class PairwiseFixedLatencyTransport extends UniformRandomTransport {
 
-  /** Latency between nodes (symmetric). */
-  private static int[][] array;
-
   /** Size of the network. */
   private int size;
 
-  /** Latencies between peers. */
+  /** Latencies between peers (symmetric). */
   private static long[][] pairwise_lat;
 
   /**
