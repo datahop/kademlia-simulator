@@ -11,6 +11,7 @@ import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaNode;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.UniformRandomGenerator;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /**
  * This control initializes the whole network (that was already created by peersim) assigning a
@@ -29,17 +30,17 @@ public class CustomDistributionDas implements peersim.core.Control {
   private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
   private static final String PAR_EVIL_RATIO_VAL = "evilNodeRatioValidator";
   private static final String PAR_EVIL_RATIO_NONVAL = "evilNodeRatioNonValidator";
-
+  private static final String PAR_PROT_GOSSIP = "protocolgossip";
   private static final String PAR_VALIDATOR_RATE = "validator_rate";
 
   /** Protocol identifiers for Kademlia, DAS, etc. * */
   private int protocolKadID;
 
-  private int protocolEvilKadID;
+  //private int protocolEvilKadID;
   private int protocolDasBuilderID;
   private int protocolDasValidatorID;
   private int protocolDasNonValidatorID;
-
+  private int protocolGossip;
   private int protocolEvilDasID;
   /** Ratio of evil nodes to total number of nodes * */
   private double evilRatioValidator;
@@ -51,8 +52,9 @@ public class CustomDistributionDas implements peersim.core.Control {
   private UniformRandomGenerator urg;
 
   public CustomDistributionDas(String prefix) {
+    protocolGossip = Configuration.getPid(prefix + "." + PAR_PROT_GOSSIP);
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
-    protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
+    //protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
     protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
     protocolDasValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_VALIDATOR);
     protocolDasNonValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_NON_VALIDATOR);
@@ -96,6 +98,11 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setProtocolID(protocolKadID);
       kadProt.setNode(node);
 
+      GossipSubProtocol gossip = null;
+      gossip = ((GossipSubProtocol) (Network.get(i).getProtocol(protocolGossip)));
+      gossip.setProtocolID(protocolGossip);
+      gossip.setNode(node);
+      
       if (i == 0) {
 
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
