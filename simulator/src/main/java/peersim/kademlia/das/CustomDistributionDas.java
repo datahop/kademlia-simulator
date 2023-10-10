@@ -127,7 +127,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setEventsCallback(dasProt);
       dasProt.setBuilderAddress(builderAddress);
 
-      dasProt.setNode(node);
+      dasProt.setNode(node, kadProt.getLogger());
       /*System.out.println(
       "Dasprot id "
           + protocolDasBuilderID

@@ -207,7 +207,7 @@ public class KademliaObserver implements Control {
 
     if (m.src == null) return;
     // Add the message to the message log, but first check if it hasn't already been added
-    assert (!peerDiscoveries.keySet().contains(m.id));
+    // assert (!peerDiscoveries.keySet().contains(m.id));
     Map<String, Object> result = new HashMap<String, Object>();
     Neighbour[] neighs = (Neighbour[]) m.value;
 

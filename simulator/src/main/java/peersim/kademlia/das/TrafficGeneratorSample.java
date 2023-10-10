@@ -10,7 +10,6 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
-import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /**
  * This control generates samples every 5 min that are stored in a single node (builder) and starts
@@ -113,7 +112,6 @@ public class TrafficGeneratorSample implements Control {
    * @return boolean
    */
   public boolean execute() {
-    Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
 
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
@@ -124,26 +122,34 @@ public class TrafficGeneratorSample implements Control {
             EDSimulator.add(CommonState.r.nextInt(12000), generateFindNodeMessage(), start, kadpid);
           }
           EDSimulator.add(
-              0,
+              CommonState.r.nextInt(12000),
               generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
               start,
               kadpid);
         }
-        for (int l = 1; l < Network.size(); l++) {
+        /*for (int l = 1; l < Network.size(); l++) {
           Node n2 = Network.get(l);
           GossipSubProtocol prot2 = (GossipSubProtocol) n2.getDASProtocol();
           prot2.getTable().addPeer("disc", start.getDASProtocol().getKademliaId());
         }
 
         EDSimulator.add(
-            0,
+            i * 10,
             Message.makeInitJoinMessage("disc"),
             start,
             start.getDASProtocol().getDASProtocolID());
+
+        EDSimulator.add(
+            Network.size() * 10,
+            Message.makePublishMessage("disc", start.getDASProtocol().getKademliaId()),
+            start,
+            start.getDASProtocol().getDASProtocolID());*/
       }
+
       first = false;
       second = true;
-    } else /*if (second)*/ {
+    } else if (!second) {
+      Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
 
       // SearchTable.createSampleMap(b);
       for (int i = 0; i < Network.size(); i++) {
@@ -163,6 +169,11 @@ public class TrafficGeneratorSample implements Control {
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
         } else if (!(n.getDASProtocol() instanceof DASProtocolBuilder))
           EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        /*EDSimulator.add(
+        0,
+        Message.makePublishMessage("disc", n.getDASProtocol().getKademliaId()),
+        n,
+        n.getDASProtocol().getDASProtocolID());*/
       }
       ID_GENERATOR++;
       second = false;

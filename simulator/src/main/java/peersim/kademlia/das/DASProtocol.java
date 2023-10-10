@@ -335,7 +335,7 @@ public abstract class DASProtocol extends GossipSubProtocol
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
-    if (m.value instanceof BigInteger[]) {
+    /*if (m.value instanceof BigInteger[]) {
       BigInteger[] smpls = (BigInteger[]) m.value;
       List<Neighbour> neigh = new ArrayList<>();
       for (int i = 0; i < smpls.length; i++) {
@@ -354,7 +354,7 @@ public abstract class DASProtocol extends GossipSubProtocol
       // logger.warning("targeted sample request " + neigh.size());
     } else {
       response.value = searchTable.getNeighbours();
-    }
+    }*/
     sendMessage(response, m.src.getId(), myPid);
   }
 
@@ -387,10 +387,10 @@ public abstract class DASProtocol extends GossipSubProtocol
     Sample[] samples = (Sample[]) m.body;
     // searchTable.addNodes((BigInteger[]) m.value);
 
-    KademliaObserver.reportPeerDiscovery(m, searchTable);
+    /* KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
       if (neigh.getId().compareTo(builderAddress) != 0) searchTable.addNeighbour(neigh);
-    }
+    }*/
     for (Sample s : samples) {
 
       kv.add((BigInteger) s.getIdByRow(), s);
@@ -404,7 +404,7 @@ public abstract class DASProtocol extends GossipSubProtocol
 
     logger.info(
         "Nodes discovered "
-            + ((Neighbour[]) m.value).length
+            //         + ((Neighbour[]) m.value).length
             + " "
             + searchTable.getAllNeighboursCount()
             + " "
@@ -793,9 +793,25 @@ public abstract class DASProtocol extends GossipSubProtocol
     searchTable.refresh();
   }
 
+  public SearchTable getSearchTable() {
+    return searchTable;
+  }
+
   protected void handleMessage(Message m, int myPid) {
 
-    logger.warning("handleMessage");
+    logger.warning(
+        "Nodes discovered "
+            + searchTable.getAllNeighboursCount()
+            + " "
+            + searchTable.getValidatorsNeighboursCount());
+    BigInteger id = (BigInteger) m.value;
+    Node n = Util.nodeIdtoNode(id, kademliaId);
+    Neighbour neigh = new Neighbour(id, n, n.getDASProtocol().isEvil());
+    searchTable.addNeighbour(neigh);
+    Message mbis = m.copy();
+    mbis.value = new Neighbour[] {neigh};
+    KademliaObserver.reportPeerDiscovery(mbis, searchTable);
+
     super.handleMessage(m, myPid);
   }
 }

@@ -10,18 +10,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.kademlia.KademliaNode;
-import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.Sample;
@@ -273,34 +268,12 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    *
    * @param node The KademliaNode object to set.
    */
-  public void setNode(KademliaNode node) {
+  public void setNode(KademliaNode node, Logger logger) {
     this.node = node;
     // this.node.setProtocolId(gossipid);
 
     // Initialize the logger with the node ID as its name
-    logger = Logger.getLogger(node.getId().toString());
-
-    // Disable the logger's parent handlers to avoid duplicate output
-    logger.setUseParentHandlers(false);
-
-    // Set the logger's level to WARNING
-    logger.setLevel(Level.WARNING);
-    // logger.setLevel(Level.ALL);
-
-    // Create a console handler for the logger
-    ConsoleHandler handler = new ConsoleHandler();
-    // Set the handler's formatter to a custom format that includes the time and logger name
-    handler.setFormatter(
-        new SimpleFormatter() {
-          private static final String format = "[%d][%s] %3$s %n";
-
-          @Override
-          public synchronized String format(LogRecord lr) {
-            return String.format(format, CommonState.getTime(), logger.getName(), lr.getMessage());
-          }
-        });
-    // Add the console handler to the logger
-    logger.addHandler(handler);
+    this.logger = logger;
   }
 
   /**
@@ -348,7 +321,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       case Message.MSG_MESSAGE:
         m = (Message) event;
         handleMessage(m, pid);
-        KademliaObserver.reportMsg(m, false);
+        // KademliaObserver.reportMsg(m, false);
         break;
       case Message.MSG_GRAFT:
         m = (Message) event;
@@ -412,7 +385,8 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
     for (String topic : allTopics) {
 
-      logger.info("Sending gossip topic " + topic);
+      if (peers.getPeers(topic) != null)
+        logger.warning("Sending gossip topic " + topic + " " + peers.getPeers(topic).size());
       List<BigInteger> msgs = seen.get(topic);
       if (msgs != null) {
 
@@ -571,72 +545,66 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   protected void handlePublish(Message m, int myPid) {
 
     String topic = (String) m.body;
-    Sample s = (Sample) m.value;
+    // Sample s = (Sample) m.value;
+    BigInteger id = (BigInteger) m.value;
     logger.warning(
         "Publish message "
             + topic
             + " "
-            + mesh.get(topic).size()
+            + id
             + " "
-            + s.getId()
+            // + mesh.get(topic).size()
+            // + " "
+            // + s.getId()
             + " "
             + gossipid);
 
     if (seen.get(topic) == null) seen.put(topic, new ArrayList<BigInteger>());
 
     // BigInteger cid = getValueId(m.value);
-    BigInteger cid = s.getId();
-    seen.get(topic).add(cid);
-    mCache.put(cid, s);
+    // BigInteger cid = s.getId();
+    seen.get(topic).add(id);
+    mCache.put(id, id);
 
-    mCache.put(s.getIdByColumn(), s);
+    // mCache.put(s.getIdByColumn(), s);
     if (mesh.get(topic) != null) {
       HashSet<BigInteger> nodesToSend = mesh.get(topic);
       nodesToSend.remove(this.node.getId());
-      for (BigInteger id : nodesToSend) {
+      for (BigInteger n : nodesToSend) {
 
-        Message msg = Message.makeMessage(topic, s);
+        Message msg = Message.makeMessage(topic, id);
         msg.src = this.node;
-        msg.dst = nodeIdtoNode(id, gossipid).getKademliaProtocol().getKademliaNode();
-        sendMessage(msg, id, gossipid);
+        msg.dst = nodeIdtoNode(n, gossipid).getKademliaProtocol().getKademliaNode();
+        sendMessage(msg, n, gossipid);
       }
     }
   }
 
   protected void handleMessage(Message m, int myPid) {
+
     String topic = (String) m.body;
-    /*if (topic.equals("Discovery")) {
-      String[] disc = ((String) m.value).split(":");
-      logger.warning("Discovery message rcvd " + disc[0] + " " + disc[1] + m.src.getId());
-      peers.addPeer(disc[0], new BigInteger(disc[1]));
-    }*/
 
-    // BigInteger cid = getValueId(m.value);
-    Sample s = (Sample) m.value;
-    BigInteger cid = s.getId();
-    mCache.put(cid, s);
+    BigInteger id = (BigInteger) m.value;
+    mCache.put(id, id);
 
-    mCache.put(s.getIdByColumn(), s);
-    logger.warning(
-        "handleMessage received " + topic + " " + cid + " " + m.id + " " + m.src.getId());
+    logger.warning("handleMessage received " + topic + " " + id + " " + m.id + " " + m.src.getId());
 
     if (seen.get(topic) == null) seen.put(topic, new ArrayList<BigInteger>());
-    if (seen.get(topic).contains(cid)) return;
+    if (seen.get(topic).contains(id)) return;
 
-    seen.get(topic).add(cid);
+    seen.get(topic).add(id);
 
     if (mesh.get(topic) != null) {
       HashSet<BigInteger> nodesToSend = mesh.get(topic);
       nodesToSend.remove(m.src.getId());
       nodesToSend.remove(this.node.getId());
-      for (BigInteger id : nodesToSend) {
+      for (BigInteger n : nodesToSend) {
         Message mbis = m.copy();
         mbis.dst =
-            ((GossipSubProtocol) nodeIdtoNode(id, gossipid).getProtocol(myPid)).getGossipNode();
+            ((GossipSubProtocol) nodeIdtoNode(n, gossipid).getProtocol(myPid)).getGossipNode();
         mbis.src = this.node;
-        logger.warning(
-            "handleMessage resending " + cid + " " + m.id + " to " + id + " " + m.dst.getId());
-        sendMessage(mbis, id, myPid);
+        logger.warning("handleMessage resending " + mbis.body + " " + mbis.value);
+        sendMessage(mbis, n, myPid);
       }
     }
   }
