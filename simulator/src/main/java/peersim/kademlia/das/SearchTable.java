@@ -66,10 +66,12 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    neighbours.remove(neigh.getId());
-    nodesIndexed.remove(neigh.getId());
-    neighbours.put(neigh.getId(), neigh);
-    nodesIndexed.add(neigh.getId());
+    if (builderAddress.compareTo(neigh.getId()) != 0) {
+      neighbours.remove(neigh.getId());
+      nodesIndexed.remove(neigh.getId());
+      neighbours.put(neigh.getId(), neigh);
+      nodesIndexed.add(neigh.getId());
+    }
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -84,12 +86,14 @@ public class SearchTable {
   }
 
   public void seenNeighbour(BigInteger id, Node n) {
-    if (neighbours.get(id) != null) {
-      neighbours.remove(id);
-      nodesIndexed.remove(id);
+    if (builderAddress.compareTo(id) != 0) {
+      if (neighbours.get(id) != null) {
+        neighbours.remove(id);
+        nodesIndexed.remove(id);
+      }
+      nodesIndexed.add(id);
+      neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
     }
-    nodesIndexed.add(id);
-    neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
   }
 
   /*public void addNonValidatorNodes(BigInteger[] nodes) {
@@ -212,8 +216,8 @@ public class SearchTable {
     for (BigInteger n : nodes) {
       neighs.add(neighbours.get(n));
     }
-    Collections.sort(neighs);
-
+    // Collections.sort(neighs);
+    Collections.shuffle(neighs);
     for (Neighbour neigh : neighs) {
       if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
       else break;

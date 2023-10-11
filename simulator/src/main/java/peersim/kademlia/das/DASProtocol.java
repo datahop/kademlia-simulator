@@ -328,7 +328,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
-    if (m.value instanceof BigInteger[]) {
+    /*if (m.value instanceof BigInteger[]) {
       BigInteger[] smpls = (BigInteger[]) m.value;
       List<Neighbour> neigh = new ArrayList<>();
       for (int i = 0; i < smpls.length; i++) {
@@ -345,9 +345,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
       response.value = neigh.toArray(new Neighbour[0]);
       // logger.warning("targeted sample request " + neigh.size());
-    } else {
-      response.value = searchTable.getNeighbours();
-    }
+    } else {*/
+    response.value = searchTable.getNeighbours();
+    // }
     sendMessage(response, m.src.getId(), myPid);
   }
 
@@ -382,8 +382,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
-      if(neigh.getId().compareTo(builderAddress)!=0)
-        searchTable.addNeighbour(neigh);
+      if (neigh.getId().compareTo(builderAddress) != 0) searchTable.addNeighbour(neigh);
     }
     for (Sample s : samples) {
 

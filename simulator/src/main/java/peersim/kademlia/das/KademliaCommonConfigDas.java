@@ -25,7 +25,7 @@ public class KademliaCommonConfigDas {
   public static int BLOCK_DIM_SIZE = 10;
 
   /** Number of samples retrieved for the random sampling */
-  public static int N_SAMPLES = 105;
+  public static int N_SAMPLES = 75;
 
   public static int MAX_SAMPLING_FAILED = 3;
 
