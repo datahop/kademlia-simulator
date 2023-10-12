@@ -19,11 +19,10 @@ public class DASProtocolBuilder extends DASProtocol {
     isValidator = false;
   }
 
-  @Override
+  /*@Override
   protected void handleGetSample(Message m, int myPid) {
-    /** Ignore sample request * */
     logger.warning("Builder handle get sample - return nothing " + this);
-  }
+  }*/
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
@@ -46,6 +45,8 @@ public class DASProtocolBuilder extends DASProtocol {
 
     while (currentBlock.hasNext()) {
       Sample s = currentBlock.next();
+      kv.add(s.getId(), s);
+      kv.add(s.getIdByColumn(), s);
       boolean inRegion = false;
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(
@@ -90,17 +91,12 @@ public class DASProtocolBuilder extends DASProtocol {
         DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
         if (dasProt.isBuilder()) continue;
         if (n.isUp()) {
-          Sample[] samples = {s};
-          Message msg = generateSeedSampleMessage(samples);
-          msg.operationId = -1;
-          msg.src = this.getKademliaProtocol().getKademliaNode();
-          msg.dst = n.getKademliaProtocol().getKademliaNode();
-          sendMessage(msg, id, dasProt.getDASProtocolID());
           samplesValidators++;
           if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;
           }
+          EDSimulator.add(1, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
         }
       }
 
@@ -116,15 +112,12 @@ public class DASProtocolBuilder extends DASProtocol {
         DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
         if (dasProt.isBuilder()) continue;
         if (n.isUp()) {
-          if (inRegion == false) {
+          /*if (inRegion == false) {
             samplesWithinRegion++;
             inRegion = true;
-          }
+          }*/
           samplesNonValidators++;
-
-          if (!dasProt.isValidator()) {
-            EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
-          }
+          EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
         }
       }
     }

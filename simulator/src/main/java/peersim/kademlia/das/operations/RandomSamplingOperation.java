@@ -44,7 +44,6 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (Sample rs : randomSamples) {
       FetchingSample s = new FetchingSample(rs);
       samples.put(rs.getIdByRow(), s);
-      // samples.put(rs.getIdByColumn(), s);
     }
     createNodes();
   }
@@ -52,14 +51,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     boolean completed = true;
-    int failed = 0;
+    // int failed = 0;
     for (FetchingSample s : samples.values()) {
       if (!s.isDownloaded()) {
-        failed++;
-        if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
-          completed = false;
-          break;
-        }
+        // failed++;
+        // if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
+        completed = false;
+        break;
+        // }
       }
     }
     return completed;
@@ -68,7 +67,7 @@ public class RandomSamplingOperation extends SamplingOperation {
   public void elaborateResponse(Sample[] sam) {
 
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+      if (samples.containsKey(s.getId())) {
         FetchingSample fs = samples.get(s.getId());
         if (!fs.isDownloaded()) {
           samplesCount++;
@@ -92,7 +91,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     for (Sample s : sam) {
 
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+      if (samples.containsKey(s.getId())) {
         FetchingSample fs = samples.get(s.getId());
         if (!fs.isDownloaded()) {
           samplesCount++;
@@ -100,14 +99,6 @@ public class RandomSamplingOperation extends SamplingOperation {
           fs.removeFetchingNode(nodes.get(node));
         }
       }
-      /*if (samples.containsKey(s.getIdByColumn())) {
-        FetchingSample fs = samples.get(s.getIdByColumn());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
-          fs.removeFetchingNode(nodes.get(node));
-        }
-      }*/
     }
 
     nodes.remove(node);
@@ -118,28 +109,30 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
-        List<BigInteger> validatorsBySample = new ArrayList<>();
+        List<BigInteger> nodesBySample = new ArrayList<>();
 
-        /*validatorsBySample.addAll(
-            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
-        validatorsBySample.addAll(
+        List<BigInteger> idsValidatorsRows =
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator);
+        List<BigInteger> idsValidatorsColumns =
             searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator));*/
-        validatorsBySample.addAll(
-            searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
+                samples.get(sample).getIdByColumn(), radiusValidator);
 
-        /*List<BigInteger> nonValidatorsBySample = new ArrayList<>();
-        nonValidatorsBySample.addAll(
+        List<BigInteger> idsNonValidatorsRows =
             searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        nonValidatorsBySample.addAll(
+                samples.get(sample).getId(), radiusNonValidator);
+        List<BigInteger> idsNonValidatorsColumns =
             searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));*/
+                samples.get(sample).getIdByColumn(), radiusNonValidator);
 
+        nodesBySample.addAll(idsValidatorsRows);
+        nodesBySample.addAll(idsValidatorsColumns);
+
+        nodesBySample.addAll(idsNonValidatorsRows);
+        nodesBySample.addAll(idsNonValidatorsColumns);
         boolean found = false;
 
-        if (validatorsBySample != null && validatorsBySample.size() > 0) {
-          for (BigInteger id : validatorsBySample) {
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
               nodes.get(id).addSample(samples.get(sample));
@@ -149,18 +142,6 @@ public class RandomSamplingOperation extends SamplingOperation {
           }
           found = true;
         }
-
-        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
-        }*/
 
         if (!found && callback != null) {
           callback.missing(sample, this);

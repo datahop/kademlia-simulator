@@ -3,6 +3,7 @@ package peersim.kademlia;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,7 +12,6 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
-import peersim.kademlia.das.Neighbour;
 import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.Operation;
 import peersim.util.IncrementalStats;
@@ -209,10 +209,10 @@ public class KademliaObserver implements Control {
     // Add the message to the message log, but first check if it hasn't already been added
     assert (!peerDiscoveries.keySet().contains(m.id));
     Map<String, Object> result = new HashMap<String, Object>();
-    Neighbour[] neighs = (Neighbour[]) m.value;
+    BigInteger[] neighs = (BigInteger[]) m.value;
 
     int notKnown = 0;
-    for (Neighbour n : neighs) {
+    for (BigInteger n : neighs) {
       if (!st.isNeighbourKnown(n)) notKnown++;
     }
     result.put("time", CommonState.getTime());

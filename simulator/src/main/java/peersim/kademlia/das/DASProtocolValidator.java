@@ -2,7 +2,9 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
+import peersim.core.Node;
 import peersim.kademlia.Message;
+import peersim.kademlia.Util;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
 public class DASProtocolValidator extends DASProtocol {
@@ -45,8 +47,18 @@ public class DASProtocolValidator extends DASProtocol {
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Error. Init block validator node - getting samples. do nothing " + this);
     // super.handleInitGetSample(m, myPid);
+    BigInteger[] samples = {(BigInteger) m.body};
+
+    for (BigInteger sample : samples) {
+      logger.warning("Init block validator node - getting samples " + sample);
+      Message msg = generateGetSampleMessage(samples);
+      msg.operationId = -1;
+      msg.src = this.kadProtocol.getKademliaNode();
+      Node n = Util.nodeIdtoNode(builderAddress, kademliaId);
+      msg.dst = n.getKademliaProtocol().getKademliaNode();
+      sendMessage(msg, builderAddress, myPid);
+    }
   }
 
   @Override

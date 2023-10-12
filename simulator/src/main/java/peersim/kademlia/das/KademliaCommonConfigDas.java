@@ -1,7 +1,5 @@
 package peersim.kademlia.das;
 
-import peersim.kademlia.KademliaCommonConfig;
-
 /**
  * Fixed Parameters for the DAS protocol.
  *
@@ -27,7 +25,7 @@ public class KademliaCommonConfigDas {
   /** Number of samples retrieved for the random sampling */
   public static int N_SAMPLES = 75;
 
-  public static int MAX_SAMPLING_FAILED = 3;
+  public static int MAX_SAMPLING_FAILED = 0;
 
   public static int PARCEL_SIZE = 128;
   /**
@@ -42,18 +40,18 @@ public class KademliaCommonConfigDas {
   /** Number of samples returned by a single node */
   public static int MAX_SAMPLES_RETURNED = 1000;
 
-  public static int MAX_NODES_RETURNED = KademliaCommonConfig.K;
+  public static int MAX_NODES_RETURNED = 25;
 
   /** Number of max hops during a sampling operation */
   public static int MAX_HOPS = 5000;
 
   /** Default upload bandwith of a validator in Mbits/sec */
-  public static int VALIDATOR_UPLOAD_RATE = 10000;
+  public static int VALIDATOR_UPLOAD_RATE = 1000000;
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
-  public static int NON_VALIDATOR_UPLOAD_RATE = 10000;
+  public static int NON_VALIDATOR_UPLOAD_RATE = 1000000;
 
-  public static int BUILDER_UPLOAD_RATE = 10000;
+  public static int BUILDER_UPLOAD_RATE = 1000000;
 
   public static int VALIDATOR_DEADLINE = 4000;
   public static int RANDOM_SAMPLING_DEADLINE = 12000;

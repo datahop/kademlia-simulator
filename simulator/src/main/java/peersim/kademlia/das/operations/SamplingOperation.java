@@ -107,37 +107,13 @@ public abstract class SamplingOperation extends FindOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
-        // List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
-        /*List<BigInteger> validatorsBySample =
-            searchTable.getValidatorNodesbySample(sample, radiusValidator);
-        List<BigInteger> nonValidatorsBySample =
-            searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);*/
-        List<BigInteger> validatorsBySample =
-            searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
-        boolean found = false;
-        if (validatorsBySample != null && validatorsBySample.size() > 0) {
-          for (BigInteger id : validatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
-        }
-        /*if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
-        }*/
-        /*List<BigInteger> nodesBySample = searchTable.getNodesbySample(sample, radiusValidator);
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+        nodesBySample.addAll(
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        nodesBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
         boolean found = false;
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {
@@ -149,7 +125,7 @@ public abstract class SamplingOperation extends FindOperation {
             }
           }
           found = true;
-        }*/
+        }
 
         if (!found && callback != null) callback.missing(sample, this);
       }
