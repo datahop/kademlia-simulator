@@ -176,6 +176,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
 
     switch (((SimpleEvent) event).getType()) {
+      case Message.MSG_EMPTY:
+        m = (Message) event;
+        handleApproachingDeadling(m, myPid);
+        break;
       case Message.MSG_INIT_NEW_BLOCK:
         m = (Message) event;
         handleInitNewBlock(m, myPid);
@@ -260,6 +264,17 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     return this.builderAddress;
   }
 
+  protected void handleApproachingDeadling(Message m, int myPid) {
+    logger.warning("Handle approaching deadline");
+    if (m.src.getId().compareTo(this.getKademliaId()) == 0) {
+      for (SamplingOperation sop : samplingOp.values()) {
+        if (!sop.completed()) {
+          sop.addExtraNodes();
+          doSampling(sop);
+        }
+      }
+    }
+  }
   /**
    * Start a topic query opearation.<br>
    *
@@ -611,6 +626,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     /*while (!doSampling(op)) {
       op.increaseRadius(2);
     }*/
+    Message m = new Message();
+    m.timestamp = CommonState.getTime();
+    m.src = this.getKademliaProtocol().getKademliaNode();
+    EDSimulator.add(
+        1000, m, Util.nodeIdtoNode(this.getKademliaId(), kademliaId), dasID); // set delay = 2*RTT
     doSampling(op);
   }
 

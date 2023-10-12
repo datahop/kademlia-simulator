@@ -132,6 +132,33 @@ public abstract class SamplingOperation extends FindOperation {
     }
   }
 
+  public void addExtraNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+        for (Sample s : currentBlock.getSamplesByRow(samples.get(sample).getRow())) {
+          nodesBySample.addAll(searchTable.getValidatorNodesbySample(s.getId(), radiusValidator));
+        }
+        for (Sample s : currentBlock.getSamplesByColumn(samples.get(sample).getColumn())) {
+          nodesBySample.addAll(
+              searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator));
+        }
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+        }
+      }
+    }
+  }
+
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
