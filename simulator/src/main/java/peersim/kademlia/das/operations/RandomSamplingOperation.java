@@ -127,18 +127,20 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         while (nodesBySample.isEmpty()) {
           nodesBySample.addAll(
-              searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+              searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+          //    searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
           nodesBySample.addAll(
-              searchTable.getValidatorNodesbySample(
-                  samples.get(sample).getIdByColumn(), radiusUsed));
+              searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+          //   searchTable.getValidatorNodesbySample(
+          //        samples.get(sample).getIdByColumn(), radiusUsed));
           radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
         }
-        nodesBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        nodesBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));
+        // nodesBySample.addAll(
+        //    searchTable.getNonValidatorNodesbySample(
+        //        samples.get(sample).getId(), radiusNonValidator));
+        // nodesBySample.addAll(
+        //    searchTable.getNonValidatorNodesbySample(
+        //        samples.get(sample).getIdByColumn(), radiusNonValidator));
 
         boolean found = false;
 
