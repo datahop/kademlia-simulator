@@ -417,17 +417,14 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               + " "
               + ((SamplingOperation) op).samplesCount());
 
-      if (!op.completed() && op.getHops() < KademliaCommonConfigDas.MAX_HOPS) {
-        if (op instanceof ValidatorSamplingOperation
-                && (CommonState.getTime() - op.getTimestamp())
-                    > KademliaCommonConfigDas.VALIDATOR_DEADLINE
-            || op instanceof RandomSamplingOperation
-                && (CommonState.getTime() - op.getTimestamp())
-                    > KademliaCommonConfigDas.RANDOM_SAMPLING_DEADLINE) {
-          samplingOp.remove(m.operationId);
-          logger.warning("Sampling operation finished");
-          KademliaObserver.reportOperation(op);
-        }
+      if (!op.completed()
+          && op.getHops() < KademliaCommonConfigDas.MAX_HOPS
+          && (op instanceof ValidatorSamplingOperation
+                  && (CommonState.getTime() - op.getTimestamp())
+                      <= KademliaCommonConfigDas.VALIDATOR_DEADLINE
+              || op instanceof RandomSamplingOperation
+                  && (CommonState.getTime() - op.getTimestamp())
+                      <= KademliaCommonConfigDas.RANDOM_SAMPLING_DEADLINE)) {
         doSampling(op);
       } else {
         logger.warning("Operation completed");

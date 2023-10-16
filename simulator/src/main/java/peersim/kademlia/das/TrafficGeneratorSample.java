@@ -42,7 +42,7 @@ public class TrafficGeneratorSample implements Control {
 
   Block b;
   private long ID_GENERATOR = 0;
-
+  long lastTime = 0;
   private boolean first = true, second = false;
 
   // ______________________________________________________________________________________________
@@ -138,6 +138,13 @@ public class TrafficGeneratorSample implements Control {
         Node n = Network.get(i);
         // b.initIterator();
         // we add 1 ms delay to be sure the builder starts before validators.
+        if (n.isUp())
+          EDSimulator.add(
+              CommonState.r.nextLong(CommonState.getTime() - lastTime),
+              generateFindNodeMessage(),
+              n,
+              kadpid);
+
         if (n.getDASProtocol() instanceof DASProtocolBuilder
             && n.getDASProtocol()
                 .getBuilderAddress()
@@ -155,7 +162,7 @@ public class TrafficGeneratorSample implements Control {
       ID_GENERATOR++;
       second = false;
     }
-
+    lastTime = CommonState.getTime();
     return false;
   }
 

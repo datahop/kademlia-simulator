@@ -144,23 +144,28 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           BigInteger radiusUsed = radiusValidator;
           while (nodesBySample.isEmpty()) {
             nodesBySample.addAll(
-                searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+                searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+            // searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
             radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           }
-          nodesBySample.addAll(
-              searchTable.getNonValidatorNodesbySample(
-                  samples.get(sample).getId(), radiusNonValidator));
+          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(),
+          // radiusNonValidator));
+          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getId(),
+          // radiusNonValidator));
         } else {
           BigInteger radiusUsed = radiusValidator;
           while (nodesBySample.isEmpty()) {
             nodesBySample.addAll(
-                searchTable.getValidatorNodesbySample(
-                    samples.get(sample).getIdByColumn(), radiusUsed));
+                searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+            // searchTable.getValidatorNodesbySample(samples.get(sample).getIdByColumn(),
+            // radiusUsed));
             radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           }
-          nodesBySample.addAll(
-              searchTable.getNonValidatorNodesbySample(
-                  samples.get(sample).getIdByColumn(), radiusNonValidator));
+          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getIdByColumn(),
+          // radiusNonValidator));
+
+          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getIdByColumn(),
+          // radiusNonValidator));
         }
         boolean found = false;
         if (nodesBySample != null && nodesBySample.size() > 0) {
