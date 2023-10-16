@@ -75,21 +75,25 @@ public class SearchTable {
   public void addNodes(BigInteger[] nodes) {
 
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id)
-          && !validatorsIndexed.contains(id)
-          && !builderAddress.equals(id)) {
-        nonValidatorsIndexed.add(id);
+      if (id.compareTo(builderAddress) != 0) {
+        if (!blackList.contains(id)
+            && !validatorsIndexed.contains(id)
+            && !builderAddress.equals(id)) {
+          nonValidatorsIndexed.add(id);
+        }
       }
     }
   }
 
   public void seenNeighbour(BigInteger id, Node n) {
-    if (neighbours.get(id) != null) {
-      neighbours.remove(id);
-      nodesIndexed.remove(id);
+    if (id.compareTo(builderAddress) != 0) {
+      if (neighbours.get(id) != null) {
+        neighbours.remove(id);
+        nodesIndexed.remove(id);
+      }
+      nodesIndexed.add(id);
+      neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
     }
-    nodesIndexed.add(id);
-    neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
   }
 
   /*public void addNonValidatorNodes(BigInteger[] nodes) {
