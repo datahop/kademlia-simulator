@@ -81,6 +81,7 @@ public class CustomDistributionDas implements peersim.core.Control {
         "Number of malicious nodes: " + numEvilValidatorNodes + " " + numEvilNonValidatorNodes);
     List<BigInteger> validatorsIds = new ArrayList<>();
     List<BigInteger> nonValidatorsIds = new ArrayList<>();
+    List<Node> validators = new ArrayList<>();
 
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
@@ -100,6 +101,7 @@ public class CustomDistributionDas implements peersim.core.Control {
 
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
         builderAddress = node.getId();
+        validators.add(generalNode);
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
       } else if (i >= (numEvilValidatorNodes + numEvilNonValidatorNodes + 1)
@@ -153,6 +155,13 @@ public class CustomDistributionDas implements peersim.core.Control {
       // if (i == 0) //
       generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
       generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
+      if (generalNode.getDASProtocol().isBuilder()) {
+        for (Node n : validators)
+          generalNode
+              .getDASProtocol()
+              .getSearchTable()
+              .addNeighbour(new Neighbour(n.getDASProtocol().getKademliaId(), n, false));
+      }
     }
     KademliaCommonConfigDas.networkSize = Network.size();
     KademliaCommonConfigDas.validatorsSize = numValidators;
