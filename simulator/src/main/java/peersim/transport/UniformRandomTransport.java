@@ -29,7 +29,7 @@ import peersim.edsim.*;
  * @author Alberto Montresor
  * @version $Revision: 1.14 $
  */
-public final class UniformRandomTransport implements Transport {
+public class UniformRandomTransport implements Transport {
 
   // ---------------------------------------------------------------------
   // Parameters
@@ -55,10 +55,10 @@ public final class UniformRandomTransport implements Transport {
   // ---------------------------------------------------------------------
 
   /** Minimum delay for message sending */
-  private final long min;
+  protected final long min;
 
   /** Difference between the max and min delay plus one. That is, max delay is min+range-1. */
-  private final long range;
+  protected final long range;
 
   // ---------------------------------------------------------------------
   // Initialization
