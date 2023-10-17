@@ -98,10 +98,10 @@ public class StateBuilder implements peersim.core.Control {
 
     int sz = Network.size();
     // For every node, add 10 boostrap nodes
+
     for (int i = 0; i < sz; i++) {
       Node iNode = Network.get(i);
       KademliaProtocol iKad = (KademliaProtocol) (iNode.getProtocol(kademliaid));
-
       for (int k = 0; k < 25; k++) {
         KademliaProtocol jKad =
             (KademliaProtocol) (Network.get(CommonState.r.nextInt(sz)).getProtocol(kademliaid));
