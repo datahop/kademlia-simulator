@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -97,6 +98,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected boolean isEvil;
 
   protected boolean missing;
+
+  protected HashMap<BigInteger, List<Message>> missingSamples;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -138,6 +142,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     searchTable = new SearchTable();
     nonValidatorsIndexed = new TreeSet<>();
     isBuilder = false;
+    missingSamples = new HashMap<>();
   }
 
   /**
@@ -310,20 +315,39 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       Sample sample = (Sample) kv.get(id);
       if (sample != null) {
         s.add(sample);
+      } else {
+        if (missingSamples.containsKey(id)) missingSamples.get(id).add(m);
+        else {
+          List<Message> nodeIds = new ArrayList<>();
+          nodeIds.add(m);
+          missingSamples.put(id, nodeIds);
+        }
+        // logger.warning("Sample request missing");
       }
     }
     // return a random subset of samples (if more than MAX_SAMPLES_RETURNED)
     Collections.shuffle(s);
     Sample[] returnedSamples;
-    if (s.size() > KademliaCommonConfigDas.MAX_SAMPLES_RETURNED)
+    /*if (s.size() > KademliaCommonConfigDas.MAX_SAMPLES_RETURNED)
       returnedSamples =
           new HashSet<Sample>(s.subList(0, KademliaCommonConfigDas.MAX_SAMPLES_RETURNED))
               .toArray(new Sample[0]);
-    else returnedSamples = s.toArray(new Sample[0]);
+    else */
+    returnedSamples = s.toArray(new Sample[0]);
 
     logger.warning("Get sample request responding with " + s.size() + " samples");
 
-    Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
+    if (returnedSamples.length > 0) {
+      Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
+      response.operationId = m.operationId;
+      response.dst = m.src;
+      response.src = this.kadProtocol.getKademliaNode();
+      response.ackId = m.id; // set ACK number
+      response.value = searchTable.getNeighbours();
+
+      sendMessage(response, m.src.getId(), myPid);
+    }
+    /*Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
     response.operationId = m.operationId;
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
@@ -348,7 +372,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     } else {
       response.value = searchTable.getNeighbours();
     }
-    sendMessage(response, m.src.getId(), myPid);
+    sendMessage(response, m.src.getId(), myPid);*/
   }
 
   private void reconstruct(Sample s) {
@@ -391,6 +415,26 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
+
+      if (missingSamples.containsKey(s.getId()) || missingSamples.containsKey(s.getIdByColumn())) {
+        logger.info("Sample received missing " + s.getId() + " " + s.getIdByColumn());
+        List<Message> messages = new ArrayList<>();
+        if (missingSamples.containsKey(s.getId())) messages.addAll(missingSamples.get(s.getId()));
+        if (missingSamples.containsKey(s.getIdByColumn()))
+          messages.addAll(missingSamples.get(s.getIdByColumn()));
+        for (Message msg : messages) {
+          Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, new Sample[] {s});
+          response.operationId = msg.operationId;
+          response.dst = msg.src;
+          response.src = this.kadProtocol.getKademliaNode();
+          response.ackId = msg.id; // set ACK number
+          response.value = searchTable.getNeighbours();
+          logger.warning("Sending sample to " + msg.src.getId());
+          sendMessage(response, msg.src.getId(), myPid);
+        }
+        missingSamples.remove(s.getId());
+        missingSamples.remove(s.getIdByColumn());
+      }
     }
 
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
@@ -507,7 +551,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(4 * latency, t, src, myPid); // set delay = 2*RTT
+      EDSimulator.add(10000, t, src, myPid); // set delay = 2*RTT
     }
   }
 
