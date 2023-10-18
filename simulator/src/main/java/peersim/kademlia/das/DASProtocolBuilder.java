@@ -1,7 +1,10 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
@@ -10,24 +13,20 @@ import peersim.kademlia.Util;
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
+  protected HashMap<BigInteger, List<BigInteger>> samplesToRequest;
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
+    samplesToRequest = new HashMap<>();
   }
 
   @Override
-  protected void handleGetSample(Message m, int myPid) {
-    /** Ignore sample request * */
-    logger.warning("Builder handle get sample - return nothing " + this);
-  }
-
-  @Override
-  protected void handleSeedSample(Message m, int myPid) {
-    System.err.println("Builder should not receive seed sample");
-    System.exit(-1);
+  protected void handleInitGetSample(Message m, int myPid) {
+    logger.warning("Init block  builder node - getting samples " + this);
+    System.err.println("Wrong eventInit block  builder node - getting samples ");
   }
 
   @Override
@@ -49,7 +48,8 @@ public class DASProtocolBuilder extends DASProtocol {
     while (currentBlock.hasNext()) {
       boolean inRegion = false;
       Sample s = currentBlock.next();
-
+      kv.add(s.getId(), s);
+      kv.add(s.getIdByColumn(), s);
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
@@ -62,7 +62,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
         for (BigInteger id : idsValidators) {
 
-          logger.warning(
+          logger.info(
               "Sending sample to validator "
                   + s.getIdByRow()
                   + " "
@@ -73,12 +73,19 @@ public class DASProtocolBuilder extends DASProtocol {
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
           if (n.isUp()) {
-            Sample[] samples = {s};
+            /*Sample[] samples = {s};
             Message msg = generateSeedSampleMessage(samples);
             msg.operationId = -1;
             msg.src = this.getKademliaProtocol().getKademliaNode();
             msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());
+            sendMessage(msg, id, dasProt.getDASProtocolID());*/
+            if (!samplesToRequest.containsKey(id)) {
+              List<BigInteger> samples = new ArrayList<>();
+              samples.add(s.getId());
+              samplesToRequest.put(id, samples);
+            } else {
+              samplesToRequest.get(id).add(s.getId());
+            }
             samplesValidators++;
             if (inRegion == false) {
               samplesWithinRegion++;
@@ -102,7 +109,7 @@ public class DASProtocolBuilder extends DASProtocol {
 
         for (BigInteger id : idsValidators) {
 
-          logger.warning(
+          logger.info(
               "Sending sample to validator "
                   + s.getIdByRow()
                   + " "
@@ -113,12 +120,19 @@ public class DASProtocolBuilder extends DASProtocol {
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
           if (n.isUp()) {
-            Sample[] samples = {s};
+            /*Sample[] samples = {s};
             Message msg = generateSeedSampleMessage(samples);
             msg.operationId = -1;
             msg.src = this.getKademliaProtocol().getKademliaNode();
             msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());
+            sendMessage(msg, id, dasProt.getDASProtocolID());*/
+            if (!samplesToRequest.containsKey(id)) {
+              List<BigInteger> samples = new ArrayList<>();
+              samples.add(s.getId());
+              samplesToRequest.put(id, samples);
+            } else {
+              samplesToRequest.get(id).add(s.getId());
+            }
             samplesValidators++;
             if (inRegion == false) {
               samplesWithinRegion++;
@@ -134,7 +148,7 @@ public class DASProtocolBuilder extends DASProtocol {
       idsNonValidators.addAll(
           searchTable.getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator));
       for (BigInteger id : idsNonValidators) {
-        logger.warning(
+        logger.info(
             "Sending sample to non-validator "
                 + s.getIdByRow()
                 + " "
@@ -148,9 +162,30 @@ public class DASProtocolBuilder extends DASProtocol {
           samplesNonValidators++;
 
           if (!dasProt.isValidator()) {
-            EDSimulator.add(2, generateNewSampleMessage(s.getId()), n, dasProt.getDASProtocolID());
+            // EDSimulator.add(0, generateNewSampleMessage(s.getId()), n,
+            // dasProt.getDASProtocolID());
+            if (!samplesToRequest.containsKey(id)) {
+              List<BigInteger> samples = new ArrayList<>();
+              samples.add(s.getId());
+              samplesToRequest.put(id, samples);
+            } else {
+              samplesToRequest.get(id).add(s.getId());
+            }
           }
         }
+      }
+    }
+
+    for (int i = 0; i < Network.size(); i++) {
+      Node n = Network.get(i);
+      DASProtocol dasProt = n.getDASProtocol();
+      BigInteger id = dasProt.getKademliaId();
+      if (!dasProt.isBuilder && samplesToRequest.containsKey(id)) {
+        EDSimulator.add(
+            1,
+            generateNewSampleMessage(samplesToRequest.get(id).toArray(new BigInteger[0])),
+            n,
+            dasProt.getDASProtocolID());
       }
     }
 
@@ -163,12 +198,6 @@ public class DASProtocolBuilder extends DASProtocol {
             + samplesValidators
             + " "
             + samplesNonValidators);
-  }
-
-  @Override
-  protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Error. Init block builder node - getting samples. do nothing " + this);
-    // super.handleInitGetSample(m, myPid);
   }
 
   @Override

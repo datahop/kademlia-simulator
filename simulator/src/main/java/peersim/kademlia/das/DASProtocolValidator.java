@@ -2,7 +2,9 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import peersim.core.CommonState;
+import peersim.core.Node;
 import peersim.kademlia.Message;
+import peersim.kademlia.Util;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
 public class DASProtocolValidator extends DASProtocol {
@@ -17,36 +19,17 @@ public class DASProtocolValidator extends DASProtocol {
   }
 
   @Override
-  protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("seed sample received");
-    if (m.body == null) return;
-
-    Sample[] samples = (Sample[]) m.body;
-    for (Sample s : samples) {
-      logger.warning(
-          "Received sample:"
-              + kv.occupancy()
-              + " "
-              + s.getRow()
-              + " "
-              + s.getColumn()
-              + " "
-              + s.getIdByRow()
-              + " "
-              + s.getIdByColumn());
-
-      kv.add((BigInteger) s.getIdByRow(), s);
-      kv.add((BigInteger) s.getIdByColumn(), s);
-      // count # of samples for each row and column
-      column[s.getColumn() - 1]++;
-      row[s.getRow() - 1]++;
-    }
-  }
-
-  @Override
   protected void handleInitGetSample(Message m, int myPid) {
-    logger.warning("Error. Init block validator node - getting samples. do nothing " + this);
-    // super.handleInitGetSample(m, myPid);
+    logger.warning("Init block non-validator node - getting samples " + this);
+    if (currentBlock == null) System.err.println("Error block not init yet");
+    BigInteger[] samples = (BigInteger[]) m.body;
+
+    Message msg = generateGetSampleMessage(samples);
+    msg.operationId = -1;
+    msg.src = this.kadProtocol.getKademliaNode();
+    Node n = Util.nodeIdtoNode(builderAddress, kademliaId);
+    msg.dst = n.getKademliaProtocol().getKademliaNode();
+    sendMessage(msg, builderAddress, myPid);
   }
 
   @Override

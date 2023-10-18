@@ -107,7 +107,7 @@ public class SearchTable {
 
   public void addValidatorNodes(BigInteger[] nodes) {
     for (BigInteger id : nodes) {
-      if (!blackList.contains(id)) {
+      if (!blackList.contains(id) && id.compareTo(builderAddress) != 0) {
         validatorsIndexed.add(id);
       }
       // routingTable.addNeighbour(id);

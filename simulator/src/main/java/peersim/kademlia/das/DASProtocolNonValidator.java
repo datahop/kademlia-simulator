@@ -1,7 +1,8 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -9,55 +10,37 @@ import peersim.kademlia.Util;
 public class DASProtocolNonValidator extends DASProtocol {
 
   protected static String prefix = null;
-
-  protected HashSet<BigInteger> reqSamples;
+  protected List<BigInteger> validatorsContacted;
 
   public DASProtocolNonValidator(String prefix) {
     super(prefix);
     DASProtocolNonValidator.prefix = prefix;
     isValidator = false;
     isBuilder = false;
-    reqSamples = new HashSet<>();
-  }
-
-  @Override
-  protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("Non-validator should not receive seed sample");
-    System.exit(-1);
-    /*if (m.body == null) return;
-
-    Sample[] samples = (Sample[]) m.body;
-    for (Sample s : samples) {
-      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
-
-      kv.add((BigInteger) s.getIdByRow(), s);
-      kv.add((BigInteger) s.getIdByColumn(), s);
-      // count # of samples for each row and column
-      column[s.getColumn() - 1]++;
-      row[s.getRow() - 1]++;
-    }*/
+    validatorsContacted = new ArrayList<>();
   }
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block non-validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
-    BigInteger[] samples = {(BigInteger) m.body};
+    if (currentBlock == null) System.err.println("Error block not init yet");
+    BigInteger[] samples = (BigInteger[]) m.body;
     BigInteger radius =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
             searchTable.getValidatorsIndexed().size());
     for (BigInteger sample : samples) {
-      if (!reqSamples.contains(sample)) {
-        // for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
-        for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
+      // for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
+      for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
+        if (!validatorsContacted.contains(id)) {
           Message msg = generateGetSampleMessage(samples);
           msg.operationId = -1;
           msg.src = this.kadProtocol.getKademliaNode();
           Node n = Util.nodeIdtoNode(id, kademliaId);
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, myPid);
-          reqSamples.add(sample);
+          validatorsContacted.add(id);
         }
       }
     }
@@ -67,6 +50,7 @@ public class DASProtocolNonValidator extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     logger.warning("Init block non-validator node - start sampling " + this);
     super.handleInitNewBlock(m, myPid);
+    validatorsContacted.clear();
     startRandomSampling();
   }
 
