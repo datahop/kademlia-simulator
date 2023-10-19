@@ -145,7 +145,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
         if (row > 0) {
           BigInteger radiusUsed = radiusValidator;
-          while (nodesBySample.isEmpty()) {
+          while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
             nodesBySample.addAll(
                 searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
             // searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
@@ -157,7 +157,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           // radiusNonValidator));
         } else {
           BigInteger radiusUsed = radiusValidator;
-          while (nodesBySample.isEmpty()) {
+          while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
             nodesBySample.addAll(
                 searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
             // searchTable.getValidatorNodesbySample(samples.get(sample).getIdByColumn(),

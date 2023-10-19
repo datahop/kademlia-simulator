@@ -313,6 +313,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     // if (!isValidator())
     //  logger.warning("Non-validator received " + samples.size() + " from " + m.src.getId());
 
+    boolean sampleFound = false;
     for (BigInteger id : samples) {
       logger.info("Requesting sample " + id + " from " + m.src.getId());
       Sample sample = (Sample) kv.get(id);
@@ -327,6 +328,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         response.value = searchTable.getNeighbours();
 
         sendMessage(response, m.src.getId(), myPid);
+        sampleFound = true;
       } else {
         if (missingSamples.containsKey(id)) missingSamples.get(id).add(m);
         else {
@@ -336,6 +338,16 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         }
         // logger.warning("Sample request missing");
       }
+    }
+    if (!sampleFound) {
+      Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, new Sample[] {});
+      response.operationId = m.operationId;
+      response.dst = m.src;
+      response.src = this.kadProtocol.getKademliaNode();
+      response.ackId = m.id; // set ACK number
+      response.value = searchTable.getNeighbours();
+
+      sendMessage(response, m.src.getId(), myPid);
     }
     // return a random subset of samples (if more than MAX_SAMPLES_RETURNED)
     // Collections.shuffle(s);
@@ -408,13 +420,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     Sample[] samples = (Sample[]) m.body;
     // searchTable.addNodes((BigInteger[]) m.value);
-    logger.info(
-        "Get sample response "
-            + samples[0].getId()
-            + " "
-            + samples[0].getIdByColumn()
-            + " samples from "
-            + m.src.getId());
 
     KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
@@ -460,7 +465,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             + searchTable.getValidatorsNeighboursCount()
             + " "
             + op);
-    if (op != null) {
+    if (op != null && samples.length > 0) {
       // keeping track of received samples
       op.elaborateResponse(samples, m.src.getId());
       logger.warning(

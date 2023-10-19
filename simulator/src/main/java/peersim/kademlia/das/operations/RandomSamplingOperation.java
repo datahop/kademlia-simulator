@@ -127,7 +127,7 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         BigInteger radiusUsed = radiusValidator;
 
-        while (nodesBySample.isEmpty()) {
+        while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
           nodesBySample.addAll(
               searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
           //    searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
