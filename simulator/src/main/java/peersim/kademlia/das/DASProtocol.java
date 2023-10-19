@@ -212,6 +212,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               sop.elaborateResponse(null, null);
             }
           }
+          searchTable.removeNode(t.node);
         }
         if (sop != null) {
           doSampling(sop);

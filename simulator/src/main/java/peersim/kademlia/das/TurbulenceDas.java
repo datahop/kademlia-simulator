@@ -78,7 +78,7 @@ public class TurbulenceDas implements Control {
   private double p_idle;
   private double p_add;
   private double p_rem;
-
+  private UniformRandomGenerator urg;
   // ______________________________________________________________________________________________
   public TurbulenceDas(String prefix) {
     this.prefix = prefix;
@@ -97,7 +97,7 @@ public class TurbulenceDas implements Control {
     Object[] tmp = Configuration.getInstanceArray(prefix + "." + PAR_INIT);
     inits = new NodeInitializer[tmp.length];
     for (int i = 0; i < tmp.length; ++i) inits[i] = (NodeInitializer) tmp[i];
-
+    urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
     // Load probability from configuration file
     p_idle = Configuration.getDouble(this.prefix + "." + PAR_IDLE, 0); // idle default 0
     p_add = Configuration.getDouble(this.prefix + "." + PAR_ADD, 0.5); // add default 0.5
@@ -138,23 +138,23 @@ public class TurbulenceDas implements Control {
 
     // Get kademlia protocol of new node
     KademliaProtocol newKad = (KademliaProtocol) (newNode.getProtocol(kademliaid));
-    newNode.setKademliaProtocol(newKad);
-    newKad.setProtocolID(kademliaid);
     // newNode.setProtocol(kademliaid, newKad);
     // Set node ID
-    UniformRandomGenerator urg =
-        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
+
     KademliaNode node = new KademliaNode(urg.generate(), "127.0.0.1", 0);
-    ((KademliaProtocol) (newNode.getProtocol(kademliaid))).setNode(node);
 
     DASProtocol dasProt = ((DASProtocol) (newNode.getProtocol(dasprotnonvalid)));
 
-    newNode.setProtocol(dasprotbuildid, dasProt);
     newKad.setNode(node);
+    newKad.setProtocolID(kademliaid);
+    newKad.setEventsCallback(dasProt);
 
     dasProt.setKademliaProtocol(newKad);
     dasProt.setDASProtocolID(dasprotbuildid);
-    newKad.setEventsCallback(dasProt);
+
+    newNode.setKademliaProtocol(newKad);
+    newNode.setProtocol(dasprotbuildid, dasProt);
+
     newNode.setDASProtocol(dasProt);
     newNode.setProtocol(dasprotvalid, null);
     newNode.setProtocol(dasevilprotid, null);
@@ -169,16 +169,27 @@ public class TurbulenceDas implements Control {
         dasProt.setBuilderAddress(builderAddress);
       }
     }
+
+    for (int k = 0; k < 25; k++) {
+      KademliaProtocol jKad = (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
+      if (jKad.getKademliaNode().isServer()) {
+        newKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+      }
+    }
     for (int j = 0; j < 3; j++) {
       // send message
       EDSimulator.add(0, Util.generateFindNodeMessage(), newNode, kademliaid);
     }
     EDSimulator.add(
-        0,
-        Util.generateFindNodeMessage(newNode.getKademliaProtocol().getKademliaNode().getId()),
-        newNode,
-        kademliaid);
-    System.out.println("Adding non-validator node " + count + " " + dasProt.getBuilderAddress());
+        0, Util.generateFindNodeMessage(newKad.getKademliaNode().getId()), newNode, kademliaid);
+    System.out.println(
+        CommonState.getTime()
+            + " Adding non-validator node "
+            + count
+            + " "
+            + newKad.getKademliaNode().getId()
+            + " "
+            + dasProt.getBuilderAddress());
 
     return false;
   }

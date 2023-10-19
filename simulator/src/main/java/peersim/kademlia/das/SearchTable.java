@@ -123,6 +123,8 @@ public class SearchTable {
     this.nodesIndexed.remove(node);
     // this.validatorsIndexed.remove(node);
     this.nonValidatorsIndexed.remove(node);
+    this.neighbours.remove(node);
+    validatorsIndexed.remove(node);
   }
 
   public TreeSet<BigInteger> nodesIndexed() {
