@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import peersim.core.CommonState;
 // import peersim.kademlia.KademliaCommonConfig;
 import peersim.core.Node;
 
@@ -66,10 +68,10 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    neighbours.remove(neigh.getId());
-    nodesIndexed.remove(neigh.getId());
-    neighbours.put(neigh.getId(), neigh);
-    nodesIndexed.add(neigh.getId());
+    if (neighbours.get(neigh.getId()) == null) {
+      neighbours.put(neigh.getId(), neigh);
+      nodesIndexed.add(neigh.getId());
+    }
   }
 
   public void addNodes(BigInteger[] nodes) {
@@ -88,11 +90,11 @@ public class SearchTable {
   public void seenNeighbour(BigInteger id, Node n) {
     if (id.compareTo(builderAddress) != 0) {
       if (neighbours.get(id) != null) {
-        neighbours.remove(id);
-        nodesIndexed.remove(id);
+        neighbours.get(id).updateLastSeen(CommonState.getTime());
+      } else {
+        nodesIndexed.add(id);
+        neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
       }
-      nodesIndexed.add(id);
-      neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
     }
   }
 

@@ -171,8 +171,8 @@ public class TurbulenceDas implements Control {
     }
 
     int k = 0;
-    while(k<25) {
-      if(Network.get(k).isUp()){
+    while (k < 25) {
+      if (Network.get(k).isUp()) {
         KademliaProtocol jKad = (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
         if (jKad.getKademliaNode().isServer()) {
           newKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
