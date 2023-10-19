@@ -94,30 +94,33 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         s.removeFetchingNode(node);
       }
     }
-    for (Sample s : sam) {
-      if (row > 0) {
-        if (samples.containsKey(s.getId())) {
-          FetchingSample fs = samples.get(s.getId());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
+    if (sam != null) {
+      for (Sample s : sam) {
+        if (row > 0) {
+          if (samples.containsKey(s.getId())) {
+            FetchingSample fs = samples.get(s.getId());
+            if (!fs.isDownloaded()) {
+              fs.setDownloaded();
+              samplesCount++;
+            }
           }
-        }
-      } else {
-        if (samples.containsKey(s.getIdByColumn())) {
-          FetchingSample fs = samples.get(s.getIdByColumn());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
+        } else {
+          if (samples.containsKey(s.getIdByColumn())) {
+            FetchingSample fs = samples.get(s.getIdByColumn());
+            if (!fs.isDownloaded()) {
+              fs.setDownloaded();
+              samplesCount++;
+            }
           }
         }
       }
     }
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
-    askNodes.add(n);
-
-    nodes.remove(n);
+    if (node != null) {
+      askNodes.add(n);
+      nodes.remove(n);
+    }
   }
 
   public boolean completed() {

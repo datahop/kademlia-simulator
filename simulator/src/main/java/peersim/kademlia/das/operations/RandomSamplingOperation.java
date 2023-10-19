@@ -90,28 +90,30 @@ public class RandomSamplingOperation extends SamplingOperation {
       }
     }
 
-    for (Sample s : sam) {
-
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
-        FetchingSample fs = samples.get(s.getId());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
-          fs.removeFetchingNode(nodes.get(node));
+    if (sam != null) {
+      for (Sample s : sam) {
+        if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            samplesCount++;
+            fs.setDownloaded();
+            fs.removeFetchingNode(nodes.get(node));
+          }
         }
+        /*if (samples.containsKey(s.getIdByColumn())) {
+          FetchingSample fs = samples.get(s.getIdByColumn());
+          if (!fs.isDownloaded()) {
+            samplesCount++;
+            fs.setDownloaded();
+            fs.removeFetchingNode(nodes.get(node));
+          }
+        }*/
       }
-      /*if (samples.containsKey(s.getIdByColumn())) {
-        FetchingSample fs = samples.get(s.getIdByColumn());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
-          fs.removeFetchingNode(nodes.get(node));
-        }
-      }*/
     }
-
-    nodes.remove(node);
-    askNodes.add(node);
+    if (node != null) {
+      nodes.remove(node);
+      askNodes.add(node);
+    }
   }
 
   protected void createNodes() {

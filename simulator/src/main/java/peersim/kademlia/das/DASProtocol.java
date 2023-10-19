@@ -10,7 +10,6 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -201,19 +200,21 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       case Timeout.TIMEOUT: // timeout
         Timeout t = (Timeout) event;
+        SamplingOperation sop = samplingOp.get(t.opID);
         if (sentMsg.containsKey(t.msgID)) { // the response msg isn't arrived
           // remove form sentMsg
           logger.warning("Timeouuuuut! " + t.msgID);
           sentMsg.remove(t.msgID);
           // this.searchTable.removeNode(t.node);
-          SamplingOperation sop = samplingOp.get(t.opID);
           if (sop != null) {
             if (!sop.completed()) {
               logger.warning("Samping operation found");
-
-              doSampling(sop);
+              sop.elaborateResponse(null, null);
             }
           }
+        }
+        if (sop != null) {
+          doSampling(sop);
         }
         break;
     }
@@ -302,19 +303,29 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     // samples to return
-    List<Sample> s = new ArrayList<>();
+    // List<Sample> s = new ArrayList<>();
 
     // if (!isValidator())
     //  logger.warning("Non-validator received " + samples.size() + " from " + m.src.getId());
 
     for (BigInteger id : samples) {
+      logger.info("Requesting sample " + id + " from " + m.src.getId());
       Sample sample = (Sample) kv.get(id);
       if (sample != null) {
-        s.add(sample);
+        // s.add(sample);
+
+        Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, new Sample[] {sample});
+        response.operationId = m.operationId;
+        response.dst = m.src;
+        response.src = this.kadProtocol.getKademliaNode();
+        response.ackId = m.id; // set ACK number
+        response.value = searchTable.getNeighbours();
+
+        sendMessage(response, m.src.getId(), myPid);
       } else {
         if (missingSamples.containsKey(id)) missingSamples.get(id).add(m);
         else {
@@ -326,27 +337,20 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
     }
     // return a random subset of samples (if more than MAX_SAMPLES_RETURNED)
-    Collections.shuffle(s);
-    Sample[] returnedSamples;
+    // Collections.shuffle(s);
+    // Sample[] returnedSamples;
     /*if (s.size() > KademliaCommonConfigDas.MAX_SAMPLES_RETURNED)
       returnedSamples =
           new HashSet<Sample>(s.subList(0, KademliaCommonConfigDas.MAX_SAMPLES_RETURNED))
               .toArray(new Sample[0]);
     else */
-    returnedSamples = s.toArray(new Sample[0]);
+    // returnedSamples = s.toArray(new Sample[0]);
 
-    logger.warning("Get sample request responding with " + s.size() + " samples");
+    // logger.warning("Get sample request responding with " + sample.getId() + " samples");
 
-    if (returnedSamples.length > 0) {
-      Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
-      response.operationId = m.operationId;
-      response.dst = m.src;
-      response.src = this.kadProtocol.getKademliaNode();
-      response.ackId = m.id; // set ACK number
-      response.value = searchTable.getNeighbours();
+    /*if (returnedSamples.length > 0) {
 
-      sendMessage(response, m.src.getId(), myPid);
-    }
+    }*/
     /*Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, returnedSamples);
     response.operationId = m.operationId;
     response.dst = m.src;
@@ -403,7 +407,13 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     Sample[] samples = (Sample[]) m.body;
     // searchTable.addNodes((BigInteger[]) m.value);
-    logger.warning("Get sample response with " + samples.length + " samples from " + m.src.getId());
+    logger.info(
+        "Get sample response "
+            + samples[0].getId()
+            + " "
+            + samples[0].getIdByColumn()
+            + " samples from "
+            + m.src.getId());
 
     KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
@@ -462,7 +472,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               + " "
               + ((SamplingOperation) op).samplesCount());
 
-      if (!op.completed()
+      /*if (!op.completed()
           && op.getHops() < KademliaCommonConfigDas.MAX_HOPS
           && (op instanceof ValidatorSamplingOperation
                   && (CommonState.getTime() - op.getTimestamp())
@@ -471,7 +481,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                   && (CommonState.getTime() - op.getTimestamp())
                       <= KademliaCommonConfigDas.RANDOM_SAMPLING_DEADLINE)) {
         doSampling(op);
-      } else {
+      } else {*/
+      if (op.completed()) {
         logger.warning("Operation completed");
         samplingOp.remove(m.operationId);
         if (op instanceof ValidatorSamplingOperation)
@@ -551,7 +562,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(10000, t, src, myPid); // set delay = 2*RTT
+      EDSimulator.add(4 * 100, t, src, myPid); // set delay = 2*RTT
     }
   }
 

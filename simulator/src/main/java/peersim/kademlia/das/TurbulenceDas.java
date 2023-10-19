@@ -7,10 +7,12 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.dynamics.NodeInitializer;
+import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaNode;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.UniformRandomGenerator;
+import peersim.kademlia.Util;
 
 /**
  * Turbulcen class is only for test/statistical purpose. This Control execute a node add or remove
@@ -167,6 +169,15 @@ public class TurbulenceDas implements Control {
         dasProt.setBuilderAddress(builderAddress);
       }
     }
+    for (int j = 0; j < 3; j++) {
+      // send message
+      EDSimulator.add(0, Util.generateFindNodeMessage(), newNode, kademliaid);
+    }
+    EDSimulator.add(
+        0,
+        Util.generateFindNodeMessage(newNode.getKademliaProtocol().getKademliaNode().getId()),
+        newNode,
+        kademliaid);
     System.out.println("Adding non-validator node " + count + " " + dasProt.getBuilderAddress());
 
     return false;

@@ -199,7 +199,7 @@ public class SearchTable {
     for (Neighbour n : neighbours.values()) {
       neighs.add(n);
     }
-    Collections.sort(neighs);
+    Collections.shuffle(neighs);
 
     for (Neighbour neigh : neighs) {
       if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);

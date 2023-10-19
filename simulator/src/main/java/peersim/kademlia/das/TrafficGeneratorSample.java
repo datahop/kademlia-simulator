@@ -1,15 +1,13 @@
 package peersim.kademlia.das;
 
-import java.math.BigInteger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
-import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.Message;
-import peersim.kademlia.UniformRandomGenerator;
+import peersim.kademlia.Util;
 
 /**
  * This control generates samples every 5 min that are stored in a single node (builder) and starts
@@ -75,38 +73,6 @@ public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   /**
-   * generates a random find node message, by selecting randomly the destination.
-   *
-   * @return Message
-   */
-  private Message generateFindNodeMessage() {
-
-    UniformRandomGenerator urg =
-        new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
-    BigInteger id = urg.generate();
-
-    Message m = Message.makeInitFindNode(id);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a random find node message, by selecting randomly the destination.
-   *
-   * @return Message
-   */
-  private Message generateFindNodeMessage(BigInteger id) {
-
-    Message m = Message.makeInitFindNode(id);
-    m.timestamp = CommonState.getTime();
-
-    return m;
-  }
-
-  // ______________________________________________________________________________________________
-  /**
    * every call of this control generates and send a random find node message
    *
    * @return boolean
@@ -120,11 +86,12 @@ public class TrafficGeneratorSample implements Control {
         if (start.isUp()) {
           for (int j = 0; j < 3; j++) {
             // send message
-            EDSimulator.add(CommonState.r.nextInt(12000), generateFindNodeMessage(), start, kadpid);
+            EDSimulator.add(
+                CommonState.r.nextInt(12000), Util.generateFindNodeMessage(), start, kadpid);
           }
           EDSimulator.add(
               0,
-              generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
+              Util.generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
               start,
               kadpid);
         }
@@ -138,6 +105,12 @@ public class TrafficGeneratorSample implements Control {
         Node n = Network.get(i);
         // b.initIterator();
         // we add 1 ms delay to be sure the builder starts before validators.
+        EDSimulator.add(
+            CommonState.r.nextLong(CommonState.getTime() - lastTime),
+            Util.generateFindNodeMessage(),
+            n,
+            kadpid);
+
         if (n.isUp())
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
