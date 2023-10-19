@@ -1,9 +1,10 @@
 package peersim.kademlia.das;
 
+import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 
-public class RefreshSearchTable {
+public class RefreshSearchTable implements Control {
   private String prefix;
 
   // ______________________________________________________________________________________________

@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 import peersim.core.CommonState;
 // import peersim.kademlia.KademliaCommonConfig;
 import peersim.core.Node;
