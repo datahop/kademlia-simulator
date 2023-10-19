@@ -171,10 +171,14 @@ public class TurbulenceDasValidator implements Control {
       }
     }
 
-    for (int k = 0; k < 25; k++) {
-      KademliaProtocol jKad = (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
-      if (jKad.getKademliaNode().isServer()) {
-        newKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+    int k = 0;
+    while(k<25) {
+      if(Network.get(k).isUp()){
+        KademliaProtocol jKad = (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
+        if (jKad.getKademliaNode().isServer()) {
+          newKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+        }
+        k++;
       }
     }
     for (int j = 0; j < 3; j++) {
