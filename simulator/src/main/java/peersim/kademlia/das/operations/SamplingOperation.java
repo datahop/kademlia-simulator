@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,6 +127,10 @@ public abstract class SamplingOperation extends FindOperation {
     }
 
     return result.toArray(new BigInteger[0]);
+  }
+
+  public Collection<Node> getNodes() {
+    return nodes.values();
   }
 
   public abstract void elaborateResponse(Sample[] sam, BigInteger node);

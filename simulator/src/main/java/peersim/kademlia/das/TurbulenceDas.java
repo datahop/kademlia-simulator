@@ -214,7 +214,7 @@ public class TurbulenceDas implements Control {
         && i > 0);
     // Remove node (set its state to DOWN)
     remove.setFailState(Node.DOWN);
-    System.out.println("Removing validator " + dasProt.getKademliaId());
+    System.out.println("Removing non-validator " + dasProt.getKademliaId());
 
     return false;
   }
