@@ -313,7 +313,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    // logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
     // samples to return
@@ -324,7 +324,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     boolean sampleFound = false;
     for (BigInteger id : samples) {
-      logger.warning("Requesting sample " + id + " from " + m.src.getId());
+      logger.info("Requesting sample " + id + " from " + m.src.getId());
       Sample sample = (Sample) kv.get(id);
       if (sample != null) {
         // s.add(sample);
@@ -440,7 +440,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
-      logger.warning("Sample received  " + s.getId() + " " + s.getIdByColumn());
+      logger.info("Sample received  " + s.getId() + " " + s.getIdByColumn());
 
       if (missingSamples.containsKey(s.getId()) || missingSamples.containsKey(s.getIdByColumn())) {
         logger.info("Sample received missing " + s.getId() + " " + s.getIdByColumn());
@@ -455,7 +455,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
           response.src = this.kadProtocol.getKademliaNode();
           response.ackId = msg.id; // set ACK number
           response.value = searchTable.getNeighbours();
-          logger.warning("Sending sample to " + msg.src.getId());
+          // logger.warning("Sending sample to " + msg.src.getId());
           sendMessage(response, msg.src.getId(), myPid);
         }
         missingSamples.remove(s.getId());
