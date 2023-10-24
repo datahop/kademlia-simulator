@@ -105,11 +105,11 @@ public class TrafficGeneratorSample implements Control {
         Node n = Network.get(i);
         // b.initIterator();
         // we add 1 ms delay to be sure the builder starts before validators.
-        EDSimulator.add(
-            CommonState.r.nextLong(CommonState.getTime() - lastTime),
-            Util.generateFindNodeMessage(),
-            n,
-            kadpid);
+        /*EDSimulator.add(
+        CommonState.r.nextLong(CommonState.getTime() - lastTime),
+        Util.generateFindNodeMessage(),
+        n,
+        kadpid);*/
 
         if (n.isUp())
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
