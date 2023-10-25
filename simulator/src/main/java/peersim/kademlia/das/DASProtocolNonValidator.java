@@ -22,6 +22,7 @@ public class DASProtocolNonValidator extends DASProtocol {
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
+    if (!init) return;
     logger.warning("Init block non-validator node - getting samples " + this);
     // super.handleInitGetSample(m, myPid);
     if (currentBlock == null) System.err.println("Error block not init yet");

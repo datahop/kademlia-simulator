@@ -7,7 +7,6 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.dynamics.NodeInitializer;
-import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaCommonConfig;
 import peersim.kademlia.KademliaNode;
 import peersim.kademlia.KademliaProtocol;
@@ -162,7 +161,7 @@ public class TurbulenceDasValidator implements Control {
     newNode.setProtocol(dasprotnonvalid, null);
 
     int count = 0;
-    BigInteger builderAddress;
+    BigInteger builderAddress = BigInteger.valueOf(0);
     for (int i = 0; i < Network.size(); ++i) {
       if (Network.get(i).isUp()) count++;
       if (Network.get(i).getDASProtocol().isBuilder()) {
@@ -171,22 +170,28 @@ public class TurbulenceDasValidator implements Control {
       }
     }
 
+    Node builder = Util.nodeIdtoNode(builderAddress, kademliaid);
+    DASProtocol builderDAS = builder.getDASProtocol();
+    builderDAS.getSearchTable().addValidatorNodes(new BigInteger[] {dasProt.getKademliaId()});
     int k = 0;
-    while (k < 25) {
-      if (Network.get(k).isUp()) {
-        KademliaProtocol jKad = (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
+    while (k < 100) {
+      Node n = Network.get(CommonState.r.nextInt(Network.size()));
+      if (n.isUp()) {
+        KademliaProtocol jKad = (KademliaProtocol) n.getProtocol(kademliaid);
         if (jKad.getKademliaNode().isServer()) {
           newKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
+          dasProt.searchTable.addNeighbour(
+              new Neighbour(jKad.getKademliaNode().getId(), n, n.getDASProtocol().isEvil()));
         }
       }
       k++;
     }
-    for (int j = 0; j < 3; j++) {
+    /*for (int j = 0; j < 3; j++) {
       // send message
       EDSimulator.add(0, Util.generateFindNodeMessage(), newNode, kademliaid);
     }
     EDSimulator.add(
-        0, Util.generateFindNodeMessage(newKad.getKademliaNode().getId()), newNode, kademliaid);
+        0, Util.generateFindNodeMessage(newKad.getKademliaNode().getId()), newNode, kademliaid);*/
     System.out.println(
         CommonState.getTime()
             + " Adding validator node "
@@ -195,7 +200,6 @@ public class TurbulenceDasValidator implements Control {
             + newKad.getKademliaNode().getId()
             + " "
             + dasProt.getBuilderAddress());
-
     return false;
   }
 

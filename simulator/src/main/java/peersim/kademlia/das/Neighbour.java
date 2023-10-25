@@ -22,6 +22,10 @@ public class Neighbour implements Comparable<Neighbour> {
     return id;
   }
 
+  public long getLastSeen() {
+    return last_seen;
+  }
+
   public void updateLastSeen(long time) {
     last_seen = time;
   }

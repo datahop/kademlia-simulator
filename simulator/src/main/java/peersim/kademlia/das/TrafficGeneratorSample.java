@@ -79,7 +79,7 @@ public class TrafficGeneratorSample implements Control {
    */
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-
+    System.out.println(CommonState.getTime() + " next");
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
         Node start = Network.get(i);
