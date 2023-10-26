@@ -7,7 +7,6 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
-import peersim.kademlia.Util;
 
 /**
  * This control generates samples every 5 min that are stored in a single node (builder) and starts
@@ -80,7 +79,7 @@ public class TrafficGeneratorSample implements Control {
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
     System.out.println(CommonState.getTime() + " next");
-    if (first) {
+    /*if (first) {
       for (int i = 0; i < Network.size(); i++) {
         Node start = Network.get(i);
         if (start.isUp()) {
@@ -98,25 +97,25 @@ public class TrafficGeneratorSample implements Control {
       }
       first = false;
       second = true;
-    } else /*if (second)*/ {
+    } else if (second) {*/
 
-      // SearchTable.createSampleMap(b);
-      for (int i = 0; i < Network.size(); i++) {
-        Node n = Network.get(i);
-        // b.initIterator();
-        // we add 1 ms delay to be sure the builder starts before validators.
-        /*EDSimulator.add(
-        CommonState.r.nextLong(CommonState.getTime() - lastTime),
-        Util.generateFindNodeMessage(),
-        n,
-        kadpid);*/
+    // SearchTable.createSampleMap(b);
+    for (int i = 0; i < Network.size(); i++) {
+      Node n = Network.get(i);
+      // b.initIterator();
+      // we add 1 ms delay to be sure the builder starts before validators.
+      /*EDSimulator.add(
+      CommonState.r.nextLong(CommonState.getTime() - lastTime),
+      Util.generateFindNodeMessage(),
+      n,
+      kadpid);*/
 
-        if (n.isUp())
-          EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-      }
-      ID_GENERATOR++;
-      second = false;
+      if (n.isUp())
+        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
     }
+    ID_GENERATOR++;
+    second = false;
+    // }
     lastTime = CommonState.getTime();
     return false;
   }

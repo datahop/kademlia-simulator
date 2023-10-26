@@ -46,7 +46,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       samples.put(rs.getIdByRow(), s);
       // samples.put(rs.getIdByColumn(), s);
     }
-    createNodes();
+    // createNodes();
   }
 
   public boolean completed() {
@@ -80,13 +80,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   public void elaborateResponse(Sample[] sam, BigInteger node) {
-    this.available_requests--;
+    // this.available_requests--;
     // if (this.available_requests == 0) nodes.clear();
-
+    pendingNodes.remove(node);
     Node n = nodes.get(node);
     if (n != null) {
       for (FetchingSample s : n.getSamples()) {
         s.removeFetchingNode(n);
+        s.setDownloaded();
       }
     }
 
@@ -100,20 +101,10 @@ public class RandomSamplingOperation extends SamplingOperation {
             fs.removeFetchingNode(nodes.get(node));
           }
         }
-        /*if (samples.containsKey(s.getIdByColumn())) {
-          FetchingSample fs = samples.get(s.getIdByColumn());
-          if (!fs.isDownloaded()) {
-            samplesCount++;
-            fs.setDownloaded();
-            fs.removeFetchingNode(nodes.get(node));
-          }
-        }*/
       }
     }
-    if (node != null) {
-      nodes.remove(node);
-      askNodes.add(node);
-    }
+    nodes.remove(node);
+    askedNodes.add(node);
   }
 
   protected void createNodes() {
@@ -122,29 +113,19 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         List<BigInteger> nodesBySample = new ArrayList<>();
 
-        // nodesBySample.addAll(
-        //    searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
-
         BigInteger radiusUsed = radiusValidator;
 
         while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
           nodesBySample.addAll(
               searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
-          //    searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
           nodesBySample.addAll(
               searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
-          //   searchTable.getValidatorNodesbySample(
-          //        samples.get(sample).getIdByColumn(), radiusUsed));
+
           radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
         }
-        // nodesBySample.addAll(
-        //    searchTable.getNonValidatorNodesbySample(
-        //        samples.get(sample).getId(), radiusNonValidator));
-        // nodesBySample.addAll(
-        //    searchTable.getNonValidatorNodesbySample(
-        //        samples.get(sample).getIdByColumn(), radiusNonValidator));
 
         boolean found = false;
+        nodesBySample.removeAll(askedNodes);
 
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {

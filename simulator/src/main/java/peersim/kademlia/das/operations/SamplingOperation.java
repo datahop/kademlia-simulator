@@ -30,7 +30,8 @@ public abstract class SamplingOperation extends FindOperation {
   protected LinkedHashMap<BigInteger, Node> nodes;
   protected HashMap<BigInteger, FetchingSample> samples;
 
-  protected List<BigInteger> askNodes;
+  protected List<BigInteger> askedNodes;
+  protected List<BigInteger> pendingNodes;
 
   public SamplingOperation(
       BigInteger srcNode,
@@ -48,9 +49,10 @@ public abstract class SamplingOperation extends FindOperation {
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
     nodes = new LinkedHashMap<>();
-    this.available_requests = 0;
+    // this.available_requests = 0;
     aggressiveness = 0;
-    askNodes = new ArrayList<>();
+    askedNodes = new ArrayList<>();
+    pendingNodes = new ArrayList<>();
     timesIncreased = 0;
   }
 
@@ -69,15 +71,16 @@ public abstract class SamplingOperation extends FindOperation {
     this.isValidator = isValidator;
     this.callback = callback;
     currentBlock = block;
-    this.available_requests = 0;
+    // this.available_requests = 0;
     aggressiveness = 0;
     radiusValidator =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-    askNodes = new ArrayList<>();
+    askedNodes = new ArrayList<>();
     timesIncreased = 0;
+    pendingNodes = new ArrayList<>();
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
@@ -107,18 +110,48 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
+    //System.out.println("[" + srcNode + "]  nodes " + nodes.size());
+    List<BigInteger> toRemove = new ArrayList<>();
+    for (BigInteger n : nodes.keySet()) {
+      List<FetchingSample> sToRemove = new ArrayList<>();
+      for (FetchingSample s : nodes.get(n).getSamples()) {
+        /*System.out.println(
+            "["
+                + srcNode
+                + "]  nodes "
+                + n
+                + " "
+                + nodes.get(n).isBeingAsked()
+                + " "
+                + nodes.get(n).getScore()
+                + " "
+                + aggressiveness
+                + " "
+                + s.isDownloaded()
+                + " "
+                + +s.beingFetchedFrom.size());*/
+        if (s.isDownloaded()) sToRemove.add(s);
+      }
+      for (FetchingSample s : sToRemove) {
+        nodes.get(n).removeFetchingSample(s);
+      }
+      if (nodes.get(n).getSamples().size() == 0) toRemove.add(n);
+    }
+    for (BigInteger id : toRemove) nodes.remove(id);
+
+    if (nodes.isEmpty()) {
+
+      createNodes();
+     // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
+    }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
-      /*System.out.println(
-          this.srcNode + "] Querying node " + n.getId() + " " + +n.getScore() + " " + this.getId());
-      for (FetchingSample fs : n.getSamples())
-        System.out.println(
-            this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());*/
 
       if (!n.isBeingAsked() && n.getScore() > 0) { // break;
         n.setBeingAsked(true);
-        this.available_requests++;
+        // this.available_requests++;
+        pendingNodes.add(n.getId());
         for (FetchingSample s : n.getSamples()) {
           s.addFetchingNode(n);
         }
@@ -139,5 +172,9 @@ public abstract class SamplingOperation extends FindOperation {
 
   public int samplesCount() {
     return samplesCount;
+  }
+
+  public int getPending() {
+    return pendingNodes.size();
   }
 }

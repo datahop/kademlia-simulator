@@ -55,7 +55,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
-    createNodes();
+    // createNodes();
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -85,9 +85,10 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   public void elaborateResponse(Sample[] sam, BigInteger n) {
 
-    this.available_requests--;
+    // this.available_requests--;
     // if (this.available_requests == 0) nodes.clear();
 
+    pendingNodes.remove(n);
     Node node = nodes.get(n);
     if (node != null) {
       for (FetchingSample s : node.getSamples()) {
@@ -117,10 +118,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
-    if (node != null) {
-      askNodes.add(n);
-      nodes.remove(n);
-    }
+
+    askedNodes.add(n);
+    nodes.remove(n);
   }
 
   public boolean completed() {
@@ -142,35 +142,24 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       if (!samples.get(sample).isDownloaded()) {
 
         List<BigInteger> nodesBySample = new ArrayList<>();
-        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
         if (row > 0) {
           BigInteger radiusUsed = radiusValidator;
           while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
             nodesBySample.addAll(
                 searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
-            // searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
             radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           }
-          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(),
-          // radiusNonValidator));
-          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getId(),
-          // radiusNonValidator));
         } else {
           BigInteger radiusUsed = radiusValidator;
           while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
             nodesBySample.addAll(
                 searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
-            // searchTable.getValidatorNodesbySample(samples.get(sample).getIdByColumn(),
-            // radiusUsed));
+
             radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           }
-          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getIdByColumn(),
-          // radiusNonValidator));
-
-          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getIdByColumn(),
-          // radiusNonValidator));
         }
         boolean found = false;
+        nodesBySample.removeAll(askedNodes);
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {
             if (!nodes.containsKey(id)) {

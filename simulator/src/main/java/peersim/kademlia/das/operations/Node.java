@@ -30,6 +30,10 @@ public class Node implements Comparable<Node> {
     return samples;
   }
 
+  public void removeFetchingSample(FetchingSample s) {
+    samples.remove(s);
+  }
+
   public void setBeingAsked(boolean value) {
     this.beingAsked = value;
   }
