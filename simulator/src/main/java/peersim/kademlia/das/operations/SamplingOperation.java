@@ -110,26 +110,26 @@ public abstract class SamplingOperation extends FindOperation {
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
-    //System.out.println("[" + srcNode + "]  nodes " + nodes.size());
+    // System.out.println("[" + srcNode + "]  nodes " + nodes.size());
     List<BigInteger> toRemove = new ArrayList<>();
     for (BigInteger n : nodes.keySet()) {
       List<FetchingSample> sToRemove = new ArrayList<>();
       for (FetchingSample s : nodes.get(n).getSamples()) {
         /*System.out.println(
-            "["
-                + srcNode
-                + "]  nodes "
-                + n
-                + " "
-                + nodes.get(n).isBeingAsked()
-                + " "
-                + nodes.get(n).getScore()
-                + " "
-                + aggressiveness
-                + " "
-                + s.isDownloaded()
-                + " "
-                + +s.beingFetchedFrom.size());*/
+        "["
+            + srcNode
+            + "]  nodes "
+            + n
+            + " "
+            + nodes.get(n).isBeingAsked()
+            + " "
+            + nodes.get(n).getScore()
+            + " "
+            + aggressiveness
+            + " "
+            + s.isDownloaded()
+            + " "
+            + +s.beingFetchedFrom.size());*/
         if (s.isDownloaded()) sToRemove.add(s);
       }
       for (FetchingSample s : sToRemove) {
@@ -142,7 +142,7 @@ public abstract class SamplingOperation extends FindOperation {
     if (nodes.isEmpty()) {
 
       createNodes();
-     // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
+      // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
     }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();

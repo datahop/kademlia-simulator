@@ -65,12 +65,14 @@ public class SearchTable {
   }*/
 
   public void addNeighbour(Neighbour neigh) {
-    if (neighbours.get(neigh.getId()) == null) {
-      neighbours.put(neigh.getId(), neigh);
-      nodesIndexed.add(neigh.getId());
-    } else {
-      if (neighbours.get(neigh.getId()).getLastSeen() < neigh.getLastSeen())
-        neighbours.get(neigh.getId()).updateLastSeen(neigh.getLastSeen());
+    if (neigh.getId().compareTo(builderAddress) != 0) {
+      if (neighbours.get(neigh.getId()) == null) {
+        neighbours.put(neigh.getId(), neigh);
+        nodesIndexed.add(neigh.getId());
+      } else {
+        if (neighbours.get(neigh.getId()).getLastSeen() < neigh.getLastSeen())
+          neighbours.get(neigh.getId()).updateLastSeen(neigh.getLastSeen());
+      }
     }
   }
 
