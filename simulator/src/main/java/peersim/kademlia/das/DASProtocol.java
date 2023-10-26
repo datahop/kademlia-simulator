@@ -393,7 +393,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     Sample[] samples = (Sample[]) m.body;
     // searchTable.addNodes((BigInteger[]) m.value);
 
-    logger.warning("Samples received  " + samples.length + " from " + m.src.getId());
+    logger.info("Samples received  " + samples.length + " from " + m.src.getId());
 
     if (reportDiscovery) KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
@@ -430,7 +430,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     // We continue an existing operation
 
-    logger.warning(
+    logger.info(
         "Nodes discovered "
             + ((Neighbour[]) m.value).length
             + " "
@@ -442,7 +442,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (op != null) {
       // keeping track of received samples
       op.elaborateResponse(samples, m.src.getId());
-      logger.warning(
+      logger.info(
           "Continue operation "
               + op.getId()
               + " "
@@ -538,7 +538,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.warning("Send message added " + m.id + " " + latency + " " + destId);
+      logger.info("Send message added " + m.id + " " + latency + " " + destId);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
@@ -632,7 +632,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected boolean doSampling(SamplingOperation sop) {
 
-    logger.warning("Doingsampling " + sop.getId() + " " + sop.getPending());
+    logger.info("Doingsampling " + sop.getId() + " " + sop.getPending());
     if (sop.completed()) {
       samplingOp.remove(sop.getId());
       KademliaObserver.reportOperation(sop);
