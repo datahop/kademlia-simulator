@@ -9,13 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-// import peersim.kademlia.KademliaCommonConfig;
+import peersim.core.Node;
 
 public class SearchTable {
-
-  // private HashMap<BigInteger, List<BigInteger>> sampleMap;
-
-  // private Block currentBlock;
 
   private HashMap<BigInteger, Neighbour> neighbours;
 
@@ -27,42 +23,18 @@ public class SearchTable {
 
   private HashSet<BigInteger> blackList; // , samplesIndexed;
 
-  // private static HashMap<BigInteger, List<BigInteger>> sampleMap = new HashMap<>();
   private BigInteger builderAddress;
 
-  public SearchTable(/*Block currentblock , BigInteger id*/ ) {
+  private List<Node> evilIds;
 
-    // this.currentBlock = currentblock;
-    // this.sampleMap = new HashMap<>();
+  public SearchTable() {
+
     this.nodesIndexed = new TreeSet<>();
     this.nonValidatorsIndexed = new TreeSet<>();
 
     this.blackList = new HashSet<>();
     this.neighbours = new HashMap<>();
-    // routingTable = new RoutingTable(KademliaCommonConfig.K, KademliaCommonConfig.BITS, 0);
-    // routingTable.setNodeId(id);
   }
-
-  /*public void setBlock(Block currentBlock) {
-    this.currentBlock = currentBlock;
-  }*/
-
-  /*public BigInteger[] getSamples(BigInteger peerId) {
-
-    List<BigInteger> result = new ArrayList<>();
-    Collections.addAll(
-        result,
-        currentBlock.getSamplesByRadiusByColumn(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-    Collections.addAll(
-        result,
-        currentBlock.getSamplesByRadiusByRow(
-            peerId,
-            currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER)));
-
-    return result.toArray(new BigInteger[0]);
-  }*/
 
   public void addNeighbour(Neighbour neigh) {
     if (neigh.getId().compareTo(builderAddress) != 0) {
@@ -89,32 +61,11 @@ public class SearchTable {
     }
   }
 
-  /*public void seenNeighbour(BigInteger id, Node n) {
-    if (id.compareTo(builderAddress) != 0) {
-      if (neighbours.get(id) != null) {
-        neighbours.get(id).updateLastSeen(CommonState.getTime());
-      } else {
-        nodesIndexed.add(id);
-        neighbours.put(id, new Neighbour(id, n, n.getDASProtocol().isEvil()));
-      }
-    }
-  }*/
-
-  /*public void addNonValidatorNodes(BigInteger[] nodes) {
-
-    for (BigInteger id : nodes) {
-      if (!blackList.contains(id) && !validatorsIndexed.contains(id)) {
-        nodesIndexed.add(id);
-      }
-    }
-  }*/
-
   public void addValidatorNodes(BigInteger[] nodes) {
     for (BigInteger id : nodes) {
       if (!blackList.contains(id) && id.compareTo(builderAddress) != 0) {
         validatorsIndexed.add(id);
       }
-      // routingTable.addNeighbour(id);
     }
   }
 
@@ -123,9 +74,7 @@ public class SearchTable {
   }
 
   public void removeNode(BigInteger node) {
-    // this.blackList.add(node);
     this.nodesIndexed.remove(node);
-    // this.validatorsIndexed.remove(node);
     this.nonValidatorsIndexed.remove(node);
     this.neighbours.remove(node);
     validatorsIndexed.remove(node);
@@ -139,10 +88,6 @@ public class SearchTable {
     return validatorsIndexed;
   }
 
-  /*public HashSet<BigInteger> samplesIndexed() {
-    return samplesIndexed;
-  }*/
-
   public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
 
     BigInteger bottom = sampleId.subtract(radius);
@@ -153,9 +98,6 @@ public class SearchTable {
 
     Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
-
-    // return sampleMap.get(sampleId);
-
   }
 
   public List<BigInteger> getValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
@@ -167,9 +109,6 @@ public class SearchTable {
     if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
     Collection<BigInteger> subSet = validatorsIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
-
-    // return sampleMap.get(sampleId);
-
   }
 
   public List<BigInteger> getNonValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
@@ -182,9 +121,6 @@ public class SearchTable {
 
     Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
     return new ArrayList<BigInteger>(subSet);
-
-    // return sampleMap.get(sampleId);
-
   }
 
   public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
@@ -192,7 +128,6 @@ public class SearchTable {
     List<BigInteger> result = new ArrayList<>();
 
     for (BigInteger sample : samples) {
-      // if (sampleMap.get(sample) != null) result.addAll(sampleMap.get(sample));
       result.addAll(getNodesbySample(sample, radius));
     }
     return result;
@@ -210,6 +145,21 @@ public class SearchTable {
     for (Neighbour neigh : neighs) {
       if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
       else break;
+    }
+    return result.toArray(new Neighbour[0]);
+  }
+
+  public void setEvilIds(List<Node> ids) {
+    this.evilIds = ids;
+  }
+
+  public Neighbour[] getEvilNeighbours() {
+
+    List<Neighbour> result = new ArrayList<>();
+    if (evilIds != null) {
+      for (Node n : evilIds) {
+        result.add(new Neighbour(n.getDASProtocol().getKademliaId(), n, true));
+      }
     }
     return result.toArray(new Neighbour[0]);
   }

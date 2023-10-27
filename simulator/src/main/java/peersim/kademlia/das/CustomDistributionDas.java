@@ -84,6 +84,7 @@ public class CustomDistributionDas implements peersim.core.Control {
         "Number of malicious nodes: " + numEvilValidatorNodes + " " + numEvilNonValidatorNodes);
     List<BigInteger> validatorsIds = new ArrayList<>();
     List<BigInteger> nonValidatorsIds = new ArrayList<>();
+    List<Node> evilNodes = new ArrayList<>();
     List<Node> validators = new ArrayList<>();
     numValidators = numValidators - numEvilValidatorNodes;
     for (int i = 0; i < Network.size(); ++i) {
@@ -108,10 +109,12 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilValDasID)));
         validatorsIds.add(kadProt.getKademliaNode().getId());
+        evilNodes.add(generalNode);
       } else if ((i > numEvilValidatorNodes)
           && (i < (numEvilValidatorNodes + numEvilNonValidatorNodes + 1))) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
         nonValidatorsIds.add(kadProt.getKademliaNode().getId());
+        evilNodes.add(generalNode);
       } else if (i > (numEvilValidatorNodes + numEvilNonValidatorNodes)
           && i < (numEvilValidatorNodes + numEvilNonValidatorNodes + (numValidators) + 1)) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasValidatorID)));
@@ -135,6 +138,7 @@ public class CustomDistributionDas implements peersim.core.Control {
 
       generalNode.setProtocol(protocolDasBuilderID, dasProt);
       generalNode.setProtocol(protocolEvilDasID, null);
+      generalNode.setProtocol(protocolEvilValDasID, null);
       generalNode.setProtocol(protocolDasValidatorID, null);
       generalNode.setProtocol(protocolDasNonValidatorID, null);
     }
@@ -148,6 +152,10 @@ public class CustomDistributionDas implements peersim.core.Control {
       generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
       generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
 
+      if (generalNode.getDASProtocol().isEvil()) {
+        DASProtocolEvilValidator dasEvil = (DASProtocolEvilValidator) generalNode.getDASProtocol();
+        dasEvil.setEvilIds(evilNodes);
+      }
       int k = 0;
       while (k < 100) {
         Node n = Network.get(CommonState.r.nextInt(Network.size()));
