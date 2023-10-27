@@ -274,7 +274,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     // samplesRequested = 0;
     row = new int[currentBlock.getSize()];
     column = new int[currentBlock.getSize()];
-
+    sentMsg.clear();
     // clearing any pending operation from previous block
     for (SamplingOperation sop : samplingOp.values()) {
       KademliaObserver.reportOperation(sop);
@@ -310,7 +310,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 
@@ -526,7 +526,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.info("Send message added " + m.id + " " + latency + " " + destId);
+      logger.warning("Send message added " + m.id + " " + latency + " " + destId);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
@@ -624,8 +624,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       KademliaObserver.reportOperation(sop);
       // logger.warning("Sampling operation finished " + sop.getId());
       if (sop instanceof ValidatorSamplingOperation)
-        logger.warning("Sampling operation finished validator dosampling " + sop.getId());
-      else logger.warning("Sampling operation finished random dosampling " + sop.getId());
+        logger.warning("Sampling operation completed validator dosampling " + sop.getId());
+      else logger.warning("Sampling operation completed random dosampling " + sop.getId());
       return true;
     } else {
       boolean success = false;
