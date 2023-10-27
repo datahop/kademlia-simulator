@@ -11,7 +11,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -81,12 +80,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected int[] row, column;
 
-  // protected int samplesRequested;
-
-  // protected BigInteger[] validatorsList;
-
-  protected HashSet<BigInteger> queried;
-
   protected int dasID;
 
   /** trace message sent for timeout purpose */
@@ -136,7 +129,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
 
-    queried = new HashSet<BigInteger>();
     uploadInterfaceBusyUntil = 0;
 
     sentMsg = new TreeMap<Long, Long>();
@@ -278,6 +270,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
     kv.erase();
+    missingSamples.clear();
     // samplesRequested = 0;
     row = new int[currentBlock.getSize()];
     column = new int[currentBlock.getSize()];
@@ -300,7 +293,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
     samplingOp.clear();
     kadOps.clear();
-    queried.clear();
   }
 
   protected void handleSeedSample(Message m, int myPid) {

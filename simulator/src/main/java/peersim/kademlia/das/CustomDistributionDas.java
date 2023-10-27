@@ -25,7 +25,6 @@ public class CustomDistributionDas implements peersim.core.Control {
   private static final String PAR_PROT_DAS_BUILDER = "protocoldasbuilder";
   private static final String PAR_PROT_DAS_VALIDATOR = "protocoldasvalidator";
   private static final String PAR_PROT_DAS_NON_VALIDATOR = "protocoldasnonvalidator";
-  private static final String PAR_PROT_EVIL_KAD = "protocolEvilkad";
   private static final String PAR_PROT_EVIL_DAS = "protocolEvildas";
   private static final String PAR_EVIL_RATIO_VAL = "evilNodeRatioValidator";
   private static final String PAR_EVIL_RATIO_NONVAL = "evilNodeRatioNonValidator";
@@ -35,7 +34,6 @@ public class CustomDistributionDas implements peersim.core.Control {
   /** Protocol identifiers for Kademlia, DAS, etc. * */
   private int protocolKadID;
 
-  private int protocolEvilKadID;
   private int protocolDasBuilderID;
   private int protocolDasValidatorID;
   private int protocolDasNonValidatorID;
@@ -52,7 +50,6 @@ public class CustomDistributionDas implements peersim.core.Control {
 
   public CustomDistributionDas(String prefix) {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
-    protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
     protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
     protocolDasValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_VALIDATOR);
     protocolDasNonValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_NON_VALIDATOR);
@@ -123,16 +120,6 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setEventsCallback(dasProt);
 
       dasProt.setBuilderAddress(builderAddress);
-
-      /*System.out.println(
-      "Dasprot id "
-          + protocolDasBuilderID
-          + " "
-          + protocolDasValidatorID
-          + " "
-          + protocolDasNonValidatorID
-          + " "
-          + protocolKadID);*/
 
       if (dasProt instanceof DASProtocolBuilder) System.out.println("DASProtocol Builder " + i);
       generalNode.setProtocol(protocolKadID, kadProt);
