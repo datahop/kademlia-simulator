@@ -33,15 +33,11 @@ public class DASProtocolBuilder extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Builder new block:" + currentBlock.getBlockId());
-    /*+ " "
-    + validatorsList.length
-    + " "
-    + nonValidatorsIndexed.size());*/
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;
     int samplesNonValidators = 0;
-
+    samplesToRequest.clear();
     BigInteger radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
@@ -73,12 +69,7 @@ public class DASProtocolBuilder extends DASProtocol {
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
           if (n.isUp()) {
-            /*Sample[] samples = {s};
-            Message msg = generateSeedSampleMessage(samples);
-            msg.operationId = -1;
-            msg.src = this.getKademliaProtocol().getKademliaNode();
-            msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());*/
+
             if (!samplesToRequest.containsKey(id)) {
               List<BigInteger> samples = new ArrayList<>();
               samples.add(s.getId());
@@ -94,9 +85,6 @@ public class DASProtocolBuilder extends DASProtocol {
           }
         }
         if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
-        // System.out.println(
-        //     "Sample id " + s.getIdByRow() + " " + s.getIdByColumn() + " " + radiusValidator);
-
       }
       inRegion = false;
       while (!inRegion) {
@@ -120,12 +108,7 @@ public class DASProtocolBuilder extends DASProtocol {
           DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
           if (dasProt.isBuilder()) continue;
           if (n.isUp()) {
-            /*Sample[] samples = {s};
-            Message msg = generateSeedSampleMessage(samples);
-            msg.operationId = -1;
-            msg.src = this.getKademliaProtocol().getKademliaNode();
-            msg.dst = n.getKademliaProtocol().getKademliaNode();
-            sendMessage(msg, id, dasProt.getDASProtocolID());*/
+
             if (!samplesToRequest.containsKey(id)) {
               List<BigInteger> samples = new ArrayList<>();
               samples.add(s.getId());
@@ -162,8 +145,7 @@ public class DASProtocolBuilder extends DASProtocol {
           samplesNonValidators++;
 
           if (!dasProt.isValidator()) {
-            // EDSimulator.add(0, generateNewSampleMessage(s.getId()), n,
-            // dasProt.getDASProtocolID());
+
             if (!samplesToRequest.containsKey(id)) {
               List<BigInteger> samples = new ArrayList<>();
               samples.add(s.getId());

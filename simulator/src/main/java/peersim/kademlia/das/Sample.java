@@ -9,45 +9,38 @@ public class Sample {
 
   /** Row and column numbers of a sample within a block */
   private int row, column;
-  /** The unique ID of the block that this sample belongs to */
-  private long blockId;
-
   /** The key of a sample in the DHT keyspace using rows number as reference */
   private BigInteger idByRow;
   /** The key of a sample in the DHT keyspace using column number as reference */
   private BigInteger idByColumn;
-  /** Block that this sample is part of */
-  private Block block;
 
   /** Initialise a sample instance and map it to the keyspace */
   public Sample(long blockId, int row, int column, Block b) {
 
     this.idByColumn = this.idByRow = null;
-    this.block = b;
     this.row = row;
     this.column = column;
-    this.blockId = blockId;
-    computeID();
+    computeID(blockId, b);
   }
 
   /**
    * Sample numbering to map each sample to an integer in the range 1 to SIZE*SIZE Samples are
    * ordered by row
    */
-  public int sampleNumberByRow() {
-    return (this.row - 1) * this.block.getSize() + (this.column - 1);
+  public int sampleNumberByRow(Block b) {
+    return (this.row - 1) * b.getSize() + (this.column - 1);
   }
 
   /**
    * Sample numbering to map each sample to an integer in the range 1 to SIZE*SIZE Samples are
    * ordered by column
    */
-  public int sampleNumberByColumn() {
-    return (this.column - 1) * this.block.getSize() + (this.row - 1);
+  public int sampleNumberByColumn(Block b) {
+    return (this.column - 1) * b.getSize() + (this.row - 1);
   }
 
   /** Map this sample to the DHT keyspace */
-  public void computeID() {
+  public void computeID(long blockId, Block b) {
     if (KademliaCommonConfigDas.MAPPING_FN == KademliaCommonConfigDas.SAMPLE_MAPPING_RANDOM) {
       try {
         String idName =
@@ -62,22 +55,14 @@ public class Sample {
       }
     } else if (KademliaCommonConfigDas.MAPPING_FN
         == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
-      /*System.out.println(
-      "ComputeId "
-          + this.row
-          + " "
-          + this.column
-          + " "
-          + this.sampleNumberByRow()
-          + " "
-          + this.sampleNumberByColumn());*/
+
       this.idByRow =
           Block.INTER_SAMPLE_GAP
-              .multiply(BigInteger.valueOf(this.sampleNumberByRow()))
+              .multiply(BigInteger.valueOf(this.sampleNumberByRow(b)))
               .add(BigInteger.valueOf(blockId));
       this.idByColumn =
           Block.INTER_SAMPLE_GAP
-              .multiply(BigInteger.valueOf(this.sampleNumberByColumn()))
+              .multiply(BigInteger.valueOf(this.sampleNumberByColumn(b)))
               .add(BigInteger.valueOf(blockId))
               .add(BigInteger.valueOf(1));
 
@@ -123,11 +108,6 @@ public class Sample {
   /** Column of the sample */
   public int getColumn() {
     return this.column;
-  }
-
-  /** Block id which the sample is part of */
-  public long getBlockId() {
-    return blockId;
   }
 
   /** Computed identifier of the sample, depending of the mapping mode */

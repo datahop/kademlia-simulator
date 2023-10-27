@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -95,8 +94,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected long time;
 
-  protected TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
-
   protected boolean isEvil;
 
   protected boolean init;
@@ -145,7 +142,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     sentMsg = new TreeMap<Long, Long>();
 
     searchTable = new SearchTable();
-    nonValidatorsIndexed = new TreeSet<>();
     isBuilder = false;
     missingSamples = new HashMap<>();
     init = false;
@@ -430,7 +426,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     SamplingOperation op = (SamplingOperation) samplingOp.get(m.operationId);
     // We continue an existing operation
 
-    logger.info(
+    logger.warning(
         "Nodes discovered "
             + ((Neighbour[]) m.value).length
             + " "
@@ -593,10 +589,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   }
 
   public void setNonValidators(List<BigInteger> nonValidators) {
-    for (BigInteger id : nonValidators) {
-      nonValidatorsIndexed.add(id);
-    }
-    searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
+
+    if (isBuilder()) searchTable.addNodes(nonValidators.toArray(new BigInteger[0]));
   }
 
   public SearchTable getSearchTable() {
@@ -725,7 +719,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   @Override
   public void missing(BigInteger sample, Operation op) {
 
-    logger.warning("Missing nodes for sample " + sample + " " + kadOps.size());
+    logger.info("Missing nodes for sample " + sample + " " + kadOps.size());
     // missing = true;
   }
 

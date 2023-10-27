@@ -24,7 +24,6 @@ public class DASProtocolNonValidator extends DASProtocol {
   protected void handleInitGetSample(Message m, int myPid) {
     if (!init) return;
     logger.warning("Init block non-validator node - getting samples " + this);
-    // super.handleInitGetSample(m, myPid);
     if (currentBlock == null) System.err.println("Error block not init yet");
     BigInteger[] samples = (BigInteger[]) m.body;
     BigInteger radius =
@@ -32,7 +31,6 @@ public class DASProtocolNonValidator extends DASProtocol {
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
             searchTable.getValidatorsIndexed().size());
     for (BigInteger sample : samples) {
-      // for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
       for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
         if (!validatorsContacted.contains(id)) {
           Message msg = generateGetSampleMessage(samples);
