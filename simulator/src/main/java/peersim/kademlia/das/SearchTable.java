@@ -232,5 +232,4 @@ public class SearchTable {
     }
     for (Neighbour n : toRemove) neighbours.remove(n.getId());
   }
-
 }

@@ -44,8 +44,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected static final String PAR_ALPHA = "alpha";
   protected static final String PAR_PARCEL = "parcelSize";
   protected static final String PAR_DISC = "reportDiscovery";
+  protected static final String PAR_MSG = "reportMsg";
 
-  private boolean reportDiscovery;
+  private boolean reportDiscovery, msgReport;
   private static String prefix = null;
   private UnreliableTransport transport;
   /** Store the time until which this node's uplink is busy sending data */
@@ -123,6 +124,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         Configuration.getInt(prefix + "." + PAR_PARCEL, KademliaCommonConfigDas.PARCEL_SIZE);
 
     reportDiscovery = Configuration.getBoolean(prefix + "." + PAR_DISC, false);
+    msgReport = Configuration.getBoolean(prefix + "." + PAR_MSG, false);
 
     kv = new KeyValueStore();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
@@ -164,7 +166,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (s instanceof Message) {
       m = (Message) event;
       // m.dst = this.kadProtocol.getKademliaNode();
-      KademliaObserver.reportMsg(m, false);
+      if (msgReport) KademliaObserver.reportMsg(m, false);
       if (m.src != null) {
         Node n = Util.nodeIdtoNode(m.src.getId(), kademliaId);
         searchTable.addNeighbour(new Neighbour(m.src.getId(), n, n.getDASProtocol().isEvil()));
