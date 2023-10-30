@@ -385,7 +385,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     logger.info("Samples received  " + samples.length + " from " + m.src.getId());
 
-    if (reportDiscovery) KademliaObserver.reportPeerDiscovery(m, searchTable);
+    if (reportDiscovery && !isEvil()) KademliaObserver.reportPeerDiscovery(m, searchTable);
     for (Neighbour neigh : (Neighbour[]) m.value) {
       if (neigh.getId().compareTo(builderAddress) != 0) searchTable.addNeighbour(neigh);
     }
