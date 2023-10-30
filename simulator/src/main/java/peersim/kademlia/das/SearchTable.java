@@ -157,8 +157,11 @@ public class SearchTable {
 
     List<Neighbour> result = new ArrayList<>();
     if (evilIds != null) {
+      Collections.shuffle(evilIds);
       for (Node n : evilIds) {
-        result.add(new Neighbour(n.getDASProtocol().getKademliaId(), n, true));
+        if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED)
+          result.add(new Neighbour(n.getDASProtocol().getKademliaId(), n, true));
+        else break;
       }
     }
     return result.toArray(new Neighbour[0]);
