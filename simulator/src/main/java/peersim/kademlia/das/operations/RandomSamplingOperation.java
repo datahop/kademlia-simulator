@@ -146,6 +146,9 @@ public class RandomSamplingOperation extends SamplingOperation {
     }
   }
 
+  protected void addExtraNodes() {
+
+  }
   public Map<String, Object> toMap() {
     // System.out.println("Mapping");
     Map<String, Object> result = new HashMap<String, Object>();

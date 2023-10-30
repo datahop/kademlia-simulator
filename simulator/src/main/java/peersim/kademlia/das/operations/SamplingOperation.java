@@ -107,6 +107,8 @@ public abstract class SamplingOperation extends FindOperation {
 
   protected abstract void createNodes();
 
+  protected abstract void addExtraNodes();
+
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
@@ -140,9 +142,11 @@ public abstract class SamplingOperation extends FindOperation {
     for (BigInteger id : toRemove) nodes.remove(id);
 
     if (nodes.isEmpty()) {
-
       createNodes();
       // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
+    }
+    if(nodes.isEmpty()){
+      addExtraNodes();
     }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();

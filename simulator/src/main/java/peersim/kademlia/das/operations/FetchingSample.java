@@ -25,6 +25,10 @@ public class FetchingSample {
     return s.getId();
   }
 
+  public Sample getSample(){
+    return s;
+  }
+
   public BigInteger getIdByColumn() {
     return s.getIdByColumn();
   }

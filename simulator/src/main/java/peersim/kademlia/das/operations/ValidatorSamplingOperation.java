@@ -177,6 +177,38 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
   }
 
+  protected void addExtraNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        BigInteger radiusUsed = radiusValidator;
+        if(row>0){
+          Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
+          for(Sample s : sRow){
+            nodesBySample.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+          }
+        } else {
+          Sample[] sColumn = currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
+          for(Sample s : sColumn){
+            nodesBySample.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+          }
+        }
+
+        nodesBySample.removeAll(askedNodes);
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+        }
+      }
+    }
+  }
+
   public Map<String, Object> toMap() {
     // System.out.println("Mapping");
     Map<String, Object> result = new HashMap<String, Object>();
