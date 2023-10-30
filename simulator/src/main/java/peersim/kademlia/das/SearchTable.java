@@ -172,7 +172,7 @@ public class SearchTable {
     for (BigInteger n : nodes) {
       neighs.add(neighbours.get(n));
     }
-    Collections.sort(neighs);
+    Collections.shuffle(neighs);
 
     for (Neighbour neigh : neighs) {
       if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
