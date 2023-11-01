@@ -25,7 +25,7 @@ public class FetchingSample {
     return s.getId();
   }
 
-  public Sample getSample(){
+  public Sample getSample() {
     return s;
   }
 

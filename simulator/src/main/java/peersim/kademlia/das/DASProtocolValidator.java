@@ -60,9 +60,21 @@ public class DASProtocolValidator extends DASProtocol {
     // start 2 row 2 column Validator operation (1 row/column with the highest number of samples
     // already downloaded and another random)
     createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
+        currentBlock.findClosestRow(
+            this.getKademliaId(),
+            currentBlock.computeRegionRadius(
+                KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
+                KademliaCommonConfigDas.validatorsSize)),
+        0,
+        time);
     createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+        0,
+        currentBlock.findClosestColumn(
+            this.getKademliaId(),
+            currentBlock.computeRegionRadius(
+                KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
+                KademliaCommonConfigDas.validatorsSize)),
+        time);
     createValidatorSamplingOperation(
         CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
     createValidatorSamplingOperation(

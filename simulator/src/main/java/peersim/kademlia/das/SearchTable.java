@@ -133,17 +133,17 @@ public class SearchTable {
     return result;
   }
 
-  public Neighbour[] getNeighbours() {
+  public Neighbour[] getNeighbours(int n) {
 
     List<Neighbour> result = new ArrayList<>();
     List<Neighbour> neighs = new ArrayList<>();
-    for (Neighbour n : neighbours.values()) {
-      neighs.add(n);
+    for (Neighbour neigh : neighbours.values()) {
+      neighs.add(neigh);
     }
     Collections.shuffle(neighs);
 
     for (Neighbour neigh : neighs) {
-      if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
+      if (result.size() < n) result.add(neigh);
       else break;
     }
     return result.toArray(new Neighbour[0]);
@@ -153,14 +153,14 @@ public class SearchTable {
     this.evilIds = ids;
   }
 
-  public Neighbour[] getEvilNeighbours() {
+  public Neighbour[] getEvilNeighbours(int n) {
 
     List<Neighbour> result = new ArrayList<>();
     if (evilIds != null) {
       Collections.shuffle(evilIds);
-      for (Node n : evilIds) {
-        if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED)
-          result.add(new Neighbour(n.getDASProtocol().getKademliaId(), n, true));
+      for (Node neigh : evilIds) {
+        if (result.size() < n)
+          result.add(new Neighbour(neigh.getDASProtocol().getKademliaId(), neigh, true));
         else break;
       }
     }

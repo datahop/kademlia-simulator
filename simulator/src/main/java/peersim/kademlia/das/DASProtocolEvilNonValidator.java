@@ -30,8 +30,7 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
-    response.value = searchTable.getEvilNeighbours();
-
+    response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);
     sendMessage(response, m.src.getId(), myPid);
   }
   /**

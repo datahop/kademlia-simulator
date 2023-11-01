@@ -1,7 +1,13 @@
 package peersim.kademlia;
 
+import com.google.common.base.Functions;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
@@ -199,5 +205,16 @@ public class Util {
 
     // If no node with the desired ID was found, return null
     return null;
+  }
+
+  public static <V> V mostCommon(final Collection<V> items) {
+    return items.stream()
+        .filter(Objects::nonNull)
+        .collect(Collectors.groupingBy(Functions.identity(), Collectors.counting()))
+        .entrySet()
+        .stream()
+        .max(Comparator.comparing(Entry::getValue))
+        .map(Entry::getKey)
+        .orElse(null);
   }
 }

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import peersim.core.CommonState;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -145,8 +146,19 @@ public abstract class SamplingOperation extends FindOperation {
       createNodes();
       // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
     }
-    if(nodes.isEmpty()){
+    if (nodes.isEmpty()) {
       addExtraNodes();
+      System.out.println(
+          "["
+              + CommonState.getTime()
+              + "]["
+              + srcNode
+              + "] Adding extra nodes "
+              + nodes.size()
+              + " "
+              + aggressiveness
+              + " "
+              + askedNodes.size());
     }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();

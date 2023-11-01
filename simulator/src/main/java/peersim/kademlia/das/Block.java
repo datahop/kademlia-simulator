@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.kademlia.KademliaCommonConfig;
+import peersim.kademlia.Util;
 
 public class Block implements Iterator<Sample>, Cloneable {
 
@@ -45,6 +46,8 @@ public class Block implements Iterator<Sample>, Cloneable {
   private HashMap<Integer, List<Parcel>> parcelByRow;
   private HashMap<Integer, List<Parcel>> parcelByColumn;
 
+  private HashMap<BigInteger, Sample> sampleMap;
+
   // Constructor with block id
   public Block(long id) {
 
@@ -59,7 +62,7 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
-
+    sampleMap = new HashMap<>();
     parcelMap = new HashMap<>();
     parcelByRow = new HashMap<>();
     parcelByColumn = new HashMap<>();
@@ -68,7 +71,8 @@ public class Block implements Iterator<Sample>, Cloneable {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
-        // sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
+        sampleMap.put(blockSamples[i][j].getIdByRow(), blockSamples[i][j]);
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j]);
       }
     }
   }
@@ -86,7 +90,7 @@ public class Block implements Iterator<Sample>, Cloneable {
     this.blockId = id;
     blockSamples = new Sample[SIZE][SIZE];
     row = column = 0;
-
+    sampleMap = new HashMap<>();
     parcelMap = new HashMap<>();
     parcelByRow = new HashMap<>();
     parcelByColumn = new HashMap<>();
@@ -96,7 +100,8 @@ public class Block implements Iterator<Sample>, Cloneable {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
-        // sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
+        sampleMap.put(blockSamples[i][j].getIdByRow(), blockSamples[i][j]);
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j]);
       }
     }
   }
@@ -112,13 +117,15 @@ public class Block implements Iterator<Sample>, Cloneable {
     // samples = new TreeSet<>();
     samplesByRow = new TreeSet<>();
     samplesByColumn = new TreeSet<>();
+    sampleMap = new HashMap<>();
 
     for (int i = 0; i < blockSamples.length; i++) {
       for (int j = 0; j < blockSamples[0].length; j++) {
         blockSamples[i][j] = new Sample(blockId, i + 1, j + 1, this);
         samplesByRow.add(blockSamples[i][j].getIdByRow());
         samplesByColumn.add(blockSamples[i][j].getIdByColumn());
-        // sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j].getIdByRow());
+        sampleMap.put(blockSamples[i][j].getIdByRow(), blockSamples[i][j]);
+        sampleMap.put(blockSamples[i][j].getIdByColumn(), blockSamples[i][j]);
       }
     }
   }
@@ -262,6 +269,38 @@ public class Block implements Iterator<Sample>, Cloneable {
       samples[i] = this.blockSamples[r][c].getId();
     }
     return samples;
+  }
+
+  public int findClosestRow(BigInteger nodeid, BigInteger radius) {
+    BigInteger bottom = nodeid.subtract(radius);
+    if (radius.compareTo(nodeid) == 1) bottom = BigInteger.ZERO;
+
+    BigInteger top = nodeid.add(radius);
+    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
+
+    Collection<BigInteger> subSet = samplesByRow.subSet(bottom, true, top, true);
+    List<Integer> rows = new ArrayList<>();
+    for (BigInteger id : subSet) {
+      rows.add(sampleMap.get(id).getRow());
+    }
+    System.out.println(rows.size() + " " + KademliaCommonConfigDas.validatorsSize + " " + radius);
+    return Util.mostCommon(rows);
+  }
+
+  public int findClosestColumn(BigInteger nodeid, BigInteger radius) {
+
+    BigInteger bottom = nodeid.subtract(radius);
+    if (radius.compareTo(nodeid) == 1) bottom = BigInteger.ZERO;
+
+    BigInteger top = nodeid.add(radius);
+    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
+
+    Collection<BigInteger> subSet = samplesByColumn.subSet(bottom, true, top, true);
+    List<Integer> column = new ArrayList<>();
+    for (BigInteger id : subSet) {
+      column.add(sampleMap.get(id).getColumn());
+    }
+    return Util.mostCommon(column);
   }
 
   /* Returns  n random selected samples */

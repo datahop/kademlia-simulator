@@ -3,6 +3,7 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
@@ -182,16 +183,21 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       if (!samples.get(sample).isDownloaded()) {
         List<BigInteger> nodesBySample = new ArrayList<>();
         BigInteger radiusUsed = radiusValidator;
-        if(row>0){
+        if (row > 0) {
           Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
-          for(Sample s : sRow){
-            nodesBySample.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+          List<BigInteger> nodes = new ArrayList<>();
+          for (Sample s : sRow) {
+            nodes.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
           }
+          nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
         } else {
-          Sample[] sColumn = currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
-          for(Sample s : sColumn){
-            nodesBySample.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+          Sample[] sColumn =
+              currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
+          List<BigInteger> nodes = new ArrayList<>();
+          for (Sample s : sColumn) {
+            nodes.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
           }
+          nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
         }
 
         nodesBySample.removeAll(askedNodes);
