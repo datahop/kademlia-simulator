@@ -189,6 +189,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           for (Sample s : sRow) {
             nodes.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
           }
+          nodes.addAll(
+              searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
           nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
         } else {
           Sample[] sColumn =
@@ -197,6 +199,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           for (Sample s : sColumn) {
             nodes.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
           }
+          nodes.addAll(searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
           nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
         }
 

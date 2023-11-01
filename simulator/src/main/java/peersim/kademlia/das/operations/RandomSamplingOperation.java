@@ -87,7 +87,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     if (n != null) {
       for (FetchingSample s : n.getSamples()) {
         s.removeFetchingNode(n);
-        s.setDownloaded();
+       // s.setDownloaded();
       }
     }
 
