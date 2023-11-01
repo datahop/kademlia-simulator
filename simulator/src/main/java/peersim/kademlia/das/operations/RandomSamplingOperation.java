@@ -3,6 +3,7 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
@@ -87,7 +88,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     if (n != null) {
       for (FetchingSample s : n.getSamples()) {
         s.removeFetchingNode(n);
-       // s.setDownloaded();
+        // s.setDownloaded();
       }
     }
 
@@ -146,7 +147,37 @@ public class RandomSamplingOperation extends SamplingOperation {
     }
   }
 
-  protected void addExtraNodes() {}
+  protected void addExtraNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        BigInteger radiusUsed = radiusValidator;
+        Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
+        List<BigInteger> nodesToAdd = new ArrayList<>();
+        for (Sample s : sRow) {
+          nodesToAdd.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+        }
+        Sample[] sColumn =
+            currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
+        for (Sample s : sColumn) {
+          nodesToAdd.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+        }
+        nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodesToAdd)));
+
+        nodesBySample.removeAll(askedNodes);
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+        }
+      }
+    }
+  }
 
   public Map<String, Object> toMap() {
     // System.out.println("Mapping");
