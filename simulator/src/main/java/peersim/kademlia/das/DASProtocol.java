@@ -207,8 +207,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
           // this.searchTable.removeNode(t.node);
           if (sop != null) {
             if (!sop.completed()) {
-              logger.warning("Sampling operation found " + sop.getId());
               sop.elaborateResponse(null, t.node);
+              logger.warning("Sampling operation found " + sop.getId() + " " + sop.getPending());
+              doSampling(sop);
             }
           }
           // searchTable.removeNode(t.node);
@@ -414,6 +415,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
     HashMap<Message, List<Sample>> toSend = new HashMap<>();
     for (Sample s : samples) {
+      logger.warning(
+          "Sample received " + s.getId() + " " + s.getIdByColumn() + " from " + m.src.getId());
 
       kv.add((BigInteger) s.getIdByRow(), s);
       kv.add((BigInteger) s.getIdByColumn(), s);
