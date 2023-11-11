@@ -120,7 +120,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
 
-    askedNodes.add(n);
+    // askedNodes.add(n);
     nodes.remove(n);
   }
 
@@ -183,7 +183,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       if (!samples.get(sample).isDownloaded()) {
         List<BigInteger> nodesBySample = new ArrayList<>();
         BigInteger radiusUsed = radiusValidator;
-        if (row > 0) {
+        if (column > 0) {
           Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
           List<BigInteger> nodes = new ArrayList<>();
           for (Sample s : sRow) {

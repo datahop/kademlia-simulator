@@ -50,9 +50,12 @@ public class DASProtocolNonValidator extends DASProtocol {
     logger.warning("Init block non-validator node - start sampling " + this);
     super.handleInitNewBlock(m, myPid);
     validatorsContacted.clear();
-    startRandomSampling();
+    if (!isEvil) startRandomSampling();
   }
 
+  public void setEvilIds(List<Node> evilIds) {
+    searchTable.setEvilIds(evilIds);
+  }
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

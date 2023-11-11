@@ -175,6 +175,7 @@ public abstract class SamplingOperation extends FindOperation {
       }
     }
 
+    askedNodes.addAll(result);
     return result.toArray(new BigInteger[0]);
   }
 

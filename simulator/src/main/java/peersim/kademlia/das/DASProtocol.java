@@ -413,7 +413,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     for (Neighbour neigh : (Neighbour[]) m.value) {
       if (neigh.getId().compareTo(builderAddress) != 0) searchTable.addNeighbour(neigh);
     }
-    HashMap<Message, List<Sample>> toSend = new HashMap<>();
+
     for (Sample s : samples) {
       logger.warning(
           "Sample received " + s.getId() + " " + s.getIdByColumn() + " from " + m.src.getId());
@@ -422,34 +422,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
-
-      if (missingSamples.containsKey(s.getId()) || missingSamples.containsKey(s.getIdByColumn())) {
-        logger.info("Sample received missing " + s.getId() + " " + s.getIdByColumn());
-        List<Message> messages = new ArrayList<>();
-        if (missingSamples.containsKey(s.getId())) messages.addAll(missingSamples.get(s.getId()));
-        if (missingSamples.containsKey(s.getIdByColumn()))
-          messages.addAll(missingSamples.get(s.getIdByColumn()));
-        for (Message msg : messages) {
-          /*Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, new Sample[] {s});
-          response.operationId = msg.operationId;
-          response.dst = msg.src;
-          response.src = this.kadProtocol.getKademliaNode();
-          response.ackId = msg.id; // set ACK number
-          response.value = searchTable.getNeighbours();
-          // logger.warning("Sending sample to " + msg.src.getId());
-          sendMessage(response, msg.src.getId(), myPid);*/
-          if (toSend.get(msg) != null) {
-            toSend.get(msg).add(s);
-          } else {
-            List<Sample> sToSend = new ArrayList<>();
-            sToSend.add(s);
-            toSend.put(msg, sToSend);
-          }
-        }
-        missingSamples.remove(s.getId());
-        missingSamples.remove(s.getIdByColumn());
-      }
     }
+    HashMap<Message, List<Sample>> toSend = findMissingSamples(samples);
 
     for (Message msg : toSend.keySet()) {
       Message response =
@@ -480,6 +454,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (op != null) {
       // keeping track of received samples
       op.elaborateResponse(samples, m.src.getId());
+      op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
       logger.warning(
           "Continue operation "
               + op.getId()
@@ -511,6 +486,33 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         KademliaObserver.reportOperation(op);
       }
     }
+  }
+
+  private HashMap<Message, List<Sample>> findMissingSamples(Sample[] samples) {
+    HashMap<Message, List<Sample>> toSend = new HashMap<>();
+    List<BigInteger> toRemove = new ArrayList<>();
+    for (BigInteger id : missingSamples.keySet()) {
+      if (kv.get(id) != null) {
+        Sample s = (Sample) kv.get(id);
+        for (Message msg : missingSamples.get(id)) {
+
+          if (toSend.get(msg) != null) {
+            toSend.get(msg).add(s);
+          } else {
+            List<Sample> sToSend = new ArrayList<>();
+            sToSend.add(s);
+            toSend.put(msg, sToSend);
+          }
+        }
+        toRemove.add(s.getId());
+        toRemove.add(s.getIdByColumn());
+      }
+    }
+    for (BigInteger id : toRemove) {
+      missingSamples.remove(id);
+    }
+
+    return toSend;
   }
 
   /**

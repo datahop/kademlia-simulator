@@ -105,7 +105,7 @@ public class RandomSamplingOperation extends SamplingOperation {
       }
     }
     nodes.remove(node);
-    askedNodes.add(node);
+    // askedNodes.add(node);
   }
 
   protected void createNodes() {
@@ -177,6 +177,15 @@ public class RandomSamplingOperation extends SamplingOperation {
         }
       }
     }
+
+    /*if (nodes.size() == 0 && getSamples().length > 0) {
+      Sample[] randomSamples = currentBlock.getNRandomSamples(getSamples().length * 10);
+      for (Sample rs : randomSamples) {
+        FetchingSample s = new FetchingSample(rs);
+        samples.put(rs.getIdByRow(), s);
+      }
+      createNodes();
+    }*/
   }
 
   public Map<String, Object> toMap() {
