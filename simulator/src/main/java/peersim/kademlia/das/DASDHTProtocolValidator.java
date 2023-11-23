@@ -23,7 +23,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("seed sample receveived");
+    logger.warning("seed sample received");
     if (m.body == null) return;
   }
 
@@ -73,10 +73,10 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             row,
             column,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
 
-    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
+    // op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
@@ -158,7 +158,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             currentBlock,
             searchTable,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);

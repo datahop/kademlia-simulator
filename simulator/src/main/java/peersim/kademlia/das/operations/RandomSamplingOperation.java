@@ -9,7 +9,6 @@ import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
-// import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.das.SearchTable;
 
 /**
@@ -53,10 +52,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     boolean completed = true;
+    int failed = 0;
     for (FetchingSample s : samples.values()) {
       if (!s.isDownloaded()) {
-        completed = false;
-        break;
+        failed++;
+        if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
+          completed = false;
+          break;
+        }
       }
     }
     return completed;
@@ -97,6 +100,14 @@ public class RandomSamplingOperation extends SamplingOperation {
           fs.removeFetchingNode(nodes.get(node));
         }
       }
+      /*if (samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getIdByColumn());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+          fs.removeFetchingNode(nodes.get(node));
+        }
+      }*/
     }
 
     nodes.remove(node);
@@ -107,28 +118,34 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
-        List<BigInteger> validatorsBySampleRow =
-            SearchTable.getNodesBySample(samples.get(sample).getId());
-        List<BigInteger> validatorsBySampleColumn =
-            SearchTable.getNodesBySample(samples.get(sample).getIdByColumn());
+        List<BigInteger> nodesBySample = new ArrayList<>();
 
-        List<BigInteger> validatorsBySample = new ArrayList<>();
+        // nodesBySample.addAll(
+        //    searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator));
 
-        validatorsBySample.addAll(validatorsBySampleRow);
-        validatorsBySample.addAll(validatorsBySampleColumn);
+        BigInteger radiusUsed = radiusValidator;
 
-        List<BigInteger> nonValidatorsBySample = new ArrayList<>();
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        nonValidatorsBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusNonValidator));
+        while (nodesBySample.isEmpty()) {
+          nodesBySample.addAll(
+              searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+          //    searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+          nodesBySample.addAll(
+              searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+          //   searchTable.getValidatorNodesbySample(
+          //        samples.get(sample).getIdByColumn(), radiusUsed));
+          radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+        }
+        // nodesBySample.addAll(
+        //    searchTable.getNonValidatorNodesbySample(
+        //        samples.get(sample).getId(), radiusNonValidator));
+        // nodesBySample.addAll(
+        //    searchTable.getNonValidatorNodesbySample(
+        //        samples.get(sample).getIdByColumn(), radiusNonValidator));
 
         boolean found = false;
 
-        if (validatorsBySampleRow != null && validatorsBySampleRow.size() > 0) {
-          for (BigInteger id : validatorsBySampleRow) {
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
             if (!nodes.containsKey(id)) {
               nodes.put(id, new Node(id));
               nodes.get(id).addSample(samples.get(sample));
@@ -139,19 +156,9 @@ public class RandomSamplingOperation extends SamplingOperation {
           found = true;
         }
 
-        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
+        if (!found && callback != null) {
+          callback.missing(sample, this);
         }
-
-        if (!found && callback != null) callback.missing(sample, this);
       }
     }
   }

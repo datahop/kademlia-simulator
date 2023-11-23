@@ -1,6 +1,5 @@
 package peersim.kademlia;
 
-import java.math.BigInteger;
 import java.util.Comparator;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -98,14 +97,15 @@ public class StateBuilder implements peersim.core.Control {
         });
 
     int sz = Network.size();
-    // For every node, add 100 random nodes to its k-bucket - not sure why this was 50 previously...
+    // For every node, add 10 boostrap nodes
+
     for (int i = 0; i < sz; i++) {
       Node iNode = Network.get(i);
       KademliaProtocol iKad = (KademliaProtocol) (iNode.getProtocol(kademliaid));
-
-      for (int k = 0; k < 100; k++) {
+      for (int k = 0; k < 25; k++) {
         KademliaProtocol jKad =
             (KademliaProtocol) (Network.get(CommonState.r.nextInt(sz)).getProtocol(kademliaid));
+        // (KademliaProtocol) (Network.get(k).getProtocol(kademliaid));
         if (jKad.getKademliaNode().isServer()) {
           iKad.getRoutingTable().addNeighbour(jKad.getKademliaNode().getId());
         }
@@ -113,7 +113,7 @@ public class StateBuilder implements peersim.core.Control {
     }
 
     // Add 50 nearby nodes to each node's k-bucket
-    for (int i = 0; i < sz; i++) {
+    /*for (int i = 0; i < sz; i++) {
       Node iNode = Network.get(i);
       KademliaProtocol iKad = (KademliaProtocol) (iNode.getProtocol(kademliaid));
       BigInteger iNodeId = iKad.getKademliaNode().getId();
@@ -133,7 +133,7 @@ public class StateBuilder implements peersim.core.Control {
           }
         }
       }
-    }
+    }*/
     return false;
   } // end execute()
 }

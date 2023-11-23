@@ -36,11 +36,13 @@ public class TrafficGeneratorSample implements Control {
 
   final String PAR_BLK_DIM_SIZE = "block_dim_size";
 
+  final String PAR_NUM_SAMPLES = "num_samples";
+
   int mapfn;
 
   Block b;
   private long ID_GENERATOR = 0;
-
+  long lastTime = 0;
   private boolean first = true, second = false;
 
   // ______________________________________________________________________________________________
@@ -53,6 +55,8 @@ public class TrafficGeneratorSample implements Control {
     KademliaCommonConfigDas.BLOCK_DIM_SIZE =
         Configuration.getInt(
             prefix + "." + PAR_BLK_DIM_SIZE, KademliaCommonConfigDas.BLOCK_DIM_SIZE);
+    KademliaCommonConfigDas.N_SAMPLES =
+        Configuration.getInt(prefix + "." + PAR_NUM_SAMPLES, KademliaCommonConfigDas.N_SAMPLES);
   }
 
   // ______________________________________________________________________________________________
@@ -116,8 +120,7 @@ public class TrafficGeneratorSample implements Control {
         if (start.isUp()) {
           for (int j = 0; j < 3; j++) {
             // send message
-            EDSimulator.add(
-                CommonState.r.nextInt(300000), generateFindNodeMessage(), start, kadpid);
+            EDSimulator.add(CommonState.r.nextInt(12000), generateFindNodeMessage(), start, kadpid);
           }
           EDSimulator.add(
               0,
@@ -130,20 +133,36 @@ public class TrafficGeneratorSample implements Control {
       second = true;
     } else /*if (second)*/ {
 
-      SearchTable.createSampleMap(b);
+      // SearchTable.createSampleMap(b);
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
         // b.initIterator();
         // we add 1 ms delay to be sure the builder starts before validators.
-        if (n.getDASProtocol().isBuilder())
+        if (n.isUp())
+          EDSimulator.add(
+              CommonState.r.nextLong(CommonState.getTime() - lastTime),
+              generateFindNodeMessage(),
+              n,
+              kadpid);
+
+        if (n.getDASProtocol() instanceof DASProtocolBuilder
+            && n.getDASProtocol()
+                .getBuilderAddress()
+                .equals(n.getKademliaProtocol().getKademliaNode().getId())) {
+          System.out.println(
+              CommonState.getTime()
+                  + " New block Builder "
+                  + n.getKademliaProtocol().getKademliaNode().getId()
+                  + " "
+                  + i);
           EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        else
+        } else if (!(n.getDASProtocol() instanceof DASProtocolBuilder))
           EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
       ID_GENERATOR++;
       second = false;
     }
-
+    lastTime = CommonState.getTime();
     return false;
   }
 

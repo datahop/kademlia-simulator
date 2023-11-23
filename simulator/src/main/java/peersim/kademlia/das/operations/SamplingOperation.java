@@ -42,9 +42,7 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-    radiusValidator =
-        currentBlock.computeRegionRadius(
-            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
@@ -103,48 +101,12 @@ public abstract class SamplingOperation extends FindOperation {
     return radiusNonValidator;
   }
 
-  protected void createNodes() {
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample).isDownloaded()) {
-
-        List<BigInteger> validatorsBySample = SearchTable.getNodesBySample(sample);
-        List<BigInteger> nonValidatorsBySample =
-            searchTable.getNonValidatorNodesbySample(sample, radiusNonValidator);
-
-        boolean found = false;
-        if (validatorsBySample != null && validatorsBySample.size() > 0) {
-          for (BigInteger id : validatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
-        }
-        if (nonValidatorsBySample != null && nonValidatorsBySample.size() > 0) {
-          for (BigInteger id : nonValidatorsBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-          }
-          found = true;
-        }
-
-        if (!found && callback != null) callback.missing(sample, this);
-      }
-    }
-  }
+  protected abstract void createNodes();
 
   public BigInteger[] doSampling() {
 
     aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
       /*System.out.println(

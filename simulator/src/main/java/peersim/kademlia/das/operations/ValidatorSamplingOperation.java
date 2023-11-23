@@ -1,7 +1,9 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.MissingNode;
@@ -129,6 +131,58 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   public int getColumn() {
     return column;
+  }
+
+  @Override
+  protected void createNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+        if (row > 0) {
+          BigInteger radiusUsed = radiusValidator;
+          while (nodesBySample.isEmpty()) {
+            nodesBySample.addAll(
+                searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+            // searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+            radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+          }
+          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(),
+          // radiusNonValidator));
+          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getId(),
+          // radiusNonValidator));
+        } else {
+          BigInteger radiusUsed = radiusValidator;
+          while (nodesBySample.isEmpty()) {
+            nodesBySample.addAll(
+                searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+            // searchTable.getValidatorNodesbySample(samples.get(sample).getIdByColumn(),
+            // radiusUsed));
+            radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+          }
+          // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getIdByColumn(),
+          // radiusNonValidator));
+
+          // searchTable.getNonValidatorNodesbySample(samples.get(sample).getIdByColumn(),
+          // radiusNonValidator));
+        }
+        boolean found = false;
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+
+        if (!found && callback != null) callback.missing(sample, this);
+      }
+    }
   }
 
   public Map<String, Object> toMap() {

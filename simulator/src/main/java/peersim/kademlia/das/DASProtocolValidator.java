@@ -18,7 +18,7 @@ public class DASProtocolValidator extends DASProtocol {
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("seed sample receveived");
+    logger.warning("seed sample received");
     if (m.body == null) return;
 
     Sample[] samples = (Sample[]) m.body;
@@ -52,9 +52,7 @@ public class DASProtocolValidator extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
-    logger.warning("Starting random sampling");
     startRandomSampling();
   }
 
@@ -97,7 +95,7 @@ public class DASProtocolValidator extends DASProtocol {
             row,
             column,
             this.isValidator,
-            validatorsList.length,
+            KademliaCommonConfigDas.validatorsSize,
             this);
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId());

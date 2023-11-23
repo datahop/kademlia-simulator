@@ -46,6 +46,20 @@ public class TrafficGenerator implements Control {
     }
     BigInteger dst = ((KademliaProtocol) (n.getProtocol(pid))).getKademliaNode().getId();
 
+    System.out.println("Sending find node " + dst);
+    Message m = Message.makeInitFindNode(dst);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  /**
+   * Generates a random find node message, by selecting randomly the destination.
+   *
+   * @return Message
+   */
+  private Message generateFindNodeMessage(BigInteger dst) {
+    // Get an existing active destination node
     Message m = Message.makeInitFindNode(dst);
     m.timestamp = CommonState.getTime();
 
@@ -83,18 +97,34 @@ public class TrafficGenerator implements Control {
    */
   public boolean execute() {
 
-    Node start;
-    do {
-      start = Network.get(CommonState.r.nextInt(Network.size()));
-    } while ((start == null) || (!start.isUp()));
+    if (first) {
+      for (int i = 0; i < Network.size(); i++) {
+        Node start = Network.get(i);
+        if (start.isUp()) {
+          for (int j = 0; j < 3; j++) {
+            // send message
+            EDSimulator.add(0, generateFindNodeMessage(), start, pid);
+          }
+          EDSimulator.add(
+              0,
+              generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
+              start,
+              pid);
+        }
+      }
+      first = false;
+    } else {
+      Node start;
+      do {
+        start = Network.get(CommonState.r.nextInt(Network.size()));
+      } while ((start == null) || (!start.isUp()));
 
-    // send message
-    EDSimulator.add(0, generateFindNodeMessage(), start, pid);
-    // EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
-
+      // send message
+      EDSimulator.add(0, generateFindNodeMessage(), start, pid);
+      // EDSimulator.add(0, generateRegionBasedFindNodeMessage(), start, pid);
+    }
     return false;
   }
-
   // ______________________________________________________________________________________________
 
 } // End of class

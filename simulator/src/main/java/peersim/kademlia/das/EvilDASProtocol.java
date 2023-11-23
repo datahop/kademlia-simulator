@@ -9,11 +9,12 @@ public class EvilDASProtocol extends DASProtocol {
   public EvilDASProtocol(String prefix) {
     super(prefix);
     EvilDASProtocol.prefix = prefix;
+    isEvil = true;
   }
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    logger.warning("seed sample receveived - do nothing " + this);
+    logger.warning("seed sample received - do nothing " + this);
   }
 
   @Override
