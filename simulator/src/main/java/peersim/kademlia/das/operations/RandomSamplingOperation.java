@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -69,11 +70,13 @@ public class RandomSamplingOperation extends SamplingOperation {
   public void elaborateResponse(Sample[] sam) {
 
     for (Sample s : sam) {
-      if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+      if (samples.containsKey(s.getId()) /*|| samples.containsKey(s.getIdByColumn())*/) {
         FetchingSample fs = samples.get(s.getId());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
+        if (fs != null) {
+          if (!fs.isDownloaded()) {
+            samplesCount++;
+            fs.setDownloaded();
+          }
         }
       }
     }
@@ -94,13 +97,23 @@ public class RandomSamplingOperation extends SamplingOperation {
 
     if (sam != null) {
       for (Sample s : sam) {
-        if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
+        if (samples.containsKey(s.getId()) /*|| samples.containsKey(s.getIdByColumn())*/) {
           FetchingSample fs = samples.get(s.getId());
-          if (!fs.isDownloaded()) {
+          // FetchingSample fs2 = samples.get(s.getIdByColumn());
+          if (fs != null) {
+            if (!fs.isDownloaded()) {
+              samplesCount++;
+              fs.setDownloaded();
+              fs.removeFetchingNode(nodes.get(node));
+            }
+          } /*else if(fs2!=null){
+               if(!fs2.isDownloaded()){
             samplesCount++;
-            fs.setDownloaded();
-            fs.removeFetchingNode(nodes.get(node));
-          }
+            fs2.setDownloaded();
+            fs2.removeFetchingNode(nodes.get(node));
+               }
+
+             }*/
         }
       }
     }
@@ -148,7 +161,15 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   protected void addExtraNodes() {
+    /*if (radiusValidator.compareTo(Block.MAX_KEY) == -1)
+      ;
+    radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+    if (radiusValidator.compareTo(Block.MAX_KEY) == 1) radiusValidator = Block.MAX_KEY;
+
+    createNodes();*/
+    // int max = 0;
     for (BigInteger sample : samples.keySet()) {
+      // if (max == 100) break;
       if (!samples.get(sample).isDownloaded()) {
         List<BigInteger> nodesBySample = new ArrayList<>();
         BigInteger radiusUsed = radiusValidator;
@@ -165,6 +186,7 @@ public class RandomSamplingOperation extends SamplingOperation {
         nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodesToAdd)));
 
         nodesBySample.removeAll(askedNodes);
+        int max = 0;
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {
             if (!nodes.containsKey(id)) {
@@ -173,19 +195,28 @@ public class RandomSamplingOperation extends SamplingOperation {
             } else {
               nodes.get(id).addSample(samples.get(sample));
             }
+            max++;
+            if (max == 5) break;
           }
+          break;
         }
       }
     }
 
-    /*if (nodes.size() == 0 && getSamples().length > 0) {
-      Sample[] randomSamples = currentBlock.getNRandomSamples(getSamples().length * 10);
+    if (nodes.size() == 0 && getSamples().length > 0) {
+      List<Sample> randomSamples = new ArrayList<>();
+      while (randomSamples.size() < getSamples().length * 10) {
+        Sample[] sample = currentBlock.getNRandomSamples(1);
+        if (!Arrays.asList(getSamples()).contains(sample[0].getId())) randomSamples.add(sample[0]);
+      }
+      for (BigInteger id : getSamples()) samples.remove(id);
+      askedNodes.clear();
       for (Sample rs : randomSamples) {
         FetchingSample s = new FetchingSample(rs);
         samples.put(rs.getIdByRow(), s);
       }
       createNodes();
-    }*/
+    }
   }
 
   public Map<String, Object> toMap() {

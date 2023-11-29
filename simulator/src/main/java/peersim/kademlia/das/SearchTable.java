@@ -133,6 +133,12 @@ public class SearchTable {
     return result;
   }
 
+  public List<BigInteger> getAllNeighbours() {
+
+    List<BigInteger> result = new ArrayList<>(neighbours.keySet());
+    return result;
+  }
+
   public Neighbour[] getNeighbours(int n) {
 
     List<Neighbour> result = new ArrayList<>();

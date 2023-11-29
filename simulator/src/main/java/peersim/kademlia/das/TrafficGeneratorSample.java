@@ -110,8 +110,10 @@ public class TrafficGeneratorSample implements Control {
       n,
       kadpid);*/
 
-      if (n.isUp())
+      if (n.isUp()) {
         EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        EDSimulator.add(1000, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+      }
     }
     ID_GENERATOR++;
     second = false;

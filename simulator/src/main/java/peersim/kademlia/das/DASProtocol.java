@@ -94,6 +94,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected HashMap<BigInteger, List<Message>> missingSamples;
 
+  protected boolean first;
+
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.
@@ -110,6 +112,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
    */
   public DASProtocol(String prefix) {
 
+    first = true;
     DASProtocol.prefix = prefix;
     isEvil = false;
     _init();
@@ -339,11 +342,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         sampleFound = true;*/
         samplesToSend.add(sample);
       } else {
-        if (missingSamples.containsKey(id)) missingSamples.get(id).add(m);
+        if (missingSamples.get(id) != null) missingSamples.get(id).add(m);
         else {
-          List<Message> nodeIds = new ArrayList<>();
-          nodeIds.add(m);
-          missingSamples.put(id, nodeIds);
+          List<Message> requests = new ArrayList<>();
+          requests.add(m);
+          missingSamples.put(id, requests);
         }
         // logger.warning("Sample request missing");
       }

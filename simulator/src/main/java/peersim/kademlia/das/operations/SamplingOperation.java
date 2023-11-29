@@ -45,7 +45,9 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-
+    radiusValidator =
+        currentBlock.computeRegionRadius(
+            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
@@ -144,7 +146,19 @@ public abstract class SamplingOperation extends FindOperation {
 
     if (nodes.isEmpty()) {
       createNodes();
-      // System.out.println("[" + srcNode + "] Repopulating nodes " + nodes.size());
+      System.out.println(
+          "["
+              + CommonState.getTime()
+              + "]["
+              + srcNode
+              + "] Adding nodes "
+              + this.getId()
+              + " "
+              + nodes.size()
+              + " "
+              + aggressiveness
+              + " "
+              + askedNodes.size());
     }
     if (nodes.isEmpty()) {
       addExtraNodes();
@@ -154,6 +168,8 @@ public abstract class SamplingOperation extends FindOperation {
               + "]["
               + srcNode
               + "] Adding extra nodes "
+              + this.getId()
+              + " "
               + nodes.size()
               + " "
               + aggressiveness
@@ -175,6 +191,11 @@ public abstract class SamplingOperation extends FindOperation {
       }
     }
 
+    /*if (result.size() == 0 && this instanceof RandomSamplingOperation && aggressiveness >= 5) {
+      result = searchTable.getAllNeighbours();
+      result.remove(askedNodes);
+      pendingNodes.addAll(result);
+    }*/
     askedNodes.addAll(result);
     return result.toArray(new BigInteger[0]);
   }
