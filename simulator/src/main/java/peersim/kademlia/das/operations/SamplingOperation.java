@@ -146,6 +146,7 @@ public abstract class SamplingOperation extends FindOperation {
 
     if (nodes.isEmpty()) {
       createNodes();
+      addExtraNodes();
       System.out.println(
           "["
               + CommonState.getTime()
@@ -160,7 +161,7 @@ public abstract class SamplingOperation extends FindOperation {
               + " "
               + askedNodes.size());
     }
-    if (nodes.isEmpty()) {
+    /*if (nodes.isEmpty()) {
       addExtraNodes();
       System.out.println(
           "["
@@ -175,7 +176,7 @@ public abstract class SamplingOperation extends FindOperation {
               + aggressiveness
               + " "
               + askedNodes.size());
-    }
+    }*/
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {

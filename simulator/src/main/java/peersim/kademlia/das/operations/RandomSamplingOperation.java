@@ -3,6 +3,7 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -161,49 +162,41 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   protected void addExtraNodes() {
-    /*if (radiusValidator.compareTo(Block.MAX_KEY) == -1)
-      ;
-    radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
-    if (radiusValidator.compareTo(Block.MAX_KEY) == 1) radiusValidator = Block.MAX_KEY;
 
-    createNodes();*/
-    // int max = 0;
-    for (BigInteger sample : samples.keySet()) {
-      // if (max == 100) break;
-      if (!samples.get(sample).isDownloaded()) {
-        List<BigInteger> nodesBySample = new ArrayList<>();
-        BigInteger radiusUsed = radiusValidator;
-        Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
-        List<BigInteger> nodesToAdd = new ArrayList<>();
-        for (Sample s : sRow) {
-          nodesToAdd.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
-        }
-        Sample[] sColumn =
-            currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
-        for (Sample s : sColumn) {
-          nodesToAdd.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
-        }
-        nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodesToAdd)));
+    int max = 0;
+    List<BigInteger> missingSamples = Arrays.asList(getSamples());
+    Collections.shuffle(missingSamples);
+    for (BigInteger sample : missingSamples) {
+      List<BigInteger> nodesBySample = new ArrayList<>();
+      BigInteger radiusUsed = radiusValidator;
+      Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
+      List<BigInteger> nodesToAdd = new ArrayList<>();
+      for (Sample s : sRow) {
+        nodesToAdd.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+      }
+      Sample[] sColumn =
+          currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
+      for (Sample s : sColumn) {
+        nodesToAdd.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+      }
+      nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodesToAdd)));
 
-        nodesBySample.removeAll(askedNodes);
-        int max = 0;
-        if (nodesBySample != null && nodesBySample.size() > 0) {
-          for (BigInteger id : nodesBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
-            max++;
-            if (max == 5) break;
+      nodesBySample.removeAll(askedNodes);
+      if (nodesBySample != null && nodesBySample.size() > 0) {
+        for (BigInteger id : nodesBySample) {
+          if (!nodes.containsKey(id)) {
+            nodes.put(id, new Node(id));
+            nodes.get(id).addSample(samples.get(sample));
+          } else {
+            nodes.get(id).addSample(samples.get(sample));
           }
-          break;
+          max++;
+          if (max == aggressiveness) return;
         }
       }
     }
 
-    if (nodes.size() == 0 && getSamples().length > 0) {
+    /*if (nodes.size() == 0 && getSamples().length > 0) {
       List<Sample> randomSamples = new ArrayList<>();
       while (randomSamples.size() < getSamples().length * 10) {
         Sample[] sample = currentBlock.getNRandomSamples(1);
@@ -216,7 +209,7 @@ public class RandomSamplingOperation extends SamplingOperation {
         samples.put(rs.getIdByRow(), s);
       }
       createNodes();
-    }
+    }*/
   }
 
   public Map<String, Object> toMap() {

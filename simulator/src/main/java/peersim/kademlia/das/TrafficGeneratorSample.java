@@ -112,7 +112,8 @@ public class TrafficGeneratorSample implements Control {
 
       if (n.isUp()) {
         EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        EDSimulator.add(1000, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        // EDSimulator.add(10, generateNewBlockMessage(b), n,
+        // n.getDASProtocol().getDASProtocolID());
       }
     }
     ID_GENERATOR++;

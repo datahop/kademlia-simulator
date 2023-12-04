@@ -317,7 +317,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.warning("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 
@@ -587,7 +587,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(4 * 100, t, src, myPid); // set delay = 2*RTT
+      EDSimulator.add(250, t, src, myPid); // set delay = 2*RTT
     }
   }
 

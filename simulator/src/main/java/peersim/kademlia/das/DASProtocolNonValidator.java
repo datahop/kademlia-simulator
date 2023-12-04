@@ -53,9 +53,10 @@ public class DASProtocolNonValidator extends DASProtocol {
     if (first) super.handleInitNewBlock(m, myPid);
     if (!isEvil) {
       if (first) {
+        startRandomSampling();
         first = false;
       } else {
-        startRandomSampling();
+        // startRandomSampling();
         first = true;
       }
     }
