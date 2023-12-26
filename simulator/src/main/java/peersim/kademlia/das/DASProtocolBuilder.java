@@ -35,12 +35,15 @@ public class DASProtocolBuilder extends DASProtocol {
     logger.warning("Builder new block:" + currentBlock.getBlockId());
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
+    int samplesWithinRegionColumn = 0; // samples that are within at least one node's region
+
     int samplesValidators = 0;
     int samplesNonValidators = 0;
     samplesToRequest.clear();
     BigInteger radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
+    int notInRegion = 0;
     while (currentBlock.hasNext()) {
       boolean inRegion = false;
       Sample s = currentBlock.next();
@@ -84,6 +87,7 @@ public class DASProtocolBuilder extends DASProtocol {
             }
           }
         }
+        // if (!inRegion) notInRegion++;
         if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
       }
       inRegion = false;
@@ -118,11 +122,13 @@ public class DASProtocolBuilder extends DASProtocol {
             }
             samplesValidators++;
             if (inRegion == false) {
-              samplesWithinRegion++;
+              samplesWithinRegionColumn++;
               inRegion = true;
             }
           }
         }
+        // if (!inRegion) notInRegion++;
+
         if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
       }
 
@@ -173,13 +179,17 @@ public class DASProtocolBuilder extends DASProtocol {
 
     logger.warning(
         samplesWithinRegion
+            + " "
+            + samplesWithinRegionColumn
             + " samples out of "
             + currentBlock.getNumSamples()
             + " samples are within a node's region"
             + " "
             + samplesValidators
             + " "
-            + samplesNonValidators);
+            + samplesNonValidators
+            + " "
+            + notInRegion);
   }
 
   @Override

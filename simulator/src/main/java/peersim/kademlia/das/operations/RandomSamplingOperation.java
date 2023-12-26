@@ -122,6 +122,16 @@ public class RandomSamplingOperation extends SamplingOperation {
     // askedNodes.add(node);
   }
 
+  public BigInteger[] getSamples() {
+    List<BigInteger> result = new ArrayList<>();
+
+    for (FetchingSample sample : samples.values()) {
+      if (!sample.isDownloaded()) result.add(sample.getId());
+    }
+
+    return result.toArray(new BigInteger[0]);
+  }
+
   protected void createNodes() {
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
@@ -130,14 +140,13 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         BigInteger radiusUsed = radiusValidator;
 
-        while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
-          nodesBySample.addAll(
-              searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
-          nodesBySample.addAll(
-              searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+        // while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
+        nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+        nodesBySample.addAll(
+            searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
 
-          radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
-        }
+        //  radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+        // }
 
         boolean found = false;
         nodesBySample.removeAll(askedNodes);
@@ -163,10 +172,10 @@ public class RandomSamplingOperation extends SamplingOperation {
 
   protected void addExtraNodes() {
 
-    int max = 0;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     for (BigInteger sample : missingSamples) {
+      int count = 0;
       List<BigInteger> nodesBySample = new ArrayList<>();
       BigInteger radiusUsed = radiusValidator;
       Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
@@ -190,8 +199,8 @@ public class RandomSamplingOperation extends SamplingOperation {
           } else {
             nodes.get(id).addSample(samples.get(sample));
           }
-          max++;
-          if (max == aggressiveness) return;
+          count++;
+          if (count == aggressiveness) return;
         }
       }
     }

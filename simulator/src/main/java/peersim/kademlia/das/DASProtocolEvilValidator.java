@@ -22,7 +22,7 @@ public class DASProtocolEvilValidator extends DASProtocolValidator {
     // super.handleInitGetSample(m, myPid);
   }
 
-  protected void handleGetSample(Message m, int myPid) {
+  /*protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
     logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
@@ -34,7 +34,7 @@ public class DASProtocolEvilValidator extends DASProtocolValidator {
     response.ackId = m.id; // set ACK number
     response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);
     sendMessage(response, m.src.getId(), myPid);
-  }
+  }*/
 
   public void setEvilIds(List<Node> evilIds) {
     searchTable.setEvilIds(evilIds);

@@ -40,7 +40,7 @@ public class DASProtocolValidator extends DASProtocol {
       if (first) {
         startRowsandColumnsSampling();
         startRandomSampling();
-        first = false;
+        // first = false;
       } else {
         // startRandomSampling();
         first = true;

@@ -20,7 +20,7 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
     // super.handleInitGetSample(m, myPid);
   }
 
-  protected void handleGetSample(Message m, int myPid) {
+  /*protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
     logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
@@ -32,7 +32,7 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
     response.ackId = m.id; // set ACK number
     response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);
     sendMessage(response, m.src.getId(), myPid);
-  }
+  }*/
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

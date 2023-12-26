@@ -37,7 +37,7 @@ public class KademliaCommonConfigDas {
   public static double NODE_RECORD_SIZE = 0.0024;
 
   /** Size of a sample in Mbits - each cell contains 512 B of data + 48 B KZG commitment */
-  public static double SAMPLE_SIZE = 0.00448;
+  public static double SAMPLE_SIZE = 0.004096;
 
   /** Number of samples returned by a single node */
   public static int MAX_SAMPLES_RETURNED = 1000;
@@ -48,12 +48,12 @@ public class KademliaCommonConfigDas {
   public static int MAX_HOPS = 5000;
 
   /** Default upload bandwith of a validator in Mbits/sec */
-  public static int VALIDATOR_UPLOAD_RATE = 1000;
+  public static int VALIDATOR_UPLOAD_RATE = 100;
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
-  public static int NON_VALIDATOR_UPLOAD_RATE = 100;
+  public static int NON_VALIDATOR_UPLOAD_RATE = 1000;
 
-  public static int BUILDER_UPLOAD_RATE = 10000;
+  public static int BUILDER_UPLOAD_RATE = 50000;
 
   public static int VALIDATOR_DEADLINE = 4000;
   public static int RANDOM_SAMPLING_DEADLINE = 12000;

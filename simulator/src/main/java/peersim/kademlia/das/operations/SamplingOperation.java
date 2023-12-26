@@ -34,6 +34,10 @@ public abstract class SamplingOperation extends FindOperation {
   protected List<BigInteger> askedNodes;
   protected List<BigInteger> pendingNodes;
 
+  protected boolean started;
+
+  protected int aggressiveness_step;
+
   public SamplingOperation(
       BigInteger srcNode,
       BigInteger destNode,
@@ -57,6 +61,8 @@ public abstract class SamplingOperation extends FindOperation {
     askedNodes = new ArrayList<>();
     pendingNodes = new ArrayList<>();
     timesIncreased = 0;
+    started = false;
+    aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step;
   }
 
   public SamplingOperation(
@@ -84,21 +90,15 @@ public abstract class SamplingOperation extends FindOperation {
     askedNodes = new ArrayList<>();
     timesIncreased = 0;
     pendingNodes = new ArrayList<>();
+    started = false;
+    aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step;
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
 
   public abstract boolean completed();
 
-  public BigInteger[] getSamples() {
-    List<BigInteger> result = new ArrayList<>();
-
-    for (FetchingSample sample : samples.values()) {
-      if (!sample.isDownloaded()) result.add(sample.getId());
-    }
-
-    return result.toArray(new BigInteger[0]);
-  }
+  public abstract BigInteger[] getSamples();
 
   public BigInteger getRadiusValidator() {
     return radiusValidator;
@@ -114,7 +114,7 @@ public abstract class SamplingOperation extends FindOperation {
 
   public BigInteger[] doSampling() {
 
-    aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
+    aggressiveness += aggressiveness_step;
     // System.out.println("[" + srcNode + "]  nodes " + nodes.size());
     List<BigInteger> toRemove = new ArrayList<>();
     for (BigInteger n : nodes.keySet()) {
@@ -161,8 +161,8 @@ public abstract class SamplingOperation extends FindOperation {
               + " "
               + askedNodes.size());
     }
-    /*if (nodes.isEmpty()) {
-      addExtraNodes();
+    if (nodes.isEmpty()) {
+      // addExtraNodes();
       System.out.println(
           "["
               + CommonState.getTime()
@@ -176,7 +176,7 @@ public abstract class SamplingOperation extends FindOperation {
               + aggressiveness
               + " "
               + askedNodes.size());
-    }*/
+    }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
@@ -198,6 +198,8 @@ public abstract class SamplingOperation extends FindOperation {
       pendingNodes.addAll(result);
     }*/
     askedNodes.addAll(result);
+
+    if (result.size() > 0) started = true;
     return result.toArray(new BigInteger[0]);
   }
 
@@ -215,5 +217,13 @@ public abstract class SamplingOperation extends FindOperation {
 
   public int getPending() {
     return pendingNodes.size();
+  }
+
+  public boolean getStarted() {
+    return started;
+  }
+
+  public int getAgressiveness() {
+    return aggressiveness;
   }
 }

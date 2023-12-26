@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import peersim.core.CommonState;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
@@ -54,7 +55,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     } else if (column > 0) {
       for (Sample sample : block.getSamplesByColumn(column)) {
-        samples.put(sample.getIdByColumn(), new FetchingSample(sample));
+        samples.put(sample.getId(), new FetchingSample(sample));
       }
     }
     this.searchTable = searchTable;
@@ -64,15 +65,15 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   public void elaborateResponse(Sample[] sam) {
 
     for (Sample s : sam) {
-      if (row > 0) {
-        if (samples.containsKey(s.getId())) {
-          FetchingSample fs = samples.get(s.getId());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
-          }
+      // if (row > 0) {
+      if (samples.containsKey(s.getId())) {
+        FetchingSample fs = samples.get(s.getId());
+        if (!fs.isDownloaded()) {
+          fs.setDownloaded();
+          samplesCount++;
         }
-      } else {
+      }
+      /*} else {
         if (samples.containsKey(s.getIdByColumn())) {
           FetchingSample fs = samples.get(s.getIdByColumn());
           if (!fs.isDownloaded()) {
@@ -80,9 +81,19 @@ public class ValidatorSamplingOperation extends SamplingOperation {
             samplesCount++;
           }
         }
-      }
+      }*/
     }
-    // System.out.println("Row " + samplesCount + " " + samples.size());
+    /*System.out.println(
+    "["
+        + CommonState.getTime()
+        + "]["
+        + srcNode
+        + "] Completed operation "
+        + this.getId()
+        + " "
+        + samplesCount
+        + " "
+        + samples.size());*/
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
@@ -100,15 +111,15 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     if (sam != null) {
       for (Sample s : sam) {
-        if (row > 0) {
-          if (samples.containsKey(s.getId())) {
-            FetchingSample fs = samples.get(s.getId());
-            if (!fs.isDownloaded()) {
-              fs.setDownloaded();
-              samplesCount++;
-            }
+        // if (row > 0) {
+        if (samples.containsKey(s.getId())) {
+          FetchingSample fs = samples.get(s.getId());
+          if (!fs.isDownloaded()) {
+            fs.setDownloaded();
+            samplesCount++;
           }
-        } else {
+        }
+        /*} else {
           if (samples.containsKey(s.getIdByColumn())) {
             FetchingSample fs = samples.get(s.getIdByColumn());
             if (!fs.isDownloaded()) {
@@ -116,9 +127,20 @@ public class ValidatorSamplingOperation extends SamplingOperation {
               samplesCount++;
             }
           }
-        }
+        }*/
       }
     }
+    /*System.out.println(
+    "["
+        + CommonState.getTime()
+        + "]["
+        + srcNode
+        + "] Completed operation "
+        + this.getId()
+        + " "
+        + samplesCount
+        + " "
+        + samples.size());*/
     // System.out.println("Row " + samplesCount + " " + samples.size());
     if (samplesCount >= samples.size() / 2) completed = true;
 
@@ -180,13 +202,27 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
   }
 
-  protected void addExtraNodes() {
-    int max = 0;
+  public BigInteger[] getSamples() {
+    List<BigInteger> result = new ArrayList<>();
 
+    for (FetchingSample sample : samples.values()) {
+      if (!sample.isDownloaded()) {
+        // if (column > 0) result.add(sample.getIdByColumn());
+        // else
+        result.add(sample.getId());
+      }
+    }
+
+    return result.toArray(new BigInteger[0]);
+  }
+
+  protected void addExtraNodes() {
+    if (CommonState.getTime() - this.getTimestamp() > 1000)
+      aggressiveness_step = aggressiveness_step * 2;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     for (BigInteger sample : missingSamples) {
-
+      int count = 0;
       List<BigInteger> nodesBySample = new ArrayList<>();
       BigInteger radiusUsed = radiusValidator;
       if (column > 0) {
@@ -218,8 +254,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           } else {
             nodes.get(id).addSample(samples.get(sample));
           }
-          max++;
-          if (max == aggressiveness) return;
+          count++;
+          if (count > aggressiveness - 2) return;
         }
       }
     }

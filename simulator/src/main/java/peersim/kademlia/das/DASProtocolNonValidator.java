@@ -54,7 +54,7 @@ public class DASProtocolNonValidator extends DASProtocol {
     if (!isEvil) {
       if (first) {
         startRandomSampling();
-        first = false;
+        // first = false;
       } else {
         // startRandomSampling();
         first = true;
