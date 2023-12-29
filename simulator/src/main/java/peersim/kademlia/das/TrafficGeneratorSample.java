@@ -40,7 +40,6 @@ public class TrafficGeneratorSample implements Control {
   Block b;
   private long ID_GENERATOR = 0;
   long lastTime = 0;
-  private boolean first = true, second = false;
 
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
@@ -78,47 +77,14 @@ public class TrafficGeneratorSample implements Control {
    */
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-    System.out.println(CommonState.getTime() + " next");
-    /*if (first) {
-      for (int i = 0; i < Network.size(); i++) {
-        Node start = Network.get(i);
-        if (start.isUp()) {
-          for (int j = 0; j < 3; j++) {
-            // send message
-            EDSimulator.add(
-                CommonState.r.nextInt(12000), Util.generateFindNodeMessage(), start, kadpid);
-          }
-          EDSimulator.add(
-              0,
-              Util.generateFindNodeMessage(start.getKademliaProtocol().getKademliaNode().getId()),
-              start,
-              kadpid);
-        }
-      }
-      first = false;
-      second = true;
-    } else if (second) {*/
 
-    // SearchTable.createSampleMap(b);
     for (int i = 0; i < Network.size(); i++) {
       Node n = Network.get(i);
-      // b.initIterator();
-      // we add 1 ms delay to be sure the builder starts before validators.
-      /*EDSimulator.add(
-      CommonState.r.nextLong(CommonState.getTime() - lastTime),
-      Util.generateFindNodeMessage(),
-      n,
-      kadpid);*/
-
       if (n.isUp()) {
         EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        // EDSimulator.add(10, generateNewBlockMessage(b), n,
-        // n.getDASProtocol().getDASProtocolID());
       }
     }
     ID_GENERATOR++;
-    second = false;
-    // }
     lastTime = CommonState.getTime();
     return false;
   }

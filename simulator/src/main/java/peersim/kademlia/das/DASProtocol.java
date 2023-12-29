@@ -626,7 +626,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
-      logger.warning("Send message added " + m.id + " " + latency + " " + destId);
+      logger.info("Send message added " + m.id + " " + latency + " " + destId);
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);

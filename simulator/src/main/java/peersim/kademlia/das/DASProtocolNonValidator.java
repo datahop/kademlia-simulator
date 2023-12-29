@@ -50,15 +50,9 @@ public class DASProtocolNonValidator extends DASProtocol {
     logger.warning("Init block non-validator node - start sampling " + this);
     // super.handleInitNewBlock(m, myPid);
     validatorsContacted.clear();
-    if (first) super.handleInitNewBlock(m, myPid);
+    super.handleInitNewBlock(m, myPid);
     if (!isEvil) {
-      if (first) {
-        startRandomSampling();
-        // first = false;
-      } else {
-        // startRandomSampling();
-        first = true;
-      }
+      startRandomSampling();
     }
   }
 

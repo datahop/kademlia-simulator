@@ -54,83 +54,83 @@ public class DASProtocolBuilder extends DASProtocol {
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
               searchTable.getValidatorsIndexed().size());
 
-      while (!inRegion) {
+      // while (!inRegion) {
 
-        List<BigInteger> idsValidators =
-            searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
+      List<BigInteger> idsValidators =
+          searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
 
-        for (BigInteger id : idsValidators) {
+      for (BigInteger id : idsValidators) {
 
-          logger.info(
-              "Sending sample to validator "
-                  + s.getIdByRow()
-                  + " "
-                  + s.getIdByColumn()
-                  + " to "
-                  + id);
-          Node n = Util.nodeIdtoNode(id, kademliaId);
-          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-          if (dasProt.isBuilder()) continue;
-          if (n.isUp()) {
+        logger.info(
+            "Sending sample to validator "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " to "
+                + id);
+        Node n = Util.nodeIdtoNode(id, kademliaId);
+        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+        if (dasProt.isBuilder()) continue;
+        if (n.isUp()) {
 
-            if (!samplesToRequest.containsKey(id)) {
-              List<BigInteger> samples = new ArrayList<>();
-              samples.add(s.getId());
-              samplesToRequest.put(id, samples);
-            } else {
-              samplesToRequest.get(id).add(s.getId());
-            }
-            samplesValidators++;
-            if (inRegion == false) {
-              samplesWithinRegion++;
-              inRegion = true;
-            }
+          if (!samplesToRequest.containsKey(id)) {
+            List<BigInteger> samples = new ArrayList<>();
+            samples.add(s.getId());
+            samplesToRequest.put(id, samples);
+          } else {
+            samplesToRequest.get(id).add(s.getId());
+          }
+          samplesValidators++;
+          if (inRegion == false) {
+            samplesWithinRegion++;
+            inRegion = true;
           }
         }
-        // if (!inRegion) notInRegion++;
-        if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
       }
+      // if (!inRegion) notInRegion++;
+      //   if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+      // }
       inRegion = false;
-      while (!inRegion) {
+      // while (!inRegion) {
 
-        List<BigInteger> idsValidators =
-            searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
+      // List<BigInteger> idsValidators =
+      idsValidators = searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
 
-        /*  + " "
-        + +idsNonValidators.size());*/
+      /*  + " "
+      + +idsNonValidators.size());*/
 
-        for (BigInteger id : idsValidators) {
+      for (BigInteger id : idsValidators) {
 
-          logger.info(
-              "Sending sample to validator "
-                  + s.getIdByRow()
-                  + " "
-                  + s.getIdByColumn()
-                  + " to "
-                  + id);
-          Node n = Util.nodeIdtoNode(id, kademliaId);
-          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-          if (dasProt.isBuilder()) continue;
-          if (n.isUp()) {
+        logger.info(
+            "Sending sample to validator "
+                + s.getIdByRow()
+                + " "
+                + s.getIdByColumn()
+                + " to "
+                + id);
+        Node n = Util.nodeIdtoNode(id, kademliaId);
+        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+        if (dasProt.isBuilder()) continue;
+        if (n.isUp()) {
 
-            if (!samplesToRequest.containsKey(id)) {
-              List<BigInteger> samples = new ArrayList<>();
-              samples.add(s.getId());
-              samplesToRequest.put(id, samples);
-            } else {
-              samplesToRequest.get(id).add(s.getId());
-            }
-            samplesValidators++;
-            if (inRegion == false) {
-              samplesWithinRegionColumn++;
-              inRegion = true;
-            }
+          if (!samplesToRequest.containsKey(id)) {
+            List<BigInteger> samples = new ArrayList<>();
+            samples.add(s.getId());
+            samplesToRequest.put(id, samples);
+          } else {
+            samplesToRequest.get(id).add(s.getId());
+          }
+          samplesValidators++;
+          if (inRegion == false) {
+            samplesWithinRegionColumn++;
+            inRegion = true;
           }
         }
-        // if (!inRegion) notInRegion++;
-
-        if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
       }
+      // if (!inRegion) notInRegion++;
+
+      //   if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
+      // }
 
       List<BigInteger> idsNonValidators =
           searchTable.getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
