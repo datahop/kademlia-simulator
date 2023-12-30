@@ -146,7 +146,7 @@ public abstract class SamplingOperation extends FindOperation {
 
     if (nodes.isEmpty()) {
       createNodes();
-      addExtraNodes();
+      // addExtraNodes();
       System.out.println(
           "["
               + CommonState.getTime()

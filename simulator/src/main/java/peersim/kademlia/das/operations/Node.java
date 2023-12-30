@@ -46,7 +46,6 @@ public class Node implements Comparable<Node> {
     int score = 0;
 
     for (FetchingSample s : samples) {
-
       if (!s.isDownloaded() && s.beingFetchedFrom.size() < aggressiveness) {
         score += 1;
       }

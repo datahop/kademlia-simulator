@@ -192,7 +192,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         break;
       case Message.MSG_GET_SAMPLE_RESPONSE:
         m = (Message) event;
-        logger.warning("Send message removed " + m.ackId);
+        logger.info("Send message removed " + m.ackId);
         sentMsg.remove(m.ackId);
         handleGetSampleResponse(m, myPid);
         break;
