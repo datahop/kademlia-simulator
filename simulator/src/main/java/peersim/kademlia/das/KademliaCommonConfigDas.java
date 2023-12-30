@@ -48,10 +48,10 @@ public class KademliaCommonConfigDas {
   public static int MAX_HOPS = 5000;
 
   /** Default upload bandwith of a validator in Mbits/sec */
-  public static int VALIDATOR_UPLOAD_RATE = 100;
+  public static int VALIDATOR_UPLOAD_RATE = 1000;
 
   /** Default upload bandwith of a non-validator in Mbits/sec */
-  public static int NON_VALIDATOR_UPLOAD_RATE = 1000;
+  public static int NON_VALIDATOR_UPLOAD_RATE = 100;
 
   public static int BUILDER_UPLOAD_RATE = 50000;
 

@@ -283,7 +283,8 @@ public class Block implements Iterator<Sample>, Cloneable {
     for (BigInteger id : subSet) {
       rows.add(sampleMap.get(id).getRow());
     }
-    System.out.println(rows.size() + " " + KademliaCommonConfigDas.validatorsSize + " " + radius);
+    // System.out.println(rows.size() + " " + KademliaCommonConfigDas.validatorsSize + " " +
+    // radius);
     return Util.mostCommon(rows);
   }
 

@@ -138,12 +138,24 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         List<BigInteger> nodesBySample = new ArrayList<>();
 
-        BigInteger radiusUsed = radiusValidator;
+        // BigInteger radiusUsed = radiusValidator;
 
         // while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
-        nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
+        // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(),
+        // radiusUsed));
+        // nodesBySample.addAll(
+        //     searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
         nodesBySample.addAll(
-            searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        nodesBySample.addAll(
+            searchTable.getValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusValidator));
+        nodesBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
+        nodesBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusNonValidator));
 
         //  radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
         // }

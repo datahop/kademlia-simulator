@@ -163,9 +163,11 @@ public class CustomDistributionDas implements peersim.core.Control {
           dasEvil.setEvilIds(evilNodes);
         }
       }
-      int k = 0;
+      /*int k = 0;
       while (k < 100) {
+        // while (k<Network.size()){
         Node n = Network.get(CommonState.r.nextInt(Network.size()));
+        // Node n = Network.get(CommonState.r.nextInt(Network.size()));
         if (n.isUp()) {
           KademliaProtocol jKad = (KademliaProtocol) n.getProtocol(protocolKadID);
           generalNode
@@ -175,7 +177,7 @@ public class CustomDistributionDas implements peersim.core.Control {
                   new Neighbour(jKad.getKademliaNode().getId(), n, n.getDASProtocol().isEvil()));
         }
         k++;
-      }
+      }*/
     }
 
     KademliaCommonConfigDas.networkSize = Network.size();
