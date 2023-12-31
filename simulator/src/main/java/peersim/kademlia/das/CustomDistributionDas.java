@@ -146,13 +146,18 @@ public class CustomDistributionDas implements peersim.core.Control {
     System.out.println("Validators " + validatorsIds.size());
     System.out.println("Non-Validators " + nonValidatorsIds.size());
 
+    SearchTable searchTable = new SearchTable();
+    searchTable.addNodes(nonValidatorsIds.toArray(new BigInteger[0]));
+    searchTable.addValidatorNodes(validatorsIds.toArray(new BigInteger[0]));
+    searchTable.setEvilIds(evilNodes);
+
     // for (DASProtocol validator : validators) {
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
-      generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
-      generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
-
-      if (generalNode.getDASProtocol().isEvil()) {
+      //generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
+      //generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
+      generalNode.getDASProtocol().setSearchTable(searchTable);
+      /*if (generalNode.getDASProtocol().isEvil()) {
         if (generalNode.getDASProtocol() instanceof DASProtocolEvilValidator) {
           DASProtocolEvilValidator dasEvil =
               (DASProtocolEvilValidator) generalNode.getDASProtocol();
@@ -162,7 +167,7 @@ public class CustomDistributionDas implements peersim.core.Control {
               (DASProtocolEvilNonValidator) generalNode.getDASProtocol();
           dasEvil.setEvilIds(evilNodes);
         }
-      }
+      }*/
       /*int k = 0;
       while (k < 100) {
         // while (k<Network.size()){
