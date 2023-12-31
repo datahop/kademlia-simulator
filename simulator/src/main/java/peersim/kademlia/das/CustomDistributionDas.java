@@ -128,7 +128,7 @@ public class CustomDistributionDas implements peersim.core.Control {
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
 
-      dasProt.setBuilderAddress(builderAddress);
+      // dasProt.setBuilderAddress(builderAddress);
 
       if (dasProt instanceof DASProtocolBuilder) System.out.println("DASProtocol Builder " + i);
       generalNode.setProtocol(protocolKadID, kadProt);
@@ -147,6 +147,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     System.out.println("Non-Validators " + nonValidatorsIds.size());
 
     SearchTable searchTable = new SearchTable();
+    searchTable.setBuilderAddress(builderAddress);
     searchTable.addNodes(nonValidatorsIds.toArray(new BigInteger[0]));
     searchTable.addValidatorNodes(validatorsIds.toArray(new BigInteger[0]));
     searchTable.setEvilIds(evilNodes);
@@ -154,9 +155,11 @@ public class CustomDistributionDas implements peersim.core.Control {
     // for (DASProtocol validator : validators) {
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
-      //generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
-      //generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
+      // generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
+      // generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
       generalNode.getDASProtocol().setSearchTable(searchTable);
+      generalNode.getDASProtocol().setBuilderAddress(builderAddress);
+
       /*if (generalNode.getDASProtocol().isEvil()) {
         if (generalNode.getDASProtocol() instanceof DASProtocolEvilValidator) {
           DASProtocolEvilValidator dasEvil =
