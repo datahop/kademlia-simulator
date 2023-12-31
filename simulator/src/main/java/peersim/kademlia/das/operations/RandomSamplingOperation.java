@@ -51,14 +51,14 @@ public class RandomSamplingOperation extends SamplingOperation {
   public boolean completed() {
 
     boolean completed = true;
-    // int failed = 0;
+    int failed = 0;
     for (FetchingSample s : samples.values()) {
       if (!s.isDownloaded()) {
-        // failed++;
-        // if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
-        completed = false;
-        break;
-        // }
+        failed++;
+        if (failed > KademliaCommonConfigDas.MAX_SAMPLING_FAILED) {
+          completed = false;
+          break;
+        }
       }
     }
     return completed;

@@ -23,7 +23,7 @@ public class KademliaCommonConfigDas {
   public static int BLOCK_DIM_SIZE = 10;
 
   /** Number of samples retrieved for the random sampling */
-  public static int N_SAMPLES = 75;
+  public static int N_SAMPLES = 95;
 
   public static int MAX_SAMPLING_FAILED = 0;
 
@@ -63,4 +63,6 @@ public class KademliaCommonConfigDas {
   public static int networkSize = 0;
 
   public static long TTL = 100000;
+
+  public static int EXTRA_NODES_MAX = 10;
 }

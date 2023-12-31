@@ -265,12 +265,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   }
 
   protected void handleApproachingDeadling(Message m, int myPid) {
-    logger.warning("Handle approaching deadline");
     if (m.src.getId().compareTo(this.getKademliaId()) == 0) {
       for (SamplingOperation sop : samplingOp.values()) {
         if (!sop.completed()) {
-          sop.addExtraNodes();
-          doSampling(sop);
+          logger.warning("Handle approaching deadline");
+          if (sop.addExtraNodes()) doSampling(sop);
         }
       }
     }
@@ -545,7 +544,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(10 * latency, t, src, myPid); // set delay = 2*RTT
+      EDSimulator.add(1000, t, src, myPid); // set delay = 2*RTT
     }
   }
 
@@ -629,6 +628,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     Message m = new Message();
     m.timestamp = CommonState.getTime();
     m.src = this.getKademliaProtocol().getKademliaNode();
+    m.dst = this.getKademliaProtocol().getKademliaNode();
     EDSimulator.add(
         1000, m, Util.nodeIdtoNode(this.getKademliaId(), kademliaId), dasID); // set delay = 2*RTT
     doSampling(op);
@@ -646,50 +646,50 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       return true;
     } else {
       boolean success = false;
-      if (sop.getAvailableRequests() == 0) {
-        logger.warning("Doing sampling again " + sop.getId());
-        BigInteger[] nextNodes = sop.doSampling();
-        for (BigInteger nextNode : nextNodes) {
-          BigInteger[] reqSamples = sop.getSamples();
-          logger.warning(
-              "sending to node "
-                  + nextNode
-                  + " "
-                  + reqSamples.length
-                  + " "
-                  + sop.getAvailableRequests()
-                  + " "
-                  + sop.getId());
+      // if (sop.getAvailableRequests() == 0) {
+      logger.warning("Doing sampling again " + sop.getId());
+      BigInteger[] nextNodes = sop.doSampling();
+      for (BigInteger nextNode : nextNodes) {
+        BigInteger[] reqSamples = sop.getSamples();
+        logger.warning(
+            "sending to node "
+                + nextNode
+                + " "
+                + reqSamples.length
+                + " "
+                + sop.getAvailableRequests()
+                + " "
+                + sop.getId());
 
-          Message msg = generateGetSampleMessage(reqSamples);
-          msg.operationId = sop.getId();
-          msg.src = this.kadProtocol.getKademliaNode();
-          // if (missing) msg.value = reqSamples;
-          success = true;
-          msg.dst = Util.nodeIdtoNode(nextNode, kademliaId).getKademliaProtocol().getKademliaNode();
-          /*if (nextNode.compareTo(builderAddress) == 0) {
-            logger.warning("Error sending to builder or 0 samples assigned");
-            continue;
-          }*/
-          sop.addMessage(msg.id);
-          // logger.warning("Send message " + dasID + " " + this);
-          sendMessage(msg, nextNode, dasID);
-          sop.getMessages();
-        }
-        /*if (!success) {
-          if (sop instanceof ValidatorSamplingOperation)
-            logger.warning("Sampling operation finished validator failed " + sop.getId());
-          else {
-            logger.warning("Sampling operation finished random failed " + sop.getId());
-            for (BigInteger id : sop.getSamples()) {
-              logger.warning("Missing sample " + id + " for op " + sop.getId());
-            }
-          }
-
-          samplingOp.remove(sop.getId());
-          KademliaObserver.reportOperation(sop);
+        Message msg = generateGetSampleMessage(reqSamples);
+        msg.operationId = sop.getId();
+        msg.src = this.kadProtocol.getKademliaNode();
+        // if (missing) msg.value = reqSamples;
+        success = true;
+        msg.dst = Util.nodeIdtoNode(nextNode, kademliaId).getKademliaProtocol().getKademliaNode();
+        /*if (nextNode.compareTo(builderAddress) == 0) {
+          logger.warning("Error sending to builder or 0 samples assigned");
+          continue;
         }*/
+        sop.addMessage(msg.id);
+        // logger.warning("Send message " + dasID + " " + this);
+        sendMessage(msg, nextNode, dasID);
+        sop.getMessages();
       }
+      /*if (!success) {
+        if (sop instanceof ValidatorSamplingOperation)
+          logger.warning("Sampling operation finished validator failed " + sop.getId());
+        else {
+          logger.warning("Sampling operation finished random failed " + sop.getId());
+          for (BigInteger id : sop.getSamples()) {
+            logger.warning("Missing sample " + id + " for op " + sop.getId());
+          }
+        }
+
+        samplingOp.remove(sop.getId());
+        KademliaObserver.reportOperation(sop);
+      }*/
+      // }
       return success;
     }
   }

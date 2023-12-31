@@ -1,7 +1,9 @@
 package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.MissingNode;
@@ -152,5 +154,44 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     if (completed) result.put("completed", "yes");
     else result.put("completed", "no");
     return result;
+  }
+
+  @Override
+  protected void createNodes() {
+    for (BigInteger sample : samples.keySet()) {
+      if (!samples.get(sample).isDownloaded()) {
+
+
+        List<BigInteger> nodesBySample = new ArrayList<>();
+        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+        if(row>0){
+        nodesBySample.addAll(
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        nodesBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
+        } else {
+         nodesBySample.addAll(
+            searchTable.getValidatorNodesbySample(samples.get(sample).getIdByColumn(), radiusValidator));
+        nodesBySample.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusNonValidator));         
+        }
+        boolean found = false;
+        if (nodesBySample != null && nodesBySample.size() > 0) {
+          for (BigInteger id : nodesBySample) {
+            if (!nodes.containsKey(id)) {
+              nodes.put(id, new Node(id));
+              nodes.get(id).addSample(samples.get(sample));
+            } else {
+              nodes.get(id).addSample(samples.get(sample));
+            }
+          }
+          found = true;
+        }
+
+        if (!found && callback != null) callback.missing(sample, this);
+      }
+    }
   }
 }

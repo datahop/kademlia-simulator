@@ -2,6 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ public abstract class SamplingOperation extends FindOperation {
 
   protected List<BigInteger> askNodes;
 
+  protected boolean extraNodesActivated;
+
   public SamplingOperation(
       BigInteger srcNode,
       BigInteger destNode,
@@ -53,6 +56,7 @@ public abstract class SamplingOperation extends FindOperation {
     aggressiveness = 0;
     askNodes = new ArrayList<>();
     timesIncreased = 0;
+    extraNodesActivated = false;
   }
 
   public SamplingOperation(
@@ -79,6 +83,8 @@ public abstract class SamplingOperation extends FindOperation {
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     askNodes = new ArrayList<>();
     timesIncreased = 0;
+    extraNodesActivated = false;
+
     // queried = new HashSet<>();
     // TODO Auto-generated constructor stub
   }
@@ -103,59 +109,41 @@ public abstract class SamplingOperation extends FindOperation {
     return radiusNonValidator;
   }
 
-  protected void createNodes() {
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample).isDownloaded()) {
+  abstract protected void createNodes();
 
-        List<BigInteger> nodesBySample = new ArrayList<>();
-        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
-        nodesBySample.addAll(
-            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
-        nodesBySample.addAll(
-            searchTable.getNonValidatorNodesbySample(
-                samples.get(sample).getId(), radiusNonValidator));
-        boolean found = false;
-        if (nodesBySample != null && nodesBySample.size() > 0) {
-          for (BigInteger id : nodesBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
-            }
+  public boolean addExtraNodes() {
+    if (!extraNodesActivated) {
+      for (BigInteger sample : samples.keySet()) {
+        if (!samples.get(sample).isDownloaded()) {
+
+          List<BigInteger> nodesBySample = new ArrayList<>();
+          // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
+          for (Sample s : currentBlock.getSamplesByRow(samples.get(sample).getRow())) {
+            nodesBySample.addAll(searchTable.getValidatorNodesbySample(s.getId(), radiusValidator));
           }
-          found = true;
-        }
-
-        if (!found && callback != null) callback.missing(sample, this);
-      }
-    }
-  }
-
-  public void addExtraNodes() {
-    for (BigInteger sample : samples.keySet()) {
-      if (!samples.get(sample).isDownloaded()) {
-
-        List<BigInteger> nodesBySample = new ArrayList<>();
-        // searchTable.getNodesbySample(samples.get(sample).getId(), radiusValidator);
-        for (Sample s : currentBlock.getSamplesByRow(samples.get(sample).getRow())) {
-          nodesBySample.addAll(searchTable.getValidatorNodesbySample(s.getId(), radiusValidator));
-        }
-        for (Sample s : currentBlock.getSamplesByColumn(samples.get(sample).getColumn())) {
-          nodesBySample.addAll(
-              searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator));
-        }
-        if (nodesBySample != null && nodesBySample.size() > 0) {
-          for (BigInteger id : nodesBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
+          for (Sample s : currentBlock.getSamplesByColumn(samples.get(sample).getColumn())) {
+            nodesBySample.addAll(
+                searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator));
+          }
+          Collections.shuffle(nodesBySample);
+          int nodesAssigned = 0;
+          if (nodesBySample != null && nodesBySample.size() > 0) {
+            for (BigInteger id : nodesBySample) {
+              if (!nodes.containsKey(id)) {
+                nodes.put(id, new Node(id));
+                nodes.get(id).addSample(samples.get(sample));
+                nodesAssigned++;
+                if (nodesAssigned >= KademliaCommonConfigDas.EXTRA_NODES_MAX) break;
+              } else {
+                nodes.get(id).addSample(samples.get(sample));
+              }
             }
           }
         }
       }
+      return true;
+    } else {
+      return false;
     }
   }
 
