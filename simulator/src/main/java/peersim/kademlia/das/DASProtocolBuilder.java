@@ -47,7 +47,7 @@ public class DASProtocolBuilder extends DASProtocol {
       boolean inRegion = false;
       Sample s = currentBlock.next();
       kv.add(s.getId(), s);
-      kv.add(s.getIdByColumn(), s);
+      // kv.add(s.getIdByColumn(), s);
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
