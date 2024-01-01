@@ -31,7 +31,8 @@ public class DASDHTProtocol extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
-    kv.erase();
+    // kv.erase();
+    kv.clear();
     // samplesRequested = 0;
     row = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];
     column = new int[KademliaCommonConfigDas.BLOCK_DIM_SIZE + 1];

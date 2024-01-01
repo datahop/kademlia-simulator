@@ -24,7 +24,6 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.KademliaEvents;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.KademliaProtocol;
-import peersim.kademlia.KeyValueStore;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.Timeout;
@@ -67,7 +66,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected boolean isValidator;
 
-  protected KeyValueStore kv;
+  // protected KeyValueStore kv;
+  protected List<BigInteger> kv;
 
   protected Block currentBlock;
 
@@ -126,7 +126,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     reportDiscovery = Configuration.getBoolean(prefix + "." + PAR_DISC, false);
     msgReport = Configuration.getBoolean(prefix + "." + PAR_MSG, false);
 
-    kv = new KeyValueStore();
+    // kv = new KeyValueStore();
+    kv = new ArrayList<>();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
     kadOps = new LinkedHashMap<Operation, SamplingOperation>();
     samplingStarted = false;
@@ -276,7 +277,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     init = true;
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
-    kv.erase();
+    // kv.erase();
+    kv.clear();
     missingSamples.clear();
     // samplesRequested = 0;
     row = new int[currentBlock.getSize()];
@@ -317,7 +319,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
+    // logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 
@@ -327,8 +329,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     for (BigInteger id : samples) {
       logger.info("Requesting sample " + id + " from " + m.src.getId());
-      Sample sample = (Sample) kv.get(id);
-      if (sample != null) {
+      // Sample sample = (Sample) kv.get(id);
+      // if (sample != null) {
+      if (kv.contains(id)) {
         // s.add(sample);
 
         /*Message response = new Message(Message.MSG_GET_SAMPLE_RESPONSE, new Sample[] {sample});
@@ -340,7 +343,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
         sendMessage(response, m.src.getId(), myPid);
         sampleFound = true;*/
-        samplesToSend.add(sample);
+        // samplesToSend.add(sample);
+        samplesToSend.add(currentBlock.getSample(id));
         if (isEvil && samplesToSend.size() > 0) break;
       } else {
         if (missingSamples.get(id) != null) missingSamples.get(id).add(m);
@@ -386,7 +390,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         && column[s.getColumn() - 1] != column.length) {
       Sample[] samples = currentBlock.getSamplesByColumn(s.getColumn());
       for (Sample sam : samples) {
-        kv.add((BigInteger) sam.getIdByRow(), sam);
+        kv.add(sam.getIdByRow());
+        // kv.add((BigInteger) sam.getIdByRow(), sam);
         // kv.add((BigInteger) sam.getIdByColumn(), sam);
       }
       column[s.getColumn() - 1] = currentBlock.getSize();
@@ -394,7 +399,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (row[s.getRow() - 1] >= row.length / 2 && row[s.getRow() - 1] != row.length) {
       Sample[] samples = currentBlock.getSamplesByRow(s.getRow());
       for (Sample sam : samples) {
-        kv.add((BigInteger) sam.getIdByRow(), sam);
+        kv.add(sam.getIdByRow());
+        // kv.add((BigInteger) sam.getIdByRow(), sam);
         // kv.add((BigInteger) sam.getIdByColumn(), sam);
       }
       row[s.getRow() - 1] = currentBlock.getSize();
@@ -417,7 +423,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       logger.info(
           "Sample received " + s.getId() + " " + s.getIdByColumn() + " from " + m.src.getId());
 
-      kv.add((BigInteger) s.getIdByRow(), s);
+      kv.add((BigInteger) s.getIdByRow());
+      // kv.add((BigInteger) s.getIdByRow(), s);
       // kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
@@ -431,10 +438,12 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
               + " "
               + samplingOp.get(m.operationId).getPending()
               + " "
-              + kv.occupancy());
+              + kv.size());
+    // + kv.occupancy());
     else
       logger.info(
-          "Samples received  " + samples.length + " from " + m.src.getId() + " " + kv.occupancy());
+          "Samples received  " + samples.length + " from " + m.src.getId() + " " + kv.size());
+    //    "Samples received  " + samples.length + " from " + m.src.getId() + " " + kv.occupancy());
     HashMap<Message, List<Sample>> toSend = findMissingSamples(samples);
 
     for (Message msg : toSend.keySet()) {
@@ -539,8 +548,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     HashMap<Message, List<Sample>> toSend = new HashMap<>();
     List<BigInteger> toRemove = new ArrayList<>();
     for (BigInteger id : missingSamples.keySet()) {
-      if (kv.get(id) != null) {
-        Sample s = (Sample) kv.get(id);
+      if (kv.contains(id)) {
+        Sample s = currentBlock.getSample(id);
+        // if (kv.get(id) != null) {
+        //  Sample s = (Sample) kv.get(id);
         for (Message msg : missingSamples.get(id)) {
 
           if (toSend.get(msg) != null) {
@@ -710,7 +721,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             this.isValidator,
             KademliaCommonConfigDas.validatorsSize,
             this);
-    op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
+    // op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random " + op.getId());
 

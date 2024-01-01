@@ -415,6 +415,10 @@ public class Block implements Iterator<Sample>, Cloneable {
     return samples;
   }
 
+  public Sample getSample(BigInteger id) {
+    return sampleMap.get(id);
+  }
+
   private void _init() {
 
     // execute once

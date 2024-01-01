@@ -46,7 +46,7 @@ public class DASProtocolBuilder extends DASProtocol {
     while (currentBlock.hasNext()) {
       boolean inRegion = false;
       Sample s = currentBlock.next();
-      kv.add(s.getId(), s);
+      // kv.add(s.getId(), s);
       // kv.add(s.getIdByColumn(), s);
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(
