@@ -53,7 +53,7 @@ public class DASProtocolNonValidator extends DASProtocol {
     validatorsContacted.clear();
     super.handleInitNewBlock(m, myPid);
     if (!isEvil) {
-      // startRandomSampling();
+      startRandomSampling();
     }
   }
 

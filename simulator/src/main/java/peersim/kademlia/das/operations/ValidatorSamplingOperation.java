@@ -174,9 +174,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           //    searchTable.getNodesbySample(samples.get(sample).getId(), radiusUsed));
           nodesBySample.addAll(
               searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
-          nodesBySample.addAll(
-              searchTable.getNonValidatorNodesbySample(
-                  samples.get(sample).getId(), radiusNonValidator));
+          /*nodesBySample.addAll(
+          searchTable.getNonValidatorNodesbySample(
+              samples.get(sample).getId(), radiusNonValidator));*/
 
           //   radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           // }
@@ -188,9 +188,9 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           nodesBySample.addAll(
               searchTable.getValidatorNodesbySample(
                   samples.get(sample).getIdByColumn(), radiusValidator));
-          nodesBySample.addAll(
-              searchTable.getNonValidatorNodesbySample(
-                  samples.get(sample).getIdByColumn(), radiusNonValidator));
+          /*nodesBySample.addAll(
+          searchTable.getNonValidatorNodesbySample(
+              samples.get(sample).getIdByColumn(), radiusNonValidator));*/
 
           // radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           // }
