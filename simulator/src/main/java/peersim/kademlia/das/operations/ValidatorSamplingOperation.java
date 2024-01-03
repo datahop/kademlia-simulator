@@ -213,7 +213,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
 
-    for (BigInteger id : nodes.keySet()) {
+    /*for (BigInteger id : nodes.keySet()) {
       for (FetchingSample s : nodes.get(id).getSamples())
         System.out.println(
             "["
@@ -226,7 +226,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
                 + id
                 + " "
                 + s.getId());
-    }
+    }*/
   }
 
   public BigInteger[] getSamples() {

@@ -320,7 +320,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.warning("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
+    logger.info("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 
@@ -421,7 +421,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }*/
 
     for (Sample s : samples) {
-      logger.warning(
+      logger.info(
           "Sample received "
               + s.getId()
               + " "
@@ -473,8 +473,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       if (isEvil)
         response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);*/
       for (Sample s : samplesToSend)
-        logger.warning(
-            "Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
+        logger.info("Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
       sendMessage(response, msg.src.getId(), myPid);
     }
     toSend.clear();
