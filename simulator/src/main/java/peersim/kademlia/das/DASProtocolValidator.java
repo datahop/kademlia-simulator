@@ -37,7 +37,7 @@ public class DASProtocolValidator extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     if (!isEvil) {
-      // startRowsandColumnsSampling();
+      startRowsandColumnsSampling();
       startRandomSampling();
     }
   }
