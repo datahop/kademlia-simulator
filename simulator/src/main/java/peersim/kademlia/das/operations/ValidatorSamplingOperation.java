@@ -212,6 +212,21 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         if (!found && callback != null) callback.missing(sample, this);
       }
     }
+
+    for (BigInteger id : nodes.keySet()) {
+      for (FetchingSample s : nodes.get(id).getSamples())
+        System.out.println(
+            "["
+                + CommonState.getTime()
+                + "]["
+                + srcNode
+                + "] Nodes created "
+                + this.getId()
+                + " "
+                + id
+                + " "
+                + s.getId());
+    }
   }
 
   public BigInteger[] getSamples() {

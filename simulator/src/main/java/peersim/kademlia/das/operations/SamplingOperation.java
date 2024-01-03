@@ -3,6 +3,7 @@ package peersim.kademlia.das.operations;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -178,6 +179,8 @@ public abstract class SamplingOperation extends FindOperation {
               + askedNodes.size());
     }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
+    Collection<Node> ns = this.getNodes();
+    Collections.sort(ns);
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {
 

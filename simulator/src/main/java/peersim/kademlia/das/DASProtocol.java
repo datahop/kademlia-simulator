@@ -584,7 +584,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
           }
         }
         toRemove.add(s.getId());
-        toRemove.add(s.getIdByColumn());
       }
     }
     for (BigInteger id : toRemove) {

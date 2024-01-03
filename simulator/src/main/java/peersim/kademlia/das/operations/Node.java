@@ -59,8 +59,10 @@ public class Node implements Comparable<Node> {
 
   @Override
   public int compareTo(Node n) {
-    if (this.getScore() < n.getScore()) return 1;
-    else if (this.getScore() > n.getScore()) return -1;
+   //if (this.getScore() < n.getScore()) return 1;
+    //else if (this.getScore() > n.getScore()) return -1;
+    if(this.samples.size() > n.samples.size()) return 1;
+    else if (this.samples.size() < n.samples.size()) return -1;
     else return 0;
   }
 }
