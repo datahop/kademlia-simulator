@@ -10,6 +10,7 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -320,7 +321,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.info("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
+    logger.warning("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 
@@ -421,7 +422,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }*/
 
     for (Sample s : samples) {
-      logger.info(
+      logger.warning(
           "Sample received "
               + s.getId()
               + " "
@@ -473,7 +474,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       if (isEvil)
         response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);*/
       for (Sample s : samplesToSend)
-        logger.info("Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
+        logger.warning(
+            "Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
       sendMessage(response, msg.src.getId(), myPid);
     }
     toSend.clear();
@@ -743,6 +745,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     // op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started random " + op.getId());
+
+    List<BigInteger> samples = Arrays.asList(op.getSamples());
+    Collections.sort(samples);
+    for (BigInteger id : samples) logger.warning("Sampling operation sample " + id);
 
     doSampling(op);
   }

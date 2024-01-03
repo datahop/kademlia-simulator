@@ -28,10 +28,16 @@ public class DASProtocolNonValidator extends DASProtocol {
     BigInteger radius =
         currentBlock.computeRegionRadius(
             KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
-            searchTable.getValidatorsIndexed().size());
+            KademliaCommonConfigDas.validatorsSize);
     for (BigInteger sample : samples) {
       logger.warning("Init block non-validator node - getting samples " + sample);
-      for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
+      List<BigInteger> nodes = searchTable.getValidatorNodesbySample(sample, radius);
+      if (nodes.size() == 0) {
+        // logger.warning("Sample not found");
+        nodes = new ArrayList<>();
+        nodes.add(builderAddress);
+      }
+      for (BigInteger id : nodes) {
         if (!validatorsContacted.contains(id)) {
           Message msg = generateGetSampleMessage(samples);
           msg.operationId = -1;
@@ -40,7 +46,7 @@ public class DASProtocolNonValidator extends DASProtocol {
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, myPid);
           validatorsContacted.add(id);
-          break;
+          // break;
         }
       }
     }
