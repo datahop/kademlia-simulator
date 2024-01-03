@@ -184,6 +184,17 @@ public abstract class SamplingOperation extends FindOperation {
     List<BigInteger> result = new ArrayList<>();
     // for (Node n : nodes.values()) {
     for (Node n : sortedNodes) {
+      /*System.out.println(
+      "["
+          + CommonState.getTime()
+          + "]["
+          + srcNode
+          + "] Sampling nodes "
+          + this.getId()
+          + " "
+          + n.getScore()
+          + " "
+          + n.getSamples().size());*/
 
       if (!n.isBeingAsked() && n.getScore() > 0) { // break;
         n.setBeingAsked(true);
