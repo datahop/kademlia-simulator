@@ -179,10 +179,11 @@ public abstract class SamplingOperation extends FindOperation {
               + askedNodes.size());
     }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
-    Collection<Node> ns = this.getNodes();
-    Collections.sort(ns);
+    List<Node> sortedNodes = new ArrayList<>(nodes.values());
+    Collections.sort(sortedNodes);
     List<BigInteger> result = new ArrayList<>();
-    for (Node n : nodes.values()) {
+    // for (Node n : nodes.values()) {
+    for (Node n : sortedNodes) {
 
       if (!n.isBeingAsked() && n.getScore() > 0) { // break;
         n.setBeingAsked(true);
