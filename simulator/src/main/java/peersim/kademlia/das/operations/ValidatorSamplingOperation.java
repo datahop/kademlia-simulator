@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import peersim.core.CommonState;
 import peersim.kademlia.das.Block;
+import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -244,8 +245,12 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   }
 
   protected void addExtraNodes() {
+    // if (CommonState.getTime() - this.getTimestamp() > 1000)
+    aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 2;
     if (CommonState.getTime() - this.getTimestamp() > 1000)
-      aggressiveness_step = aggressiveness_step * 2;
+      aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
+    if (CommonState.getTime() - this.getTimestamp() > 2000)
+      aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 8;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     for (BigInteger sample : missingSamples) {
@@ -253,20 +258,31 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       List<BigInteger> nodesBySample = new ArrayList<>();
       BigInteger radiusUsed = radiusValidator;
       if (column > 0) {
-        Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
+        // Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
         List<BigInteger> nodes = new ArrayList<>();
-        for (Sample s : sRow) {
-          nodes.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
-        }
+        // for (Sample s : sRow) {
+        // nodes.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+        nodes.addAll(
+            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        nodes.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getId(), radiusNonValidator));
+        // }
 
         nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
       } else {
-        Sample[] sColumn =
-            currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
+        // Sample[] sColumn =
+        // currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
         List<BigInteger> nodes = new ArrayList<>();
-        for (Sample s : sColumn) {
-          nodes.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
-        }
+        // for (Sample s : sColumn) {
+        // nodes.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+        nodes.addAll(
+            searchTable.getValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusValidator));
+        nodes.addAll(
+            searchTable.getNonValidatorNodesbySample(
+                samples.get(sample).getIdByColumn(), radiusNonValidator));
+        // }
         nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodes)));
       }
 
@@ -282,7 +298,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
             nodes.get(id).addSample(samples.get(sample));
           }
           count++;
-          if (count > aggressiveness - 2) return;
+          if (count == aggressiveness) return;
         }
       }
     }

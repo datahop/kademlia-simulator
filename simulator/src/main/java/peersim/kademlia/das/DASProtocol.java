@@ -10,7 +10,6 @@ package peersim.kademlia.das;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -474,8 +473,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       if (isEvil)
         response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);*/
       for (Sample s : samplesToSend)
-        logger.info(
-            "Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
+        logger.info("Sending sample cached " + s.getId() + " to " + msg.src.getId() + " " + msg.id);
       sendMessage(response, msg.src.getId(), myPid);
     }
     toSend.clear();
@@ -663,7 +661,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       // add to sent msg
       this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(latency * 8 + 200, t, src, myPid); // set delay = 2*RTT
+      /// BigInteger[] samples = (Sample[]) m.body;
+
+      long timeout = latency * 4;
+      if (timeout < 200) timeout = 200;
+      EDSimulator.add(timeout, t, src, myPid); // set delay = 2*RTT
     }
   }
 

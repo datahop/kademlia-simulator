@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+
+import peersim.core.CommonState;
 import peersim.kademlia.das.Block;
 import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
@@ -183,7 +185,11 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   protected void addExtraNodes() {
-
+    aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 2;
+    if (CommonState.getTime() - this.getTimestamp() > 1000)
+      aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
+    if (CommonState.getTime() - this.getTimestamp() > 2000)
+      aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 8;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     for (BigInteger sample : missingSamples) {
@@ -193,12 +199,14 @@ public class RandomSamplingOperation extends SamplingOperation {
       Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
       List<BigInteger> nodesToAdd = new ArrayList<>();
       for (Sample s : sRow) {
-        nodesToAdd.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+        // nodesToAdd.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
+        nodesToAdd.addAll(searchTable.getValidatorNodesbySample(s.getId(), radiusUsed));
       }
       Sample[] sColumn =
           currentBlock.getSamplesByColumn(samples.get(sample).getSample().getColumn());
       for (Sample s : sColumn) {
-        nodesToAdd.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+        // nodesToAdd.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
+        nodesToAdd.addAll(searchTable.getValidatorNodesbySample(s.getId(), radiusUsed));
       }
       nodesBySample.addAll(new ArrayList<>(new LinkedHashSet<>(nodesToAdd)));
 
