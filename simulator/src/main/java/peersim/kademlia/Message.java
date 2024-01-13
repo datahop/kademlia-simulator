@@ -1,7 +1,9 @@
 package peersim.kademlia;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import peersim.kademlia.das.Sample;
 
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
@@ -110,6 +112,8 @@ public class Message extends SimpleEvent {
   /** Available to count the number of hops the message did. */
   protected int nrHops = 0;
 
+  protected int size = 0;
+
   // ______________________________________________________________________________________________
   /**
    * Creates an empty message by using default values (message type = MSG_LOOKUP and <code>
@@ -139,6 +143,19 @@ public class Message extends SimpleEvent {
     super(messageType);
     this.id = (ID_GENERATOR++);
     this.body = body;
+
+    if (body instanceof BigInteger[]) {
+      BigInteger[] reqs = (BigInteger[]) body;
+      size += 32 * reqs.length;
+      size += 64;
+      size += 4;
+    } else if (body instanceof Sample[]) {
+      Sample[] samples = (Sample[]) body;
+      size += 512 * samples.length;
+      size += 15 * 32;
+      size += 64;
+      size += 4;
+    }
   }
 
   // ______________________________________________________________________________________________
@@ -248,6 +265,9 @@ public class Message extends SimpleEvent {
     return s + "[Type=" + typeToString() + "] BODY=(...)";
   }
 
+  public int getSize() {
+    return size;
+  }
   // ______________________________________________________________________________________________
   public Message copy() {
     Message dolly = new Message();

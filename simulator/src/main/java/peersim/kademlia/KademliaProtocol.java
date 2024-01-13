@@ -557,7 +557,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // If the event is a message, report the message to the Kademlia observer.
     if (event instanceof Message) {
       m = (Message) event;
-      KademliaObserver.reportMsg(m, false);
+      // KademliaObserver.reportMsg(m, false);
     }
 
     // Handle the event based on its type.

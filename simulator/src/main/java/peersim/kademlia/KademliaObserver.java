@@ -3,6 +3,7 @@ package peersim.kademlia;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -60,6 +61,10 @@ public class KademliaObserver implements Control {
   private static HashMap<Long, Map<String, Object>> peerDiscoveries =
       new HashMap<Long, Map<String, Object>>();
 
+  private static HashMap<BigInteger, Integer> msgsIn = new HashMap<>();
+  private static HashMap<BigInteger, Integer> msgsOut = new HashMap<>();
+  private static HashMap<BigInteger, Integer> bytesIn = new HashMap<>();
+  private static HashMap<BigInteger, Integer> bytesOut = new HashMap<>();
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
 
@@ -123,9 +128,11 @@ public class KademliaObserver implements Control {
     if (!directory.exists()) {
       directory.mkdir();
     }
+
+    HashMap<Long, Map<String, Object>> msgsInOut = writeMessages();
     // Write messages log to file if not empty
-    if (!messages.isEmpty()) {
-      writeLogs(messages, logFolderName + "/" + "messages.csv");
+    if (!msgsInOut.isEmpty()) {
+      writeLogs(msgsInOut, logFolderName + "/" + "messages.csv");
     }
     if (!operations.isEmpty()) {
       writeLogs(operations, logFolderName + "/" + "operation.csv");
@@ -180,14 +187,44 @@ public class KademliaObserver implements Control {
    * @param m The message to report
    * @param sent a boolean indicating whether the message was sent or received.
    */
-  public static void reportMsg(Message m, boolean sent) {
+  public static void reportMsg(Message m, boolean sent, BigInteger id) {
     // Messages without a source are control messages sent by the traffic control,
     // so we don't want to log them.
-    if (m.src == null) return;
+
+    if (m.src == null) {
+      // System.exit(-1);
+      return;
+    }
+    // System.out.println("Reporting msg " + m);
 
     // Add the message to the message log, but first check if it hasn't already been added
-    assert (!messages.keySet().contains(m.id));
-    messages.put(m.id, m.toMap(sent));
+    // assert (!messages.keySet().contains(m.id));
+    // messages.put(m.id, m.toMap(sent));
+    if (sent) {
+      if (msgsOut.get(id) == null) {
+        msgsOut.put(id, 1);
+        bytesOut.put(id, m.getSize());
+      } else {
+        Integer msgs = msgsOut.get(id);
+        Integer bytes = bytesOut.get(id);
+        bytes += m.getSize();
+        msgs++;
+        msgsOut.put(id, msgs);
+        bytesOut.put(id, bytes);
+      }
+    } else {
+      if (msgsIn.get(id) == null) {
+        msgsIn.put(id, 1);
+        bytesIn.put(id, m.getSize());
+      } else {
+        Integer msgs = msgsIn.get(id);
+        Integer bytes = bytesOut.get(id);
+        msgs++;
+        bytes += m.getSize();
+        msgsIn.put(id, msgs);
+        bytesIn.put(id, bytes);
+      }
+    }
   }
 
   /**
@@ -226,5 +263,23 @@ public class KademliaObserver implements Control {
     result.put("malicious_peers", st.getMaliciousNeighboursCount());
     result.put("validators_discovered", st.getValidatorsNeighboursCount());
     peerDiscoveries.put(m.id, result);
+  }
+
+  private static HashMap<Long, Map<String, Object>> writeMessages() {
+    HashMap<Long, Map<String, Object>> msgs = new HashMap<>();
+
+    Long msgId = (long) 0;
+    for (BigInteger id : msgsIn.keySet()) {
+      System.out.println("Writing messages log " + id);
+      Map<String, Object> result = new HashMap<String, Object>();
+      result.put("id", id);
+      result.put("msgsIn", msgsIn.get(id));
+      result.put("msgsOut", msgsOut.get(id));
+      result.put("bytesIn", bytesIn.get(id));
+      result.put("bytesOut", bytesOut.get(id));
+      msgs.put(msgId, result);
+      msgId++;
+    }
+    return msgs;
   }
 }
