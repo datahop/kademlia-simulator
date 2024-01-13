@@ -85,7 +85,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected int dasID;
 
   /** trace message sent for timeout purpose */
-  protected TreeMap<Long, Long> sentMsg;
+  protected TreeMap<Long, Message> sentMsg;
 
   protected long time;
 
@@ -94,6 +94,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected boolean init;
 
   protected HashMap<BigInteger, List<Message>> missingSamples;
+
+  protected List<Long> opsToRemove;
 
   /**
    * Replicate this object by returning an identical copy.<br>
@@ -135,8 +137,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     uploadInterfaceBusyUntil = 0;
 
-    sentMsg = new TreeMap<Long, Long>();
+    sentMsg = new TreeMap<Long, Message>();
 
+    opsToRemove = new ArrayList<Long>();
     // searchTable = new SearchTable();
     isBuilder = false;
     missingSamples = new HashMap<>();
@@ -195,6 +198,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         m = (Message) event;
         handleSeedSample(m, myPid);
         break;
+      case Message.MSG_CANCEL_SAMPLE:
+        m = (Message) event;
+        handleCancelSampling(m, myPid);
+        break;
       case Message.MSG_GET_SAMPLE_RESPONSE:
         m = (Message) event;
         logger.info("Send message removed " + m.ackId);
@@ -204,11 +211,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       case Timeout.TIMEOUT: // timeout
         Timeout t = (Timeout) event;
-        SamplingOperation sop = samplingOp.get(t.opID);
         if (sentMsg.containsKey(t.msgID)) { // the response msg isn't arrived
           // remove form sentMsg
           logger.warning("Timeouuuuut! " + t.msgID + " " + t.node);
-          sentMsg.remove(t.msgID);
+          SamplingOperation sop = samplingOp.get(t.opID);
+          // sentMsg.remove(t.msgID);
           // this.searchTable.removeNode(t.node);
           if (sop != null) {
             if (!sop.completed()) {
@@ -303,6 +310,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
     samplingOp.clear();
     kadOps.clear();
+    opsToRemove.clear();
   }
 
   protected void handleSeedSample(Message m, int myPid) {
@@ -406,6 +414,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
       row[s.getRow() - 1] = currentBlock.getSize();
     }
+  }
+
+  protected void handleCancelSampling(Message m, int myPid) {
+    logger.warning("Canceling pending samples requests from " + m.src.getId());
+    opsToRemove.add(m.operationId);
   }
 
   protected void handleGetSampleResponse(Message m, int myPid) {
@@ -542,6 +555,24 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       if (op.completed()) {
         // logger.warning("Operation completed");
         // samplingOp.remove(m.operationId);
+        List<Message> sentMsgsOp = new ArrayList<>();
+        for (Message msg : sentMsg.values()) {
+          if (msg.operationId == op.getId()) sentMsgsOp.add(msg);
+        }
+        for (Message msg : sentMsgsOp) {
+          Message response = new Message(Message.MSG_CANCEL_SAMPLE);
+          response.operationId = op.getId();
+          response.dst = msg.dst;
+          response.src = this.kadProtocol.getKademliaNode();
+          // response.ackId = msg.id; // set ACK number*/
+          /*response.value =
+              searchTable.getNeighbours(
+                  KademliaCommonConfigDas.MAX_NODES_RETURNED * toSend.get(msg).size());
+          if (isEvil)
+            response.value = searchTable.getEvilNeighbours(KademliaCommonConfigDas.MAX_NODES_RETURNED);*/
+          sendMessage(response, response.dst.getId(), myPid);
+          sentMsg.remove(msg.id);
+        }
         toRemove.add(op.getId());
         if (op instanceof ValidatorSamplingOperation)
           logger.warning(
@@ -573,13 +604,16 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
         // if (kv.get(id) != null) {
         //  Sample s = (Sample) kv.get(id);
         for (Message msg : missingSamples.get(id)) {
-
-          if (toSend.get(msg) != null) {
-            toSend.get(msg).add(s);
+          if (!opsToRemove.contains(msg.operationId)) {
+            if (toSend.get(msg) != null) {
+              toSend.get(msg).add(s);
+            } else {
+              List<Sample> sToSend = new ArrayList<>();
+              sToSend.add(s);
+              toSend.put(msg, sToSend);
+            }
           } else {
-            List<Sample> sToSend = new ArrayList<>();
-            sToSend.add(s);
-            toSend.put(msg, sToSend);
+            opsToRemove.remove(msg.operationId);
           }
         }
         toRemove.add(s.getId());
@@ -649,7 +683,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
       logger.info("Transmission " + latency + " " + transDelay);
       // add to sent msg
-      this.sentMsg.put(m.id, m.timestamp);
+      // this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);
     }
 
@@ -660,11 +694,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       logger.info("Send message added " + m.id + " " + latency + " " + destId);
 
       // add to sent msg
-      this.sentMsg.put(m.id, m.timestamp);
+      this.sentMsg.put(m.id, m);
       /// BigInteger[] samples = (Sample[]) m.body;
 
-      long timeout = latency * 4;
-      if (timeout < 200) timeout = 200;
+      long timeout = latency * 2 * 4; // 4 RTT
+      // if (timeout < 200) timeout = 200;
       EDSimulator.add(timeout, t, src, myPid); // set delay = 2*RTT
     }
   }
@@ -804,13 +838,13 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
           sendMessage(msg, nextNode, dasID);
           sop.getMessages();
         }
-        if (!success && !sop.getStarted()) {
+        /*if (!success && !sop.getStarted()) {
           Timeout t = new Timeout(this.getKademliaId(), sop.getId(), sop.getId());
           // add to sent msg
           this.sentMsg.put(sop.getId(), CommonState.getTime());
 
           EDSimulator.add(100, t, this.getKademliaProtocol().getNode(), dasID); // set delay = 2*RTT
-        }
+        }*/
       }
       return success;
     }

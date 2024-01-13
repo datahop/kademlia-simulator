@@ -76,6 +76,8 @@ public class Message extends SimpleEvent {
 
   public static final int MSG_SEED_SAMPLE = 17;
 
+  public static final int MSG_CANCEL_SAMPLE = 18;
+
   /**
    * Message Type: INIT_FIND_REGION_BASED (command to a node to start looking for node within a
    * region)
@@ -225,6 +227,10 @@ public class Message extends SimpleEvent {
     return new Message(MSG_SEED_SAMPLE, body);
   }
 
+  public static final Message makeCancelSample(Object body) {
+    return new Message(MSG_CANCEL_SAMPLE, body);
+  }
+
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request
@@ -289,6 +295,8 @@ public class Message extends SimpleEvent {
         return "MSG_GET_ANY_SAMPLE_RESPONSE";
       case MSG_SEED_SAMPLE:
         return "MSG_SEED_SAMPLE";
+      case MSG_CANCEL_SAMPLE:
+        return "MSG_CANCEL_SAMPLE";
       default:
         return "UNKNOW:" + type;
     }

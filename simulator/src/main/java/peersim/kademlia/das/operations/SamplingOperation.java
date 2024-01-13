@@ -115,7 +115,7 @@ public abstract class SamplingOperation extends FindOperation {
 
   public BigInteger[] doSampling() {
 
-    if(CommonState.getTime()<200)aggressiveness=aggressiveness_step;
+    if (CommonState.getTime() < 200) aggressiveness = aggressiveness_step;
     else aggressiveness += aggressiveness_step;
     // System.out.println("[" + srcNode + "]  nodes " + nodes.size());
     List<BigInteger> toRemove = new ArrayList<>();

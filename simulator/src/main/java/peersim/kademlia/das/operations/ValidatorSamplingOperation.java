@@ -8,9 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import peersim.core.CommonState;
 import peersim.kademlia.das.Block;
-import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.das.MissingNode;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SearchTable;
@@ -25,6 +23,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   // private RoutingTable rou;
   protected int row, column;
+  protected HashMap<BigInteger, Integer> extras;
   /**
    * default constructor
    *
@@ -60,6 +59,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       }
     }
     this.searchTable = searchTable;
+    this.extras = new HashMap<>();
     // createNodes();
   }
 
@@ -74,6 +74,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           samplesCount++;
         }
       }
+      this.extras.remove(s.getId());
       /*} else {
         if (samples.containsKey(s.getIdByColumn())) {
           FetchingSample fs = samples.get(s.getIdByColumn());
@@ -120,6 +121,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
             samplesCount++;
           }
         }
+        this.extras.remove(s.getId());
+
         /*} else {
           if (samples.containsKey(s.getIdByColumn())) {
             FetchingSample fs = samples.get(s.getIdByColumn());
@@ -246,17 +249,18 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
   protected void addExtraNodes() {
     // if (CommonState.getTime() - this.getTimestamp() > 1000)
-    aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 2;
-    if (CommonState.getTime() - this.getTimestamp() > 1000)
+    // aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 2;
+    /*if (CommonState.getTime() - this.getTimestamp() > 1000)
       aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
-    if (CommonState.getTime() - this.getTimestamp() > 2000)
-      aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 8;
+    if (CommonState.getTime() - this.getTimestamp() > 2000)*/
+    // aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
+    int globalcount = 0;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
+    // int totalcount = 0;
     for (BigInteger sample : missingSamples) {
-      int count = 0;
       List<BigInteger> nodesBySample = new ArrayList<>();
-      BigInteger radiusUsed = radiusValidator;
+      // BigInteger radiusUsed = radiusValidator;
       if (column > 0) {
         // Sample[] sRow = currentBlock.getSamplesByRow(samples.get(sample).getSample().getRow());
         List<BigInteger> nodes = new ArrayList<>();
@@ -288,7 +292,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
       nodesBySample.removeAll(askedNodes);
       Collections.shuffle(nodesBySample);
-      // int max = 0;
+      int count = 0;
       if (nodesBySample != null && nodesBySample.size() > 0) {
         for (BigInteger id : nodesBySample) {
           if (!nodes.containsKey(id)) {
@@ -298,9 +302,12 @@ public class ValidatorSamplingOperation extends SamplingOperation {
             nodes.get(id).addSample(samples.get(sample));
           }
           count++;
-          if (count == aggressiveness) return;
+          globalcount++;
+          if (count >= aggressiveness) break;
+          // if (count >= 256) return;
         }
       }
+      if (globalcount > 256) break;
     }
   }
 
