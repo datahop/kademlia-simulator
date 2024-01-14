@@ -266,8 +266,14 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         List<BigInteger> nodes = new ArrayList<>();
         // for (Sample s : sRow) {
         // nodes.addAll(searchTable.getNodesbySample(s.getId(), radiusUsed));
-        nodes.addAll(
-            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
+        BigInteger radiusUsed = radiusValidator;
+        boolean nodeInRegion = false;
+        while (!nodeInRegion) {
+          nodes.addAll(
+              searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+          if (!nodes.isEmpty()) nodeInRegion = true;
+          else radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+        }
         nodes.addAll(
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getId(), radiusNonValidator));
@@ -280,9 +286,15 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         List<BigInteger> nodes = new ArrayList<>();
         // for (Sample s : sColumn) {
         // nodes.addAll(searchTable.getNodesbySample(s.getIdByColumn(), radiusUsed));
-        nodes.addAll(
-            searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator));
+        BigInteger radiusUsed = radiusValidator;
+        boolean nodeInRegion = false;
+        while (!nodeInRegion) {
+          nodes.addAll(
+              searchTable.getValidatorNodesbySample(
+                  samples.get(sample).getIdByColumn(), radiusUsed));
+          if (!nodes.isEmpty()) nodeInRegion = true;
+          else radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+        }
         nodes.addAll(
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getIdByColumn(), radiusNonValidator));
