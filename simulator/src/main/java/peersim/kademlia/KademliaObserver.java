@@ -234,7 +234,7 @@ public class KademliaObserver implements Control {
         bytesIn.put(id, m.getSize());
       } else {
         int msgs = msgsIn.get(id);
-        int bytes = bytesOut.get(id);
+        int bytes = bytesIn.get(id);
         msgs++;
         bytes += m.getSize();
         msgsIn.put(id, msgs);

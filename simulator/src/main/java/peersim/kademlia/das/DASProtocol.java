@@ -174,7 +174,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     SimpleEvent s = (SimpleEvent) event;
     if (s instanceof Message) {
       m = (Message) event;
-      logger.warning("Reporting " + msgReport + " " + m.getType() + " " + m.getSize());
+      logger.info("Reporting " + msgReport + " " + m.getType() + " " + m.getSize());
 
       // m.dst = this.kadProtocol.getKademliaNode();
       if (msgReport
