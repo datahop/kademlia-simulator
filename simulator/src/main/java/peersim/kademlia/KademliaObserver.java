@@ -195,8 +195,20 @@ public class KademliaObserver implements Control {
     // Messages without a source are control messages sent by the traffic control,
     // so we don't want to log them.
 
+    // BigInteger id2 = new
+    // BigInteger("83814183170291850251680823880522715558189094423550585243365458794131648333116");
+    // if(id.compareTo(id2)==0){
+    /*if (sent) {
+      if (m.getType() == Message.MSG_GET_SAMPLE)
+        System.out.println(id + " sending sample request " + m.getSize());
+      else System.out.println(id + " sending sample response " + m.getSize());
+    } else {
+      if (m.getType() == Message.MSG_GET_SAMPLE)
+        System.out.println(id + " receiving sample request " + m.getSize());
+      else System.out.println(id + " receiving sample response " + m.getSize());
+    }*/
+    // }
     if (m.src == null) {
-      // System.exit(-1);
       return;
     }
     // System.out.println("Reporting msg " + m);
@@ -209,8 +221,8 @@ public class KademliaObserver implements Control {
         msgsOut.put(id, 1);
         bytesOut.put(id, m.getSize());
       } else {
-        Integer msgs = msgsOut.get(id);
-        Integer bytes = bytesOut.get(id);
+        int msgs = msgsOut.get(id);
+        int bytes = bytesOut.get(id);
         bytes += m.getSize();
         msgs++;
         msgsOut.put(id, msgs);
@@ -221,8 +233,8 @@ public class KademliaObserver implements Control {
         msgsIn.put(id, 1);
         bytesIn.put(id, m.getSize());
       } else {
-        Integer msgs = msgsIn.get(id);
-        Integer bytes = bytesOut.get(id);
+        int msgs = msgsIn.get(id);
+        int bytes = bytesOut.get(id);
         msgs++;
         bytes += m.getSize();
         msgsIn.put(id, msgs);

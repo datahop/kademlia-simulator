@@ -146,15 +146,15 @@ public class Message extends SimpleEvent {
 
     if (body instanceof BigInteger[]) {
       BigInteger[] reqs = (BigInteger[]) body;
-      size += 32 * reqs.length;
-      size += 64;
-      size += 4;
+      size += 32 * reqs.length; // req size
+      size += 64; // src / dst ids
+      size += 4; // msg type
     } else if (body instanceof Sample[]) {
       Sample[] samples = (Sample[]) body;
-      size += 512 * samples.length;
-      size += 15 * 32;
-      size += 64;
-      size += 4;
+      size += 512 * samples.length; // samples
+      size += 15 * 32; // neighbours
+      size += 64; // src dst id
+      size += 4; // message type
     }
   }
 
