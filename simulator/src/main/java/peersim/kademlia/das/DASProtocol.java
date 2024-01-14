@@ -175,7 +175,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (s instanceof Message) {
       m = (Message) event;
       // m.dst = this.kadProtocol.getKademliaNode();
-      if (msgReport) KademliaObserver.reportMsg(m, false, this.getKademliaId());
+      if (msgReport
+          && (m.getType() == Message.MSG_GET_SAMPLE
+              || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE))
+        KademliaObserver.reportMsg(m, false, this.getKademliaId());
       /*if (m.src != null) {
         Node n = Util.nodeIdtoNode(m.src.getId(), kademliaId);
         searchTable.addNeighbour(new Neighbour(m.src.getId(), n, n.getDASProtocol().isEvil()));
@@ -644,7 +647,10 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     Node src = this.kadProtocol.getNode();
     Node dest = Util.nodeIdtoNode(destId, kademliaId);
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
-    if (msgReport) KademliaObserver.reportMsg(m, true, this.getKademliaId());
+    if (msgReport
+        && (m.getType() == Message.MSG_GET_SAMPLE
+            || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE))
+      KademliaObserver.reportMsg(m, true, this.getKademliaId());
 
     if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
       transport.send(src, dest, m, myPid);
