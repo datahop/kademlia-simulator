@@ -12,6 +12,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
+import peersim.core.Node;
 import peersim.kademlia.das.Neighbour;
 import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.Operation;
@@ -30,6 +31,8 @@ public class KademliaObserver implements Control {
   private static final String PAR_STEP = "step";
 
   private static final String PAR_FOLDER = "logfolder";
+
+  private static final String PAR_PROTOCOL = "protocol";
 
   /** keep statistics of the number of hops of every message delivered. */
   public static IncrementalStats hopStore = new IncrementalStats();
@@ -71,6 +74,7 @@ public class KademliaObserver implements Control {
   /** The time granularity of reporting metrics */
   private static int observerStep;
 
+  private static int kademliaid;
   /**
    * Constructor to initialize the observer.
    *
@@ -80,8 +84,8 @@ public class KademliaObserver implements Control {
     observerStep = Configuration.getInt(prefix + "." + PAR_STEP);
 
     logFolderName = Configuration.getString(prefix + "." + PAR_FOLDER, "./logs");
-
-    System.out.println("Logfolder: " + logFolderName);
+    kademliaid = Configuration.getPid(prefix + "." + PAR_PROTOCOL);
+    // System.out.println("Logfolder: " + logFolderName);
   }
 
   private static void writeLogs(Map<Long, Map<String, Object>> map, String filename) {
@@ -273,10 +277,16 @@ public class KademliaObserver implements Control {
       // System.out.println("Writing messages log " + id);
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
+      Node n = Util.nodeIdtoNode(id, kademliaid);
+      boolean builder = n.getDASProtocol().isBuilder();
+      boolean validator = n.getDASProtocol().isValidator();
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));
       result.put("bytesOut", bytesOut.get(id));
+      if (builder) result.put("nodeType", "builder");
+      else if (validator) result.put("nodeType", "validator");
+      else result.put("nodeType", "regular");
       msgs.put(msgId, result);
       msgId++;
     }
