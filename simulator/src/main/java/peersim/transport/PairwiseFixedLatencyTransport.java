@@ -4,7 +4,7 @@ import peersim.config.*;
 import peersim.core.*;
 import peersim.edsim.*;
 
-public final class PairwiseFixedLatencyTransport extends UniformRandomTransport {
+public class PairwiseFixedLatencyTransport extends UniformRandomTransport {
 
   /** Size of the network. */
   private int size;

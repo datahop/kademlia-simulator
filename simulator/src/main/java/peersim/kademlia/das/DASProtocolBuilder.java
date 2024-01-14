@@ -53,40 +53,41 @@ public class DASProtocolBuilder extends DASProtocol {
           currentBlock.computeRegionRadius(
               KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
               searchTable.getValidatorsIndexed().size());
+      BigInteger radiusUsed = radiusValidator;
+      while (!inRegion) {
 
-      // while (!inRegion) {
+        List<BigInteger> idsValidators =
+            searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusUsed);
+        idsValidators.addAll(searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusUsed));
+        for (BigInteger id : idsValidators) {
 
-      List<BigInteger> idsValidators =
-          searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusValidator);
-      idsValidators.addAll(
-          searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator));
-      for (BigInteger id : idsValidators) {
+          logger.info(
+              "Sending sample to validator "
+                  + s.getIdByRow()
+                  + " "
+                  + s.getIdByColumn()
+                  + " to "
+                  + id);
+          Node n = Util.nodeIdtoNode(id, kademliaId);
+          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
+          if (dasProt.isBuilder()) continue;
+          if (n.isUp()) {
 
-        logger.info(
-            "Sending sample to validator "
-                + s.getIdByRow()
-                + " "
-                + s.getIdByColumn()
-                + " to "
-                + id);
-        Node n = Util.nodeIdtoNode(id, kademliaId);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        if (dasProt.isBuilder()) continue;
-        if (n.isUp()) {
-
-          if (!samplesToRequest.containsKey(id)) {
-            List<BigInteger> samples = new ArrayList<>();
-            samples.add(s.getId());
-            samplesToRequest.put(id, samples);
-          } else {
-            samplesToRequest.get(id).add(s.getId());
-          }
-          samplesValidators++;
-          if (inRegion == false) {
-            samplesWithinRegion++;
-            inRegion = true;
+            if (!samplesToRequest.containsKey(id)) {
+              List<BigInteger> samples = new ArrayList<>();
+              samples.add(s.getId());
+              samplesToRequest.put(id, samples);
+            } else {
+              samplesToRequest.get(id).add(s.getId());
+            }
+            samplesValidators++;
+            if (inRegion == false) {
+              samplesWithinRegion++;
+              inRegion = true;
+            }
           }
         }
+        if (!inRegion) radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
       }
 
       List<BigInteger> idsNonValidators =

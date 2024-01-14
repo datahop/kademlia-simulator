@@ -139,18 +139,18 @@ public class RandomSamplingOperation extends SamplingOperation {
 
         List<BigInteger> nodesBySample = new ArrayList<>();
 
-        // BigInteger radiusUsed = radiusValidator;
+        BigInteger radiusUsed = radiusValidator;
 
-        // while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
-        // nodesBySample.addAll(searchTable.getNodesbySample(samples.get(sample).getId(),
-        // radiusUsed));
-        // nodesBySample.addAll(
-        //     searchTable.getNodesbySample(samples.get(sample).getIdByColumn(), radiusUsed));
-        nodesBySample.addAll(
-            searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusValidator));
-        nodesBySample.addAll(
-            searchTable.getValidatorNodesbySample(
-                samples.get(sample).getIdByColumn(), radiusValidator));
+        boolean notInRegion = false;
+        while (!notInRegion) {
+          nodesBySample.addAll(
+              searchTable.getValidatorNodesbySample(samples.get(sample).getId(), radiusUsed));
+          nodesBySample.addAll(
+              searchTable.getValidatorNodesbySample(
+                  samples.get(sample).getIdByColumn(), radiusUsed));
+          if (!nodesBySample.isEmpty()) notInRegion = true;
+          if (!notInRegion) radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+        }
         nodesBySample.addAll(
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getId(), radiusNonValidator));
@@ -158,10 +158,7 @@ public class RandomSamplingOperation extends SamplingOperation {
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getIdByColumn(), radiusNonValidator));
 
-        //  radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
-        // }
-
-        boolean found = false;
+        // boolean found = false;
         nodesBySample.removeAll(askedNodes);
 
         if (nodesBySample != null && nodesBySample.size() > 0) {
@@ -173,12 +170,12 @@ public class RandomSamplingOperation extends SamplingOperation {
               nodes.get(id).addSample(samples.get(sample));
             }
           }
-          found = true;
+          // found = true;
         }
 
-        if (!found && callback != null) {
+        /*if (!found && callback != null) {
           callback.missing(sample, this);
-        }
+        }*/
       }
     }
   }

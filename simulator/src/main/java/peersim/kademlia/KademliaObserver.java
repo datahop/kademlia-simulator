@@ -270,7 +270,7 @@ public class KademliaObserver implements Control {
 
     Long msgId = (long) 0;
     for (BigInteger id : msgsIn.keySet()) {
-      System.out.println("Writing messages log " + id);
+      // System.out.println("Writing messages log " + id);
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
       result.put("msgsIn", msgsIn.get(id));
