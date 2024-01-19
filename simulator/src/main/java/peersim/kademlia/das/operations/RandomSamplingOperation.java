@@ -245,7 +245,7 @@ public class RandomSamplingOperation extends SamplingOperation {
     result.put("src", this.srcNode);
     result.put("type", "RandomSamplingOperation");
     result.put("messages", getMessagesString());
-    result.put("num_messages", getMessages().size());
+    result.put("nodes_contacted", getMessages().size());
     result.put("start", this.timestamp);
     result.put("completion_time", this.stopTime);
     result.put("hops", this.nrHops);

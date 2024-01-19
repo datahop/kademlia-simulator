@@ -163,7 +163,7 @@ public abstract class SamplingOperation extends FindOperation {
               + askedNodes.size());
     }
     if (nodes.isEmpty()) {
-      if (this instanceof ValidatorSamplingOperation) addExtraNodes();
+      // if (this instanceof ValidatorSamplingOperation) addExtraNodes();
       // addExtraNodes();
       System.out.println(
           "["
