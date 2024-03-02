@@ -63,8 +63,8 @@ public class DASProtocolNonValidator extends DASProtocol {
     }
   }
 
-  public void setEvilIds(List<Node> evilIds) {
-    searchTable.setEvilIds(evilIds);
+  public void setEvil(List<Node> evilIds) {
+    searchTable.setEvil(evilIds);
   }
   /**
    * Replicate this object by returning an identical copy.<br>

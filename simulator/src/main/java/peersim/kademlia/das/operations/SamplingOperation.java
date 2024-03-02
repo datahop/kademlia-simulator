@@ -164,7 +164,7 @@ public abstract class SamplingOperation extends FindOperation {
     }
     if (nodes.isEmpty()) {
       // if (this instanceof ValidatorSamplingOperation) addExtraNodes();
-      // addExtraNodes();
+      addExtraNodes();
       System.out.println(
           "["
               + CommonState.getTime()

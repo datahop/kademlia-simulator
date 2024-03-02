@@ -25,7 +25,8 @@ public class SearchTable {
 
   private BigInteger builderAddress;
 
-  private List<Node> evilIds;
+  private List<Node> evilNodes;
+  private List<BigInteger> evilIds;
 
   public SearchTable() {
 
@@ -155,16 +156,25 @@ public class SearchTable {
     return result.toArray(new Neighbour[0]);
   }
 
-  public void setEvilIds(List<Node> ids) {
+  public void setEvil(List<Node> nodes) {
+    this.evilNodes = nodes;
+  }
+
+  public boolean isEvil(BigInteger id) {
+    if (evilIds.contains(id)) return true;
+    else return false;
+  }
+
+  public void setEvilIds(List<BigInteger> ids) {
     this.evilIds = ids;
   }
 
   public Neighbour[] getEvilNeighbours(int n) {
 
     List<Neighbour> result = new ArrayList<>();
-    if (evilIds != null) {
-      Collections.shuffle(evilIds);
-      for (Node neigh : evilIds) {
+    if (evilNodes != null) {
+      Collections.shuffle(evilNodes);
+      for (Node neigh : evilNodes) {
         if (result.size() < n)
           result.add(new Neighbour(neigh.getDASProtocol().getKademliaId(), neigh, true));
         else break;

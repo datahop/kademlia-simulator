@@ -36,8 +36,8 @@ public class DASProtocolEvilValidator extends DASProtocolValidator {
     sendMessage(response, m.src.getId(), myPid);
   }*/
 
-  public void setEvilIds(List<Node> evilIds) {
-    searchTable.setEvilIds(evilIds);
+  public void setEvil(List<Node> evilIds) {
+    searchTable.setEvil(evilIds);
   }
 
   /**

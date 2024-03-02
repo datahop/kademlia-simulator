@@ -134,6 +134,8 @@ public class RandomSamplingOperation extends SamplingOperation {
   }
 
   protected void createNodes() {
+
+    List<BigInteger> toRemove = new ArrayList<>();
     for (BigInteger sample : samples.keySet()) {
       if (!samples.get(sample).isDownloaded()) {
 
@@ -158,24 +160,39 @@ public class RandomSamplingOperation extends SamplingOperation {
             searchTable.getNonValidatorNodesbySample(
                 samples.get(sample).getIdByColumn(), radiusNonValidator));
 
-        // boolean found = false;
+        boolean found = false;
         nodesBySample.removeAll(askedNodes);
 
         if (nodesBySample != null && nodesBySample.size() > 0) {
           for (BigInteger id : nodesBySample) {
-            if (!nodes.containsKey(id)) {
-              nodes.put(id, new Node(id));
-              nodes.get(id).addSample(samples.get(sample));
-            } else {
-              nodes.get(id).addSample(samples.get(sample));
+            if (!searchTable.isEvil(id)) {
+              if (!nodes.containsKey(id)) {
+                nodes.put(id, new Node(id));
+                nodes.get(id).addSample(samples.get(sample));
+              } else {
+                nodes.get(id).addSample(samples.get(sample));
+              }
+              found = true;
             }
           }
-          // found = true;
         }
 
-        /*if (!found && callback != null) {
+        if (!found && callback != null) {
           callback.missing(sample, this);
-        }*/
+          toRemove.add(sample);
+        }
+      }
+    }
+    if (toRemove.size() > 0) {
+      System.out.println(CommonState.getTime() + "Removing sample " + toRemove.size());
+      for (BigInteger sample : toRemove) {
+        samples.remove(sample);
+      }
+      Sample[] randomSamples = currentBlock.getNRandomSamples(toRemove.size());
+      for (Sample rs : randomSamples) {
+        FetchingSample s = new FetchingSample(rs);
+        samples.put(rs.getIdByRow(), s);
+        // samples.put(rs.getIdByColumn(), s);
       }
     }
   }

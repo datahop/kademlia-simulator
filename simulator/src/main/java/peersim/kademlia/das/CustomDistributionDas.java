@@ -86,6 +86,7 @@ public class CustomDistributionDas implements peersim.core.Control {
     List<BigInteger> nonValidatorsIds = new ArrayList<>();
     List<Node> evilNodes = new ArrayList<>();
     List<Node> validators = new ArrayList<>();
+    List<BigInteger> evilIds = new ArrayList<>();
     numValidators = numValidators - numEvilValidatorNodes;
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
@@ -110,11 +111,13 @@ public class CustomDistributionDas implements peersim.core.Control {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilValDasID)));
         validatorsIds.add(kadProt.getKademliaNode().getId());
         evilNodes.add(generalNode);
+        evilIds.add(id);
       } else if ((i > numEvilValidatorNodes)
           && (i < (numEvilValidatorNodes + numEvilNonValidatorNodes + 1))) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
         nonValidatorsIds.add(kadProt.getKademliaNode().getId());
         evilNodes.add(generalNode);
+        evilIds.add(id);
       } else if (i > (numEvilValidatorNodes + numEvilNonValidatorNodes)
           && i < (numEvilValidatorNodes + numEvilNonValidatorNodes + (numValidators) + 1)) {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasValidatorID)));
@@ -150,7 +153,8 @@ public class CustomDistributionDas implements peersim.core.Control {
     searchTable.setBuilderAddress(builderAddress);
     searchTable.addNodes(nonValidatorsIds.toArray(new BigInteger[0]));
     searchTable.addValidatorNodes(validatorsIds.toArray(new BigInteger[0]));
-    searchTable.setEvilIds(evilNodes);
+    searchTable.setEvil(evilNodes);
+    searchTable.setEvilIds(evilIds);
 
     // for (DASProtocol validator : validators) {
     for (int i = 0; i < Network.size(); i++) {
