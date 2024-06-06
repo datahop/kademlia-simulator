@@ -7,6 +7,7 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
+//DAS Protocol process functions executed only by builder. It basically seeds validators every block.
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
@@ -34,10 +35,6 @@ public class DASProtocolBuilder extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Builder new block:" + currentBlock.getBlockId());
-    /*+ " "
-    + validatorsList.length
-    + " "
-    + nonValidatorsIndexed.size());*/
 
     int samplesWithinRegion = 0; // samples that are within at least one node's region
     int samplesValidators = 0;
@@ -87,18 +84,12 @@ public class DASProtocolBuilder extends DASProtocol {
           }
         }
         if (!inRegion) radiusValidator = radiusValidator.multiply(BigInteger.valueOf(2));
-        // System.out.println(
-        //     "Sample id " + s.getIdByRow() + " " + s.getIdByColumn() + " " + radiusValidator);
-
       }
       inRegion = false;
       while (!inRegion) {
 
         List<BigInteger> idsValidators =
             searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusValidator);
-
-        /*  + " "
-        + +idsNonValidators.size());*/
 
         for (BigInteger id : idsValidators) {
 
@@ -168,7 +159,6 @@ public class DASProtocolBuilder extends DASProtocol {
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Error. Init block builder node - getting samples. do nothing " + this);
-    // super.handleInitGetSample(m, myPid);
   }
 
   @Override

@@ -62,15 +62,7 @@ public class Sample {
       }
     } else if (KademliaCommonConfigDas.MAPPING_FN
         == KademliaCommonConfigDas.SAMPLE_MAPPING_REGION_BASED) {
-      /*System.out.println(
-      "ComputeId "
-          + this.row
-          + " "
-          + this.column
-          + " "
-          + this.sampleNumberByRow()
-          + " "
-          + this.sampleNumberByColumn());*/
+
       this.idByRow =
           Block.INTER_SAMPLE_GAP
               .multiply(BigInteger.valueOf(this.sampleNumberByRow()))

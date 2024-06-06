@@ -12,9 +12,8 @@ import peersim.kademlia.Message;
 import peersim.kademlia.UniformRandomGenerator;
 
 /**
- * This control generates samples every 5 min that are stored in a single node (builder) and starts
- * random sampling from the rest of the nodes In parallel, random lookups are started to start
- * discovering nodes
+ * This control generates starts a DAS process every block time by sending a new block message to
+ * all nodes
  *
  * @author Sergi Rene
  * @version 1.0
@@ -43,7 +42,7 @@ public class TrafficGeneratorSample implements Control {
   Block b;
   private long ID_GENERATOR = 0;
   long lastTime = 0;
-  private boolean first = true, second = false;
+  private boolean first = true;
 
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
@@ -114,13 +113,14 @@ public class TrafficGeneratorSample implements Control {
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
 
+    // In the first step only initialize doing 3 random lookups
     if (first) {
       for (int i = 0; i < Network.size(); i++) {
         Node start = Network.get(i);
         if (start.isUp()) {
           for (int j = 0; j < 3; j++) {
             // send message
-            EDSimulator.add(CommonState.r.nextInt(12000), generateFindNodeMessage(), start, kadpid);
+            EDSimulator.add(0, generateFindNodeMessage(), start, kadpid);
           }
           EDSimulator.add(
               0,
@@ -130,14 +130,13 @@ public class TrafficGeneratorSample implements Control {
         }
       }
       first = false;
-      second = true;
-    } else /*if (second)*/ {
 
-      // SearchTable.createSampleMap(b);
+      // After the first step start doing DAS sending a new block message to all nodes
+    } else {
+
       for (int i = 0; i < Network.size(); i++) {
         Node n = Network.get(i);
-        // b.initIterator();
-        // we add 1 ms delay to be sure the builder starts before validators.
+
         if (n.isUp())
           EDSimulator.add(
               CommonState.r.nextLong(CommonState.getTime() - lastTime),
@@ -155,12 +154,10 @@ public class TrafficGeneratorSample implements Control {
                   + n.getKademliaProtocol().getKademliaNode().getId()
                   + " "
                   + i);
-          EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        } else if (!(n.getDASProtocol() instanceof DASProtocolBuilder))
-          EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        }
+        EDSimulator.add(1, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
       }
       ID_GENERATOR++;
-      second = false;
     }
     lastTime = CommonState.getTime();
     return false;

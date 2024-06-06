@@ -5,6 +5,8 @@ import peersim.core.CommonState;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
+
+//DAS Protocol process functions executed only by validators. It stores samples received by the builder, and it starts random sampling and row/column fetching every block.
 public class DASProtocolValidator extends DASProtocol {
 
   protected static String prefix = null;
@@ -46,7 +48,6 @@ public class DASProtocolValidator extends DASProtocol {
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Error. Init block validator node - getting samples. do nothing " + this);
-    // super.handleInitGetSample(m, myPid);
   }
 
   @Override

@@ -6,6 +6,7 @@ import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
+//DAS Protocol process functions executed only by regular-nodes. It gets samples from validators (init seeding), and starts random sampling, for every block.
 public class DASProtocolNonValidator extends DASProtocol {
 
   protected static String prefix = null;
@@ -24,24 +25,12 @@ public class DASProtocolNonValidator extends DASProtocol {
   protected void handleSeedSample(Message m, int myPid) {
     logger.warning("Non-validator should not receive seed sample");
     System.exit(-1);
-    /*if (m.body == null) return;
 
-    Sample[] samples = (Sample[]) m.body;
-    for (Sample s : samples) {
-      logger.warning("Received sample:" + kv.occupancy() + " " + s.getRow() + " " + s.getColumn());
-
-      kv.add((BigInteger) s.getIdByRow(), s);
-      kv.add((BigInteger) s.getIdByColumn(), s);
-      // count # of samples for each row and column
-      column[s.getColumn() - 1]++;
-      row[s.getRow() - 1]++;
-    }*/
   }
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block non-validator node - getting samples " + this);
-    // super.handleInitGetSample(m, myPid);
     BigInteger[] samples = {(BigInteger) m.body};
     BigInteger radius =
         currentBlock.computeRegionRadius(
@@ -49,7 +38,6 @@ public class DASProtocolNonValidator extends DASProtocol {
             searchTable.getValidatorsIndexed().size());
     for (BigInteger sample : samples) {
       if (!reqSamples.contains(sample)) {
-        // for (BigInteger id : searchTable.getNodesbySample(sample, radius)) {
         for (BigInteger id : searchTable.getValidatorNodesbySample(sample, radius)) {
           Message msg = generateGetSampleMessage(samples);
           msg.operationId = -1;

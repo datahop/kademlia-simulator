@@ -3,7 +3,7 @@ package peersim.kademlia.das;
 import peersim.kademlia.KademliaCommonConfig;
 
 /**
- * Fixed Parameters for the DAS protocol.
+ * Config parameters for the DAS protocol.
  *
  * @author Sergi Rene
  * @version 1.0
