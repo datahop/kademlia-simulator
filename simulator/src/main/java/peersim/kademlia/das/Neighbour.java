@@ -4,8 +4,7 @@ import java.math.BigInteger;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
-
-//Class used to keep track of known nodes to advertise to other nodes
+// Class used to keep track of known nodes to advertise to other nodes
 public class Neighbour implements Comparable<Neighbour> {
 
   protected BigInteger id;

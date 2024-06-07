@@ -7,7 +7,8 @@ import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
-//DAS Protocol process functions executed only by builder. It basically seeds validators every block.
+// DAS Protocol process functions executed only by builder. It basically seeds validators every
+// block.
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
