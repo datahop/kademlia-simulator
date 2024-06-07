@@ -39,7 +39,6 @@ public class EvilDASProtocol extends DASProtocol {
     logger.warning("Received sample evil node: do nothing");
   }
 
-
   /**
    * Replicate this object by returning an identical copy.<br>
    * It is called by the initializer and do not fill any particular field.

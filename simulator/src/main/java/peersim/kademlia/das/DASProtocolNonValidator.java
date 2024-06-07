@@ -6,7 +6,8 @@ import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
-//DAS Protocol process functions executed only by regular-nodes. It gets samples from validators (init seeding), and starts random sampling, for every block.
+// DAS Protocol process functions executed only by regular-nodes. It gets samples from validators
+// (init seeding), and starts random sampling, for every block.
 public class DASProtocolNonValidator extends DASProtocol {
 
   protected static String prefix = null;
@@ -25,7 +26,6 @@ public class DASProtocolNonValidator extends DASProtocol {
   protected void handleSeedSample(Message m, int myPid) {
     logger.warning("Non-validator should not receive seed sample");
     System.exit(-1);
-
   }
 
   @Override
