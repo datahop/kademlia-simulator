@@ -111,7 +111,7 @@ public class CustomDistributionDas implements peersim.core.Control {
         builderAddress = node.getId();
         validators.add(generalNode);
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
-        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilDasID)));
+        dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolEvilValDasID)));
         validatorsIds.add(kadProt.getKademliaNode().getId());
         evilNodes.add(generalNode);
         evilIds.add(id);
