@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -24,25 +25,46 @@ public class SearchTable {
   // Builder node
   private BigInteger builderAddress;
 
+  private HashSet<BigInteger> blackList;
+  private List<Node> evilNodes;
+  private List<BigInteger> evilIds;
+  private boolean onlyAddEvilNghbrs = false;
+
   public SearchTable() {
 
     this.nodesIndexed = new TreeSet<>();
     this.nonValidatorsIndexed = new TreeSet<>();
+    this.blackList = new HashSet<>();
     this.neighbours = new HashMap<>();
   }
 
   public void addNeighbour(Neighbour neigh) {
-    neighbours.remove(neigh.getId());
-    nodesIndexed.remove(neigh.getId());
-    neighbours.put(neigh.getId(), neigh);
-    nodesIndexed.add(neigh.getId());
+    if (this.onlyAddEvilNghbrs && !neigh.isEvil()) {
+      return;
+    }
+
+    if (neigh.getId().compareTo(builderAddress) != 0) {
+      if (neighbours.get(neigh.getId()) == null) {
+        neighbours.put(neigh.getId(), neigh);
+        nodesIndexed.add(neigh.getId());
+      } else {
+        if (neighbours.get(neigh.getId()).getLastSeen() < neigh.getLastSeen())
+          neighbours.get(neigh.getId()).updateLastSeen(neigh.getLastSeen());
+      }
+    }
+  }
+
+  public void setOnlyAddEvilNghbrs() {
+    this.onlyAddEvilNghbrs = true;
   }
 
   public void addNodes(BigInteger[] nodes) {
 
     for (BigInteger id : nodes) {
       if (id.compareTo(builderAddress) != 0) {
-        if (!validatorsIndexed.contains(id) && !builderAddress.equals(id)) {
+        if (!blackList.contains(id)
+            && !validatorsIndexed.contains(id)
+            && !builderAddress.equals(id)) {
           nonValidatorsIndexed.add(id);
         }
       }
@@ -62,7 +84,9 @@ public class SearchTable {
 
   public void addValidatorNodes(BigInteger[] nodes) {
     for (BigInteger id : nodes) {
-      validatorsIndexed.add(id);
+      if (!blackList.contains(id) && id.compareTo(builderAddress) != 0) {
+        validatorsIndexed.add(id);
+      }
     }
   }
 
@@ -73,6 +97,8 @@ public class SearchTable {
   public void removeNode(BigInteger node) {
     this.nodesIndexed.remove(node);
     this.nonValidatorsIndexed.remove(node);
+    this.neighbours.remove(node);
+    validatorsIndexed.remove(node);
   }
 
   public TreeSet<BigInteger> nodesIndexed() {
@@ -126,6 +152,19 @@ public class SearchTable {
       result.addAll(getNodesbySample(sample, radius));
     }
     return result;
+  }
+
+  public void setEvil(List<Node> nodes) {
+    this.evilNodes = nodes;
+  }
+
+  public boolean isEvil(BigInteger id) {
+    if (evilIds.contains(id)) return true;
+    else return false;
+  }
+
+  public void setEvilIds(List<BigInteger> ids) {
+    this.evilIds = ids;
   }
 
   public Neighbour[] getNeighbours() {
@@ -187,6 +226,20 @@ public class SearchTable {
       if (neigh.getNode().isUp()) count++;
     }
     return count;
+  }
+
+  public Neighbour[] getEvilNeighbours(int n) {
+
+    List<Neighbour> result = new ArrayList<>();
+    if (evilNodes != null) {
+      Collections.shuffle(evilNodes);
+      for (Node neigh : evilNodes) {
+        if (result.size() < n)
+          result.add(new Neighbour(neigh.getDASProtocol().getKademliaId(), neigh, true));
+        else break;
+      }
+    }
+    return result.toArray(new Neighbour[0]);
   }
 
   public int getMaliciousNeighboursCount() {

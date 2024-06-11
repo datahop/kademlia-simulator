@@ -53,6 +53,7 @@ public class DASProtocolValidator extends DASProtocol {
   @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
+    // Onur: I think the sampling should only be done is this is node is not evil
     startRowsandColumnsSampling();
     startRandomSampling();
   }

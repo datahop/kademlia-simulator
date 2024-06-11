@@ -10,6 +10,7 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
     super(prefix);
     DASProtocolEvilNonValidator.prefix = prefix;
     isEvil = true;
+    searchTable.setOnlyAddEvilNghbrs();
     isValidator = false;
     isBuilder = false;
   }

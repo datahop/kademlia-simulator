@@ -296,6 +296,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     response.dst = m.src;
     response.src = this.kadProtocol.getKademliaNode();
     response.ackId = m.id; // set ACK number
+
     if (m.value instanceof BigInteger[]) {
       BigInteger[] smpls = (BigInteger[]) m.value;
       List<Neighbour> neigh = new ArrayList<>();
