@@ -3,3 +3,5 @@ target/
 logs/
 .vscode/
 *.code-workspace
+simulator/logs*
+visualiser/myenv

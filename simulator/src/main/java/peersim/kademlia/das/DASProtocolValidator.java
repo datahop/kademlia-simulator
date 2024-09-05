@@ -24,7 +24,9 @@ public class DASProtocolValidator extends DASProtocol {
     if (m.body == null) return;
 
     Sample[] samples = (Sample[]) m.body;
+
     for (Sample s : samples) {
+
       logger.warning(
           "Received sample:"
               + kv.occupancy()
