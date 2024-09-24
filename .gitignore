@@ -5,3 +5,4 @@ logs/
 *.code-workspace
 simulator/logs*
 visualiser/myenv
+*.csv
