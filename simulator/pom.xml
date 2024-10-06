@@ -13,6 +13,7 @@
         <java.version>17</java.version>
   </properties>
   <dependencies>
+
   	<dependency>
     	<groupId>org.apache.commons</groupId>
     	<artifactId>commons-math3</artifactId>
@@ -93,6 +94,15 @@
         <artifactId>gs-ui-swing</artifactId>
 		<version>2.0</version>
     </dependency>
+  
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <scope>system</scope>
+        <version>2.10.1</version>
+        <systemPath>${pom.basedir}/lib/gson-2.10.1.jar</systemPath>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>
