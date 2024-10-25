@@ -36,6 +36,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int column,
       boolean isValidator,
       int numValidators,
+      List<BigInteger> validatorList,
       MissingNode callback) {
     super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
 
@@ -106,9 +107,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       } else {
         if (samples.containsKey(s.getIdByColumn())) {
           FetchingSample fs = samples.get(s.getIdByColumn());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
+          if (fs != null) {
+            if (!fs.isDownloaded()) {
+              fs.setDownloaded();
+              samplesCount++;
+            }
           }
         }
       }

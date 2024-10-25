@@ -22,7 +22,8 @@ public abstract class SamplingOperation extends FindOperation {
   protected Block currentBlock;
   protected int aggressiveness;
   // protected HashSet<BigInteger> queried;
-
+  protected int strategy;
+  protected int timeout;
   protected int timesIncreased;
   protected BigInteger radiusValidator, radiusNonValidator;
 
@@ -42,7 +43,10 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-
+    strategy = KademliaCommonConfigDas.validatorStrategy;
+    if (strategy == 3) {
+      timeout = peersim.kademlia.Timeout.TIMEOUT;
+    }
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();
@@ -83,6 +87,18 @@ public abstract class SamplingOperation extends FindOperation {
 
   public abstract boolean completed();
 
+  public void updateTimeout(int timeout) {
+    this.timeout = timeout;
+  }
+
+  public int getTimeout() {
+    return this.timeout;
+  }
+
+  public int getStrategy() {
+    return this.strategy;
+  }
+
   public BigInteger[] getSamples() {
     List<BigInteger> result = new ArrayList<>();
 
@@ -103,9 +119,62 @@ public abstract class SamplingOperation extends FindOperation {
 
   protected abstract void createNodes();
 
+  // === Paper Algorithm ===
   public BigInteger[] doSampling() {
 
-    aggressiveness += KademliaCommonConfigDas.aggressiveness_step;
+    aggressiveness += KademliaCommonConfigDas.row_column_sampling_aggressiveness_step;
+    for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
+    List<BigInteger> result = new ArrayList<>();
+    for (Node n : nodes.values()) {
+      /*System.out.println(
+          this.srcNode + "] Querying node " + n.getId() + " " + +n.getScore() + " " + this.getId());
+      for (FetchingSample fs : n.getSamples())
+        System.out.println(
+            this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());*/
+
+      if (!n.isBeingAsked() && n.getScore() > 0) { // break;
+        n.setBeingAsked(true);
+        this.available_requests++;
+        for (FetchingSample s : n.getSamples()) {
+          s.addFetchingNode(n);
+        }
+        result.add(n.getId());
+      }
+    }
+
+    return result.toArray(new BigInteger[0]);
+  }
+
+  public BigInteger[] doRowColumnSampling() {
+    aggressiveness += KademliaCommonConfigDas.row_column_sampling_aggressiveness_step;
+    for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
+    List<BigInteger> result = new ArrayList<>();
+    for (Node n : nodes.values()) {
+      /*System.out.println(
+          this.srcNode + "] Querying node " + n.getId() + " " + +n.getScore() + " " + this.getId());
+      for (FetchingSample fs : n.getSamples())
+        System.out.println(
+            this.srcNode + "] Sample " + fs.beingFetchedFrom.size() + " " + fs.isDownloaded());*/
+
+      if (!n.isBeingAsked() && n.getScore() > 0) { // break;
+        n.setBeingAsked(true);
+        this.available_requests++;
+        for (FetchingSample s : n.getSamples()) {
+          s.addFetchingNode(n);
+        }
+        result.add(n.getId());
+      }
+    }
+
+    return result.toArray(new BigInteger[0]);
+  }
+
+  public BigInteger[] doRandomSampling() {
+
+    aggressiveness += KademliaCommonConfigDas.random_sampling_aggressiveness_step;
+    if (KademliaCommonConfigDas.validatorStrategy == 1) {
+      aggressiveness = 0;
+    }
     for (Node n : nodes.values()) n.setAgressiveness(aggressiveness);
     List<BigInteger> result = new ArrayList<>();
     for (Node n : nodes.values()) {

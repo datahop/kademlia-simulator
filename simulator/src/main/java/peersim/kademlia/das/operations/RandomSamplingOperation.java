@@ -20,6 +20,7 @@ import peersim.kademlia.das.SearchTable;
 public class RandomSamplingOperation extends SamplingOperation {
 
   protected Block currentBlock;
+
   /**
    * default constructor
    *
@@ -39,7 +40,10 @@ public class RandomSamplingOperation extends SamplingOperation {
     super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators, callback);
     this.currentBlock = currentBlock;
     this.searchTable = searchTable;
-
+    strategy = KademliaCommonConfigDas.validatorStrategy;
+    if (strategy == 3) {
+      timeout = peersim.kademlia.Timeout.TIMEOUT;
+    }
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
       FetchingSample s = new FetchingSample(rs);
@@ -70,9 +74,11 @@ public class RandomSamplingOperation extends SamplingOperation {
     for (Sample s : sam) {
       if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
         FetchingSample fs = samples.get(s.getId());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
+        if (fs != null) {
+          if (!fs.isDownloaded()) {
+            samplesCount++;
+            fs.setDownloaded();
+          }
         }
       }
     }
@@ -94,10 +100,12 @@ public class RandomSamplingOperation extends SamplingOperation {
 
       if (samples.containsKey(s.getId()) || samples.containsKey(s.getIdByColumn())) {
         FetchingSample fs = samples.get(s.getId());
-        if (!fs.isDownloaded()) {
-          samplesCount++;
-          fs.setDownloaded();
-          fs.removeFetchingNode(nodes.get(node));
+        if (fs != null) {
+          if (!fs.isDownloaded()) {
+            samplesCount++;
+            fs.setDownloaded();
+            fs.removeFetchingNode(nodes.get(node));
+          }
         }
       }
       /*if (samples.containsKey(s.getIdByColumn())) {

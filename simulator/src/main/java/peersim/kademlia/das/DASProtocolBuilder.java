@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import peersim.config.Configuration;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -13,10 +14,15 @@ import peersim.kademlia.Util;
 // block.
 public class DASProtocolBuilder extends DASProtocol {
 
+  protected static final String PAR_BUILDER = "builderStrategy";
+
   protected static String prefix = null;
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
+    DASProtocolBuilder.prefix = prefix;
+    KademliaCommonConfigDas.builderStrategy =
+        Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderStrategy);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
@@ -43,16 +49,22 @@ public class DASProtocolBuilder extends DASProtocol {
     int samplesValidators = 0;
     int samplesNonValidators = 0;
 
-    BigInteger radiusNonValidator =
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-
     // ===============
     // Row Sampling
     // ===============
     int actualRow = 1;
     while (currentBlock.getSize() >= actualRow) {
       boolean inRegion = false;
-      Sample[] sampleRow = currentBlock.getSamplesByRow(actualRow); // get all sample of the row
+      Sample[] sampleRow;
+      logger.warning("Builder strategy:" + KademliaCommonConfigDas.builderStrategy);
+      if (KademliaCommonConfigDas.builderStrategy == 1) {
+        sampleRow =
+            currentBlock.getNSamplesByRow(
+                actualRow,
+                KademliaCommonConfigDas.BLOCK_DIM_SIZE / 2); // get half ofall sample of the row
+      } else {
+        sampleRow = currentBlock.getSamplesByRow(actualRow); // get all sample of the row
+      }
 
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(1, searchTable.getValidatorsIndexed().size());
@@ -78,12 +90,11 @@ public class DASProtocolBuilder extends DASProtocol {
               + numberValidatorRow);
 
       // Get size of Parcels to send
-      int sizeParcels =
-          (currentBlock.getSize() / numberValidatorRow)
-              * KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER;
-
-      if (currentBlock.getSize() / numberValidatorRow != 0) {
-        sizeParcels += KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER;
+      int sizeParcels = 0;
+      sizeParcels = (currentBlock.getSize() / numberValidatorRow);
+      int redundancyFactor = 1;
+      if (KademliaCommonConfigDas.builderStrategy == 2) {
+        redundancyFactor = 2;
       }
 
       int indexSampleList = 0;
@@ -93,9 +104,9 @@ public class DASProtocolBuilder extends DASProtocol {
         // Create Row Parcels to send
         // --------------------------
 
-        Sample[] validatorParcel = new Sample[sizeParcels];
+        Sample[] validatorParcel = new Sample[sizeParcels * redundancyFactor];
         int k = 0;
-        while (k != sizeParcels) {
+        while (k != sizeParcels * redundancyFactor) {
           Sample s = sampleRow[indexSampleList % sampleRow.length];
           validatorParcel[k] = s;
           indexSampleList++;
@@ -112,11 +123,11 @@ public class DASProtocolBuilder extends DASProtocol {
         if (dasProt.isBuilder()) continue;
         if (n.isUp()) {
           Sample[] samples = validatorParcel;
-          Message msg = generateSeedSampleMessage(samples);
+          Message msg = generateSeedSampleMessage(samples, idsValidators, true);
           msg.operationId = -1;
           msg.src = this.getKademliaProtocol().getKademliaNode();
           msg.dst = n.getKademliaProtocol().getKademliaNode();
-          sendMessage(msg, id, dasProt.getDASProtocolID());
+          sendMessage(msg, id, dasProt.getDASProtocolID(), 0);
           samplesValidators++;
           if (inRegion == false) {
             samplesWithinRegion++;
@@ -132,8 +143,17 @@ public class DASProtocolBuilder extends DASProtocol {
 
     while (currentBlock.getSize() >= actualColumn) {
       boolean inRegion = false;
-      Sample[] sampleColumn =
-          currentBlock.getSamplesByRow(actualColumn); // get all sample of the row
+      Sample[] sampleColumn;
+      if (KademliaCommonConfigDas.builderStrategy == 0) {
+        sampleColumn = currentBlock.getSamplesByColumn(actualColumn); // get all sample of the row
+      } else if (KademliaCommonConfigDas.builderStrategy == 1) {
+        sampleColumn =
+            currentBlock.getNSamplesByColumn(
+                actualColumn,
+                KademliaCommonConfigDas.BLOCK_DIM_SIZE / 2); // get all sample of the row
+      } else {
+        sampleColumn = currentBlock.getSamplesByColumn(actualColumn);
+      }
 
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(1, searchTable.getValidatorsIndexed().size());
@@ -159,12 +179,11 @@ public class DASProtocolBuilder extends DASProtocol {
               + numberValidatorColumn);
 
       // Get size of Parcels to send
-      int sizeParcels =
-          (currentBlock.getSize() / numberValidatorColumn)
-              * KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER;
-
-      if (currentBlock.getSize() / numberValidatorColumn != 0) {
-        sizeParcels += KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER;
+      int sizeParcels = 0;
+      sizeParcels = (currentBlock.getSize() / numberValidatorColumn);
+      int redundancyFactor = 1;
+      if (KademliaCommonConfigDas.builderStrategy == 2) {
+        redundancyFactor = 2;
       }
 
       int indexSampleList = 0;
@@ -174,9 +193,9 @@ public class DASProtocolBuilder extends DASProtocol {
         // Create Row Parcels to send
         // --------------------------
 
-        Sample[] validatorParcel = new Sample[sizeParcels];
+        Sample[] validatorParcel = new Sample[sizeParcels * redundancyFactor];
         int k = 0;
-        while (k != sizeParcels) {
+        while (k != sizeParcels * redundancyFactor) {
           Sample s = sampleColumn[indexSampleList % sampleColumn.length];
           validatorParcel[k] = s;
           indexSampleList++;
@@ -193,11 +212,11 @@ public class DASProtocolBuilder extends DASProtocol {
         if (dasProt.isBuilder()) continue;
         if (n.isUp()) {
           Sample[] samples = validatorParcel;
-          Message msg = generateSeedSampleMessage(samples);
+          Message msg = generateSeedSampleMessage(samples, idsValidators, false);
           msg.operationId = -1;
           msg.src = this.getKademliaProtocol().getKademliaNode();
           msg.dst = n.getKademliaProtocol().getKademliaNode();
-          sendMessage(msg, id, dasProt.getDASProtocolID());
+          sendMessage(msg, id, dasProt.getDASProtocolID(), 0);
           samplesValidators++;
           if (inRegion == false) {
             samplesWithinRegion++;

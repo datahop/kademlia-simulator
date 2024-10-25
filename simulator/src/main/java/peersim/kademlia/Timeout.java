@@ -33,4 +33,14 @@ public class Timeout extends SimpleEvent {
     this.msgID = msgID;
     this.opID = opID;
   }
+
+  public Timeout(BigInteger node, long msgID, long opID, int timeout) {
+    super(TIMEOUT);
+    if (timeout > 0) {
+      this.timestamp = timeout;
+    }
+    this.node = node;
+    this.msgID = msgID;
+    this.opID = opID;
+  }
 }

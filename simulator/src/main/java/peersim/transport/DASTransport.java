@@ -46,7 +46,7 @@ public class DASTransport implements Transport {
         NodeLatency entry = nodes.get(i % nodes.size());
         for (int j = 0; j < size; j++) {
           int latency = entry.latency[j % entry.latency.length];
-          if (latency != 0) {
+          if (latency >= 10) {
 
             latencies[i][j] = latency;
           } else {

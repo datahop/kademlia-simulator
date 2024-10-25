@@ -10,7 +10,7 @@ import peersim.kademlia.KademliaCommonConfig;
  */
 public class KademliaCommonConfigDas {
 
-  public static int ALPHA = 5; // number of simultaneous lookup messages
+  public static int ALPHA = 20; // number of simultaneous lookup messages
 
   /** Different ways of mapping samples to DHT keyspace */
   public static int SAMPLE_MAPPING_RANDOM = 1;
@@ -19,17 +19,17 @@ public class KademliaCommonConfigDas {
   public static int MAPPING_FN = SAMPLE_MAPPING_REGION_BASED;
 
   /** Number of copies of each sample stored in the network */
-  public static int NUM_SAMPLE_COPIES_PER_PEER = 2;
+  public static int NUM_SAMPLE_COPIES_PER_PEER = 1;
 
   /** Block matrix dimension */
-  public static int BLOCK_DIM_SIZE = 10;
+  public static int BLOCK_DIM_SIZE = 512;
 
   /** Number of samples retrieved for the random sampling */
-  public static int N_SAMPLES = 105;
+  public static int N_SAMPLES = 75;
 
   public static int MAX_SAMPLING_FAILED = 3;
 
-  public static int PARCEL_SIZE = 128;
+  public static int PARCEL_SIZE = 512;
   /**
    * Size of a node record (a single neighbor information returned alongside samples in
    * GET_SAMPLE_RESPONSE) in Mbits - I used ENR size for this, which is 300 bytes
@@ -58,11 +58,25 @@ public class KademliaCommonConfigDas {
   public static int VALIDATOR_DEADLINE = 4000;
   public static int RANDOM_SAMPLING_DEADLINE = 12000;
 
-  public static int aggressiveness_step = 1;
+  public static int random_sampling_aggressiveness_step = 10;
+  public static int row_column_sampling_aggressiveness_step = 1;
   public static int multiplyRadiusLimit = 0;
 
   public static int validatorsSize = 0;
   public static int networkSize = 0;
+
+  // Builder Strategy to disseminate sample
+  // 0 == All samples
+  // 1 == Half of the samples
+  // 2 == 2 of All samples
+
+  public static int builderStrategy = 0;
+
+  // Validator Strategy for sampling
+  // 0 == Brute Force
+  // 1 == Initial Number of sample search at each steps
+  // 2 == Only research with a number of node equal to number of missing samples
+  public static int validatorStrategy = 0;
 
   public static long TTL = 100000;
 }

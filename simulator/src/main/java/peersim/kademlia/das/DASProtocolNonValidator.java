@@ -44,7 +44,7 @@ public class DASProtocolNonValidator extends DASProtocol {
           msg.src = this.kadProtocol.getKademliaNode();
           Node n = Util.nodeIdtoNode(id, kademliaId);
           msg.dst = n.getKademliaProtocol().getKademliaNode();
-          sendMessage(msg, id, myPid);
+          sendMessage(msg, id, myPid, 0);
           reqSamples.add(sample);
         }
       }

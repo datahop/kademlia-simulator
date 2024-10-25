@@ -243,11 +243,35 @@ public class Block implements Iterator<Sample>, Cloneable {
     return this.blockSamples[row - 1];
   }
 
+  public Sample[] getNSamplesByRow(int row, int n) {
+    Sample[] RowSamples = this.blockSamples[row - 1];
+    Sample[] samples = new Sample[n];
+    for (int i = 0; i < samples.length; i++) {
+      int c = CommonState.r.nextInt(SIZE);
+      samples[i] = RowSamples[c];
+    }
+    return samples;
+  }
+
   public Sample[] getSamplesByColumn(int column) {
 
     Sample[] samples = new Sample[SIZE];
     for (int i = 0; i < blockSamples.length; i++) {
       samples[i] = this.blockSamples[i][column - 1];
+    }
+    return samples;
+  }
+
+  public Sample[] getNSamplesByColumn(int column, int n) {
+    Sample[] Columnsamples = new Sample[SIZE];
+    for (int i = 0; i < blockSamples.length; i++) {
+      Columnsamples[i] = this.blockSamples[i][column - 1];
+    }
+
+    Sample[] samples = new Sample[n];
+    for (int i = 0; i < samples.length; i++) {
+      int r = CommonState.r.nextInt(SIZE);
+      samples[i] = Columnsamples[r];
     }
     return samples;
   }
