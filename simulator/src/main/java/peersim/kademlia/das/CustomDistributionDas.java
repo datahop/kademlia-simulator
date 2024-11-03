@@ -65,12 +65,6 @@ public class CustomDistributionDas implements peersim.core.Control {
     validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
   }
 
-  /**
-   * Scan over the nodes in the network and assign a randomly generated NodeId in the space
-   * 0..2^BITS, where BITS is a parameter from the kademlia protocol (usually 160)
-   *
-   * @return boolean always false
-   */
   public boolean execute() {
 
     int numValidators = (int) (Network.size() * validatorRate);
@@ -88,6 +82,8 @@ public class CustomDistributionDas implements peersim.core.Control {
     List<Node> validators = new ArrayList<>();
     List<BigInteger> evilIds = new ArrayList<>();
     numValidators = numValidators - numEvilValidatorNodes;
+    SearchTable searchTable = new SearchTable();
+
     for (int i = 0; i < Network.size(); ++i) {
       Node generalNode = Network.get(i);
       BigInteger id;
@@ -103,7 +99,6 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setNode(node);
 
       if (i == 0) {
-
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
         builderAddress = node.getId();
         validators.add(generalNode);
@@ -125,13 +120,10 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
         nonValidatorsIds.add(kadProt.getKademliaNode().getId());
-        // node.setServer(false);
       }
 
       dasProt.setKademliaProtocol(kadProt);
       kadProt.setEventsCallback(dasProt);
-
-      // dasProt.setBuilderAddress(builderAddress);
 
       if (dasProt instanceof DASProtocolBuilder) System.out.println("DASProtocol Builder " + i);
       generalNode.setProtocol(protocolKadID, kadProt);
@@ -144,56 +136,23 @@ public class CustomDistributionDas implements peersim.core.Control {
       generalNode.setProtocol(protocolEvilValDasID, null);
       generalNode.setProtocol(protocolDasValidatorID, null);
       generalNode.setProtocol(protocolDasNonValidatorID, null);
+
+      generalNode.getDASProtocol().setSearchTable(searchTable);
+      generalNode.getDASProtocol().setBuilderAddress(builderAddress);
     }
 
     System.out.println("Validators " + validatorsIds.size());
     System.out.println("Non-Validators " + nonValidatorsIds.size());
 
-    SearchTable searchTable = new SearchTable();
     searchTable.setBuilderAddress(builderAddress);
     searchTable.addNodes(nonValidatorsIds.toArray(new BigInteger[0]));
     searchTable.addValidatorNodes(validatorsIds.toArray(new BigInteger[0]));
     searchTable.setEvil(evilNodes);
     searchTable.setEvilIds(evilIds);
 
-    // for (DASProtocol validator : validators) {
-    for (int i = 0; i < Network.size(); i++) {
-      Node generalNode = Network.get(i);
-      // generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
-      // generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
-      generalNode.getDASProtocol().setSearchTable(searchTable);
-      generalNode.getDASProtocol().setBuilderAddress(builderAddress);
-
-      /*if (generalNode.getDASProtocol().isEvil()) {
-        if (generalNode.getDASProtocol() instanceof DASProtocolEvilValidator) {
-          DASProtocolEvilValidator dasEvil =
-              (DASProtocolEvilValidator) generalNode.getDASProtocol();
-          dasEvil.setEvilIds(evilNodes);
-        } else {
-          DASProtocolEvilNonValidator dasEvil =
-              (DASProtocolEvilNonValidator) generalNode.getDASProtocol();
-          dasEvil.setEvilIds(evilNodes);
-        }
-      }*/
-      /*int k = 0;
-      while (k < 100) {
-        // while (k<Network.size()){
-        Node n = Network.get(CommonState.r.nextInt(Network.size()));
-        // Node n = Network.get(CommonState.r.nextInt(Network.size()));
-        if (n.isUp()) {
-          KademliaProtocol jKad = (KademliaProtocol) n.getProtocol(protocolKadID);
-          generalNode
-              .getDASProtocol()
-              .searchTable
-              .addNeighbour(
-                  new Neighbour(jKad.getKademliaNode().getId(), n, n.getDASProtocol().isEvil()));
-        }
-        k++;
-      }*/
-    }
-
     KademliaCommonConfigDas.networkSize = Network.size();
     KademliaCommonConfigDas.validatorsSize = numValidators;
+
     return false;
   }
 }

@@ -1,7 +1,6 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -10,12 +9,14 @@ import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 public class DASProtocolValidator extends DASProtocol {
 
   protected static String prefix = null;
+  protected boolean started;
 
   public DASProtocolValidator(String prefix) {
     super(prefix);
     DASProtocolValidator.prefix = prefix;
     isValidator = true;
     isBuilder = false;
+    started = false;
   }
 
   @Override
@@ -34,12 +35,39 @@ public class DASProtocolValidator extends DASProtocol {
   }
 
   @Override
+  protected void handleSeedSample(Message m, int myPid) {
+    Sample[] samples = (Sample[]) m.body;
+    for (Sample s : samples) {
+      logger.warning(
+          "Sample received "
+              + s.getId()
+              + " "
+              + s.getIdByColumn()
+              + " from "
+              + m.src.getId()
+              + " "
+              + m.id);
+
+      kv.add((BigInteger) s.getIdByRow());
+      // kv.add((BigInteger) s.getIdByRow(), s);
+      // kv.add((BigInteger) s.getIdByColumn(), s);
+      // count # of samples for each row and column and reconstruct if more than half received
+      reconstruct(s);
+    }
+    if (!started) {
+      started = true;
+      startRowsandColumnsSampling();
+    }
+  }
+
+  @Override
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
-    if (!isEvil) {
+    started = false;
+    /*if (!isEvil) {
       startRowsandColumnsSampling();
       startRandomSampling();
-    }
+    }*/
   }
 
   /**
@@ -77,14 +105,17 @@ public class DASProtocolValidator extends DASProtocol {
                 KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
                 KademliaCommonConfigDas.validatorsSize)),
         time);*/
-    createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
-    createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
-    createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
-    createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+    // createValidatorSamplingOperation(
+    //     CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
+    // createValidatorSamplingOperation(
+    //     0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+    // createValidatorSamplingOperation(
+    //     CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
+    //  createValidatorSamplingOperation(
+    //      0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
+
+    createValidatorSamplingOperation(searchTable.getValidatorRow(this.getKademliaId()), 0, time);
+    createValidatorSamplingOperation(0, searchTable.getValidatorColumn(this.getKademliaId()), time);
   }
 
   private void createValidatorSamplingOperation(int row, int column, long timestamp) {

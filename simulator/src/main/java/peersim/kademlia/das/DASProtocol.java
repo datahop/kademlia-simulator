@@ -398,7 +398,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
   }
 
-  private void reconstruct(Sample s) {
+  protected void reconstruct(Sample s) {
     column[s.getColumn() - 1]++;
     row[s.getRow() - 1]++;
     if (column[s.getColumn() - 1] >= column.length / 2

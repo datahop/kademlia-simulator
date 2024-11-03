@@ -1,254 +1,125 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import peersim.core.Node;
+import java.util.*;
 
-public class SearchTable {
+import peersim.core.CommonState;
+import peersim.core.Network;
 
-  private HashMap<BigInteger, Neighbour> neighbours;
+public class SearchTable extends SearchTableV1 {
 
-  private TreeSet<BigInteger> nodesIndexed; // , samplesIndexed;
-
-  private static TreeSet<BigInteger> validatorsIndexed = new TreeSet<>(); // , samplesIndexed;
-
-  private TreeSet<BigInteger> nonValidatorsIndexed; // , samplesIndexed;
-
-  private HashSet<BigInteger> blackList; // , samplesIndexed;
-
-  private BigInteger builderAddress;
-
-  private List<Node> evilNodes;
-  private List<BigInteger> evilIds;
+  private HashMap<BigInteger, List<BigInteger>> validatorsSamples;
+  private HashMap<BigInteger, Integer> validatorsRow;
+  private HashMap<BigInteger, Integer> validatorsColumn;
+  private HashMap<Integer, List<BigInteger>> rowsValidator;
+  private HashMap<Integer, List<BigInteger>> columnsValidator;
 
   public SearchTable() {
-
-    this.nodesIndexed = new TreeSet<>();
-    this.nonValidatorsIndexed = new TreeSet<>();
-
-    this.blackList = new HashSet<>();
-    this.neighbours = new HashMap<>();
+    validatorsSamples = new HashMap<>();
+    validatorsRow = new HashMap<>();
+    validatorsColumn = new HashMap<>();
+    rowsValidator = new HashMap<>();
+    columnsValidator = new HashMap<>();
   }
 
-  public void addNeighbour(Neighbour neigh) {
-    if (neigh.getId().compareTo(builderAddress) != 0) {
-      if (neighbours.get(neigh.getId()) == null) {
-        neighbours.put(neigh.getId(), neigh);
-        nodesIndexed.add(neigh.getId());
+  public void assignSamples(Block b, int r) {
+    /*  BigInteger radiusValidator = b.computeRegionRadius(r, this.getValidatorsIndexed().size());
+
+    while (b.hasNext()) {
+       BigInteger radiusUsed = radiusValidator;
+       boolean inRegion = false;
+       Sample s = b.next();
+       while (!inRegion) {
+
+         List<BigInteger> idsValidators = this.getValidatorNodesbySample(s.getIdByRow(), radiusUsed);
+         if (idsValidators.size() > 0) {
+           inRegion = true;
+           validatorsSamples.put(s.getIdByRow(), idsValidators);
+           rowsValidator.put(s.getRow(), idsValidators);
+           for (BigInteger id : idsValidators) {
+             validatorsRow.put(id, s.getRow());
+           }
+         }
+         idsValidators = this.getValidatorNodesbySample(s.getIdByColumn(), radiusUsed);
+         if (idsValidators.size() > 0) {
+           inRegion = true;
+           validatorsSamples.put(s.getIdByColumn(), idsValidators);
+           columnsValidator.put(s.getRow(), idsValidators);
+           for (BigInteger id : idsValidators) {
+             validatorsColumn.put(id, s.getColumn());
+           }
+         }
+         if (!inRegion) radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
+       }
+     }*/
+    int nodesPerRow =
+        Network.size() / (b.getSize() * KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+
+    int row = 1;
+    int counter = 0;
+    for (int i = 0; i < Network.size(); i++) {
+      counter++;
+      BigInteger id = Network.get(i).getDASProtocol().getKademliaId();
+      if (rowsValidator.get(row) != null) {
+        rowsValidator.get(row).add(id);
       } else {
-        if (neighbours.get(neigh.getId()).getLastSeen() < neigh.getLastSeen())
-          neighbours.get(neigh.getId()).updateLastSeen(neigh.getLastSeen());
+        List<BigInteger> list = new ArrayList<>();
+        list.add(id);
+        rowsValidator.put(row, list);
       }
-    }
-  }
-
-  public void addNodes(BigInteger[] nodes) {
-
-    for (BigInteger id : nodes) {
-      if (id.compareTo(builderAddress) != 0) {
-        if (!blackList.contains(id)
-            && !validatorsIndexed.contains(id)
-            && !builderAddress.equals(id)) {
-          nonValidatorsIndexed.add(id);
-        }
+      validatorsRow.put(id, row);
+      if (counter == nodesPerRow) {
+        row++;
+        counter = 0;
       }
+      if (row > b.getSize()) break;
     }
-  }
 
-  public void addValidatorNodes(BigInteger[] nodes) {
-    for (BigInteger id : nodes) {
-      if (!blackList.contains(id) && id.compareTo(builderAddress) != 0) {
-        validatorsIndexed.add(id);
+    int column = 1;
+    counter = 0;
+    for (int i = 0; i < Network.size(); i++) {
+      counter++;
+      BigInteger id = Network.get(i).getDASProtocol().getKademliaId();
+      if (columnsValidator.get(column) != null) {
+        columnsValidator.get(column).add(id);
+      } else {
+        List<BigInteger> list = new ArrayList<>();
+        list.add(id);
+        columnsValidator.put(column, list);
       }
-    }
-  }
+      validatorsColumn.put(id, column);
 
-  public void setBuilderAddress(BigInteger builderAddress) {
-    this.builderAddress = builderAddress;
-  }
-
-  public void removeNode(BigInteger node) {
-    this.nodesIndexed.remove(node);
-    this.nonValidatorsIndexed.remove(node);
-    this.neighbours.remove(node);
-    validatorsIndexed.remove(node);
-  }
-
-  public TreeSet<BigInteger> nodesIndexed() {
-    return nodesIndexed;
-  }
-
-  public TreeSet<BigInteger> getValidatorsIndexed() {
-    return validatorsIndexed;
-  }
-
-  public List<BigInteger> getNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = sampleId.add(radius);
-    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
-
-    Collection<BigInteger> subSet = nodesIndexed.subSet(bottom, true, top, true);
-    return new ArrayList<BigInteger>(subSet);
-  }
-
-  public List<BigInteger> getValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = sampleId.add(radius);
-    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
-    Collection<BigInteger> subSet = validatorsIndexed.subSet(bottom, true, top, true);
-    return new ArrayList<BigInteger>(subSet);
-  }
-
-  public List<BigInteger> getNonValidatorNodesbySample(BigInteger sampleId, BigInteger radius) {
-
-    BigInteger bottom = sampleId.subtract(radius);
-    if (radius.compareTo(sampleId) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = sampleId.add(radius);
-    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
-
-    Collection<BigInteger> subSet = nonValidatorsIndexed.subSet(bottom, true, top, true);
-    return new ArrayList<BigInteger>(subSet);
-  }
-
-  public List<BigInteger> getNodesbySample(Set<BigInteger> samples, BigInteger radius) {
-
-    List<BigInteger> result = new ArrayList<>();
-
-    for (BigInteger sample : samples) {
-      result.addAll(getNodesbySample(sample, radius));
-    }
-    return result;
-  }
-
-  public List<BigInteger> getAllNeighbours() {
-
-    List<BigInteger> result = new ArrayList<>(neighbours.keySet());
-    return result;
-  }
-
-  public Neighbour[] getNeighbours(int n) {
-
-    List<Neighbour> result = new ArrayList<>();
-    List<Neighbour> neighs = new ArrayList<>();
-    for (Neighbour neigh : neighbours.values()) {
-      neighs.add(neigh);
-    }
-    Collections.shuffle(neighs);
-
-    for (Neighbour neigh : neighs) {
-      if (result.size() < n) result.add(neigh);
-      else break;
-    }
-    return result.toArray(new Neighbour[0]);
-  }
-
-  public void setEvil(List<Node> nodes) {
-    this.evilNodes = nodes;
-  }
-
-  public boolean isEvil(BigInteger id) {
-    if (evilIds.contains(id)) return true;
-    else return false;
-  }
-
-  public void setEvilIds(List<BigInteger> ids) {
-    this.evilIds = ids;
-  }
-
-  public Neighbour[] getEvilNeighbours(int n) {
-
-    List<Neighbour> result = new ArrayList<>();
-    if (evilNodes != null) {
-      Collections.shuffle(evilNodes);
-      for (Node neigh : evilNodes) {
-        if (result.size() < n)
-          result.add(new Neighbour(neigh.getDASProtocol().getKademliaId(), neigh, true));
-        else break;
+      if (counter == nodesPerRow) {
+        column++;
+        counter = 0;
       }
+      if (column > b.getSize()) break;
     }
-    return result.toArray(new Neighbour[0]);
+
+    for (int i : rowsValidator.keySet()) {
+      System.out.println("Row " + i + " nodes " + rowsValidator.get(i).size());
+    }
+
+    for (int i : columnsValidator.keySet()) {
+      System.out.println("Column " + i + " nodes " + columnsValidator.get(i).size());
+    }
+    
+    for (int r=1;r<=b.getSize();r++) {
+      Sample s = b.getSample(row, column)
+      List<BigInteger> vals = rowsValidator.get(s.getRow());
+      validatorsSamples.put(s.getId(),vals.get(CommonState.r.nextInt(vals.size())) )
+    }
   }
 
-  public Neighbour[] getNeighbours(BigInteger id, BigInteger radius) {
-
-    List<BigInteger> nodes = getNodesbySample(id, radius);
-    List<Neighbour> neighs = new ArrayList<>();
-    List<Neighbour> result = new ArrayList<>();
-    for (BigInteger n : nodes) {
-      neighs.add(neighbours.get(n));
-    }
-    Collections.shuffle(neighs);
-
-    for (Neighbour neigh : neighs) {
-      if (result.size() < KademliaCommonConfigDas.MAX_NODES_RETURNED) result.add(neigh);
-      else break;
-    }
-    return result.toArray(new Neighbour[0]);
+  public List<BigInteger> getNodesBySample(BigInteger sampleId) {
+    return validatorsSamples.get(sampleId);
   }
 
-  public int getAllNeighboursCount() {
-    return neighbours.size();
+  public int getValidatorRow(BigInteger id) {
+    return validatorsRow.get(id);
   }
 
-  public int getValidatorsNeighboursCount() {
-    int count = 0;
-    for (Neighbour neigh : neighbours.values()) {
-      if (neigh.getNode().getDASProtocol().isValidator()) count++;
-    }
-    return count;
-  }
-
-  public int getNonValidatorsNeighboursCount() {
-    int count = 0;
-    for (Neighbour neigh : neighbours.values()) {
-      if (!neigh.getNode().getDASProtocol().isValidator()) count++;
-    }
-    return count;
-  }
-
-  public int getAllAliveNeighboursCount() {
-    int count = 0;
-    for (Neighbour neigh : neighbours.values()) {
-      if (neigh.getNode().isUp()) count++;
-    }
-    return count;
-  }
-
-  public int getMaliciousNeighboursCount() {
-    int count = 0;
-    for (Neighbour neigh : neighbours.values()) {
-      if (neigh.isEvil()) count++;
-    }
-    return count;
-  }
-
-  public boolean isNeighbourKnown(Neighbour neighbour) {
-    return neighbours.containsKey(neighbour.getId());
-  }
-
-  public void refresh() {
-
-    List<Neighbour> toRemove = new ArrayList<>();
-    for (Neighbour neigh : neighbours.values()) {
-      if (neigh.expired()) {
-        toRemove.add(neigh);
-        nodesIndexed.remove(neigh.getId());
-      }
-    }
-    for (Neighbour n : toRemove) neighbours.remove(n.getId());
+  public int getValidatorColumn(BigInteger id) {
+    return validatorsColumn.get(id);
   }
 }

@@ -1,32 +1,27 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import peersim.core.Network;
 import peersim.core.Node;
-import peersim.edsim.EDSimulator;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static String prefix = null;
-  protected HashMap<BigInteger, List<BigInteger>> samplesToRequest;
 
   public DASProtocolBuilder(String prefix) {
     super(prefix);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
-    samplesToRequest = new HashMap<>();
   }
 
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block  builder node - getting samples " + this);
     System.err.println("Wrong eventInit block  builder node - getting samples ");
+    System.exit(-1);
   }
 
   @Override
@@ -34,118 +29,36 @@ public class DASProtocolBuilder extends DASProtocol {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Builder new block:" + currentBlock.getBlockId());
 
-    int samplesWithinRegion = 0; // samples that are within at least one node's region
-    int samplesWithinRegionColumn = 0; // samples that are within at least one node's region
+    searchTable.assignSamples(currentBlock, KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
 
-    int samplesValidators = 0;
-    int samplesNonValidators = 0;
-    samplesToRequest.clear();
-    BigInteger radiusNonValidator =
-        currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
-
+    currentBlock.initIterator();
     while (currentBlock.hasNext()) {
-      boolean inRegion = false;
       Sample s = currentBlock.next();
-      kv.add(s.getId());
-      // kv.add(s.getId(), s);
-      // kv.add(s.getIdByColumn(), s);
-      BigInteger radiusValidator =
-          currentBlock.computeRegionRadius(
-              KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER,
-              searchTable.getValidatorsIndexed().size());
-      BigInteger radiusUsed = radiusValidator;
-      while (!inRegion) {
 
-        List<BigInteger> idsValidators =
-            searchTable.getValidatorNodesbySample(s.getIdByRow(), radiusUsed);
-        idsValidators.addAll(searchTable.getValidatorNodesbySample(s.getIdByColumn(), radiusUsed));
-        for (BigInteger id : idsValidators) {
-
-          logger.info(
-              "Sending sample to validator "
-                  + s.getIdByRow()
-                  + " "
-                  + s.getIdByColumn()
-                  + " to "
-                  + id);
+      List<BigInteger> nodesByRow = searchTable.getNodesBySample(s.getId());
+      if (nodesByRow != null) {
+        for (BigInteger id : nodesByRow) {
+          Message msg = new Message(Message.MSG_SEED_SAMPLE, new Sample[] {s});
+          msg.operationId = -1;
+          msg.src = this.kadProtocol.getKademliaNode();
           Node n = Util.nodeIdtoNode(id, kademliaId);
-          DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-          if (dasProt.isBuilder()) continue;
-          if (n.isUp()) {
-
-            if (!samplesToRequest.containsKey(id)) {
-              List<BigInteger> samples = new ArrayList<>();
-              samples.add(s.getId());
-              samplesToRequest.put(id, samples);
-            } else {
-              samplesToRequest.get(id).add(s.getId());
-            }
-            samplesValidators++;
-            if (inRegion == false) {
-              samplesWithinRegion++;
-              inRegion = true;
-            }
-          }
+          msg.dst = n.getKademliaProtocol().getKademliaNode();
+          sendMessage(msg, id, myPid);
         }
-        if (!inRegion) radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
       }
 
-      List<BigInteger> idsNonValidators =
-          searchTable.getNonValidatorNodesbySample(s.getIdByRow(), radiusNonValidator);
-      idsNonValidators.addAll(
-          searchTable.getNonValidatorNodesbySample(s.getIdByColumn(), radiusNonValidator));
-      for (BigInteger id : idsNonValidators) {
-        logger.info(
-            "Sending sample to non-validator "
-                + s.getIdByRow()
-                + " "
-                + s.getIdByColumn()
-                + " to "
-                + id);
-        Node n = Util.nodeIdtoNode(id, kademliaId);
-        DASProtocol dasProt = ((DASProtocol) (n.getDASProtocol()));
-        if (dasProt.isBuilder()) continue;
-        if (n.isUp()) {
-          samplesNonValidators++;
-
-          if (!dasProt.isValidator()) {
-
-            if (!samplesToRequest.containsKey(id)) {
-              List<BigInteger> samples = new ArrayList<>();
-              samples.add(s.getId());
-              samplesToRequest.put(id, samples);
-            } else {
-              samplesToRequest.get(id).add(s.getId());
-            }
-          }
+      List<BigInteger> nodesByColumn = searchTable.getNodesBySample(s.getIdByColumn());
+      if (nodesByColumn != null) {
+        for (BigInteger id : nodesByColumn) {
+          Message msg = new Message(Message.MSG_SEED_SAMPLE, new Sample[] {s});
+          msg.operationId = -1;
+          msg.src = this.kadProtocol.getKademliaNode();
+          Node n = Util.nodeIdtoNode(id, kademliaId);
+          msg.dst = n.getKademliaProtocol().getKademliaNode();
+          sendMessage(msg, id, myPid);
         }
       }
     }
-
-    for (int i = 0; i < Network.size(); i++) {
-      Node n = Network.get(i);
-      DASProtocol dasProt = n.getDASProtocol();
-      BigInteger id = dasProt.getKademliaId();
-      if (!dasProt.isBuilder && samplesToRequest.containsKey(id)) {
-        EDSimulator.add(
-            1,
-            generateNewSampleMessage(samplesToRequest.get(id).toArray(new BigInteger[0])),
-            n,
-            dasProt.getDASProtocolID());
-      }
-    }
-
-    logger.warning(
-        samplesWithinRegion
-            + " "
-            + samplesWithinRegionColumn
-            + " samples out of "
-            + currentBlock.getNumSamples()
-            + " samples are within a node's region"
-            + " "
-            + samplesValidators
-            + " "
-            + samplesNonValidators);
   }
 
   @Override
