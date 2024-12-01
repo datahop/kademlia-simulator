@@ -29,7 +29,7 @@ public class DASProtocolBuilder extends DASProtocol {
     super.handleInitNewBlock(m, myPid);
     logger.warning("Builder new block:" + currentBlock.getBlockId());
 
-    searchTable.assignSamples(currentBlock, KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
+    searchTable.assignByRowColumn(currentBlock);
 
     currentBlock.initIterator();
     while (currentBlock.hasNext()) {
@@ -44,6 +44,8 @@ public class DASProtocolBuilder extends DASProtocol {
           Node n = Util.nodeIdtoNode(id, kademliaId);
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, myPid);
+          System.out.println(
+              "Sending row " + s.getRow() + " column " + s.getColumn() + " to " + id);
         }
       }
 
@@ -56,6 +58,8 @@ public class DASProtocolBuilder extends DASProtocol {
           Node n = Util.nodeIdtoNode(id, kademliaId);
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, myPid);
+          System.out.println(
+              "Sending row " + s.getRow() + " column " + s.getColumn() + " to " + id);
         }
       }
     }

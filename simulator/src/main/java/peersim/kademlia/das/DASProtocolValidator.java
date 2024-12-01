@@ -1,6 +1,7 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -114,8 +115,16 @@ public class DASProtocolValidator extends DASProtocol {
     //  createValidatorSamplingOperation(
     //      0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
 
-    createValidatorSamplingOperation(searchTable.getValidatorRow(this.getKademliaId()), 0, time);
-    createValidatorSamplingOperation(0, searchTable.getValidatorColumn(this.getKademliaId()), time);
+    int row = searchTable.getValidatorRow(this.getKademliaId());
+    if (row == 0) {
+      row = CommonState.r.nextInt(currentBlock.getSize()) + 1;
+    }
+    int column = searchTable.getValidatorColumn(this.getKademliaId());
+    if (column == 0) {
+      column = CommonState.r.nextInt(currentBlock.getSize()) + 1;
+    }
+    createValidatorSamplingOperation(row, 0, time);
+    // createValidatorSamplingOperation(0, column, time);
   }
 
   private void createValidatorSamplingOperation(int row, int column, long timestamp) {

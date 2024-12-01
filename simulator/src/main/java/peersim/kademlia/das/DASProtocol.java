@@ -801,7 +801,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
   protected boolean doSampling(SamplingOperation sop) {
 
-    logger.info("Doingsampling " + sop.getId() + " " + sop.getPending());
+    logger.warning("Doingsampling " + sop.getId() + " " + sop.getPending());
     if (sop.completed()) {
       samplingOp.remove(sop.getId());
       KademliaObserver.reportOperation(sop);
