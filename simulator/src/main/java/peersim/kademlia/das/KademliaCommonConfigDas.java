@@ -58,7 +58,8 @@ public class KademliaCommonConfigDas {
   public static int VALIDATOR_DEADLINE = 4000;
   public static int RANDOM_SAMPLING_DEADLINE = 12000;
 
-  public static int aggressiveness_step = 1;
+  public static int random_sampling_aggressiveness_step = 10;
+  public static int row_column_sampling_aggressiveness_step = 1;
   public static int multiplyRadiusLimit = 0;
 
   public static int validatorsSize = 0;

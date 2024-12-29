@@ -21,9 +21,14 @@ public class DASProtocolEvilValidator extends DASProtocolValidator {
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block evil node validator - getting samples " + this);
-    // super.handleInitGetSample(m, myPid);
   }
 
+  @Override
+  protected void handleInitNewBlock(Message m, int myPid) {
+    // evil validator. do not sample
+  }
+  
+  
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
     logger.info("KV size " + kv.occupancy() + " from:" + m.src.getId() + " " + m.id);

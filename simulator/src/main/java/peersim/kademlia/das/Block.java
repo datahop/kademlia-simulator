@@ -237,7 +237,6 @@ public class Block implements Iterator<Sample>, Cloneable {
     return this.blockSamples[row - 1];
   }
 
- 
   public Sample[] getNSamplesByRow(int row, int n) {
     Sample[] RowSamples = this.blockSamples[row - 1];
     Sample[] samples = new Sample[n];
@@ -256,7 +255,6 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
     return samples;
   }
-
 
   public Sample[] getNSamplesByColumn(int column, int n) {
     Sample[] Columnsamples = new Sample[SIZE];
