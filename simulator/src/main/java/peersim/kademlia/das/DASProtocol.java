@@ -177,11 +177,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
       case Timeout.TIMEOUT: // timeout
         Timeout t = (Timeout) event;
+
         if (sentMsg.containsKey(t.msgID)) { // the response msg isn't arrived
           // remove form sentMsg
           logger.warning("Timeouuuuut! " + t.msgID);
           sentMsg.remove(t.msgID);
-          // this.searchTable.removeNode(t.node);
           SamplingOperation sop = samplingOp.get(t.opID);
           if (sop != null) {
             if (!sop.completed()) {
@@ -462,7 +462,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       }
       logger.info("Transmission " + latency + " " + transDelay);
       // add to sent msg
-      this.sentMsg.put(m.id, m.timestamp);
+      // this.sentMsg.put(m.id, m.timestamp);
       EDSimulator.add(latency, m, dest, myPid);
     }
 

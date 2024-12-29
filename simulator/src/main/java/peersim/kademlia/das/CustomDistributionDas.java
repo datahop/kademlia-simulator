@@ -55,7 +55,6 @@ public class CustomDistributionDas implements peersim.core.Control {
 
   public CustomDistributionDas(String prefix) {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
-    // protocolEvilKadID = Configuration.getPid(prefix + "." + PAR_PROT_EVIL_KAD, protocolKadID);
     protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
     protocolDasValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_VALIDATOR);
     protocolDasNonValidatorID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_NON_VALIDATOR);
@@ -88,7 +87,6 @@ public class CustomDistributionDas implements peersim.core.Control {
     List<BigInteger> nonValidatorsIds = new ArrayList<>();
     List<Neighbour> evilNeighbours = new ArrayList<>();
     List<Node> validators = new ArrayList<>();
-    // List<BigInteger> evilIds = new ArrayList<>();
     numValidators = numValidators - numEvilValidatorNodes;
 
     for (int i = 0; i < Network.size(); ++i) {
@@ -130,7 +128,6 @@ public class CustomDistributionDas implements peersim.core.Control {
       } else {
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
         nonValidatorsIds.add(kadProt.getKademliaNode().getId());
-        // node.setServer(false);
       }
 
       dasProt.setKademliaProtocol(kadProt);
@@ -156,10 +153,10 @@ public class CustomDistributionDas implements peersim.core.Control {
 
     for (int i = 0; i < Network.size(); i++) {
       Node generalNode = Network.get(i);
-      // generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
+      generalNode.getDASProtocol().setNonValidators(nonValidatorsIds);
       generalNode.getDASProtocol().addKnownValidator(validatorsIds.toArray(new BigInteger[0]));
       // Populate builder's searchtable with all the validators
-      /*if (generalNode.getDASProtocol().isBuilder()) {
+      if (generalNode.getDASProtocol().isBuilder()) {
         for (Node n : validators)
           generalNode
               .getDASProtocol()
@@ -175,7 +172,7 @@ public class CustomDistributionDas implements peersim.core.Control {
             continue;
           sTable.addNeighbour(evilNghbr);
         }
-      }*/
+      }
     }
 
     KademliaCommonConfigDas.networkSize = Network.size();

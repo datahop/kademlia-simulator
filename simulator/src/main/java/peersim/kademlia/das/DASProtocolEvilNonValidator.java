@@ -1,5 +1,6 @@
 package peersim.kademlia.das;
 
+import peersim.core.CommonState;
 import peersim.kademlia.Message;
 
 public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
@@ -15,18 +16,15 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
     isBuilder = false;
   }
 
-
-  @Override
-  protected void handleInitNewBlock(Message m, int myPid) {
-    //evil node. do not sample
-  }
-
   @Override
   protected void handleInitGetSample(Message m, int myPid) {
     logger.warning("Init block evil node validator - getting samples " + this);
-    // super.handleInitGetSample(m, myPid);
   }
 
+  protected void handleGetSample(Message m, int myPid) {
+    logger.warning("evil node nonvalidator - witholding samples "+m.body);
+
+  }
 
   /**
    * Replicate this object by returning an identical copy.<br>
