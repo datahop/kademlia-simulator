@@ -1,7 +1,9 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import peersim.core.CommonState;
+import java.util.List;
+import peersim.config.Configuration;
+import peersim.core.Network;
 import peersim.kademlia.Message;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
@@ -10,10 +12,23 @@ import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 public class DASProtocolValidator extends DASProtocol {
 
   protected static String prefix = null;
+  protected static final String PAR_VALIDATOR = "validatorStrategy";
 
   public DASProtocolValidator(String prefix) {
     super(prefix);
     DASProtocolValidator.prefix = prefix;
+
+    KademliaCommonConfigDas.validatorStrategy =
+        Configuration.getInt(
+            prefix + "." + PAR_VALIDATOR, KademliaCommonConfigDas.validatorStrategy);
+
+    if (KademliaCommonConfigDas.validatorStrategy == 0) {
+      KademliaCommonConfigDas.random_sampling_aggressiveness_step = Network.size();
+    } else if (KademliaCommonConfigDas.validatorStrategy == 1) {
+      KademliaCommonConfigDas.random_sampling_aggressiveness_step =
+          KademliaCommonConfigDas.N_SAMPLES;
+    }
+
     isValidator = true;
     isBuilder = false;
   }
@@ -23,7 +38,11 @@ public class DASProtocolValidator extends DASProtocol {
     logger.warning("seed sample received");
     if (m.body == null) return;
 
-    Sample[] samples = (Sample[]) m.body;
+    SeedingSampleBody body = (SeedingSampleBody) m.body;
+    Sample[] samples = (Sample[]) body.getsamplesList();
+    List<BigInteger> validatorList = body.getValidators();
+    boolean isRow = body.getIsRow();
+
     for (Sample s : samples) {
       logger.warning(
           "Received sample:"
@@ -42,6 +61,14 @@ public class DASProtocolValidator extends DASProtocol {
       // count # of samples for each row and column
       column[s.getColumn() - 1]++;
       row[s.getRow() - 1]++;
+      reconstruct(s);
+
+      if (isRow) {
+        createValidatorSamplingOperation(samples[0].getRow(), 0, time, validatorList);
+      } else {
+        createValidatorSamplingOperation(0, samples[0].getColumn(), time, validatorList);
+      }
+      startRandomSampling();
     }
   }
 
@@ -54,41 +81,12 @@ public class DASProtocolValidator extends DASProtocol {
   protected void handleInitNewBlock(Message m, int myPid) {
     super.handleInitNewBlock(m, myPid);
     if (!isEvil) {
-      startRowsandColumnsSampling();
       startRandomSampling();
     }
   }
 
-  /**
-   * Starts getting rows and columns, only for validators
-   *
-   * @param m initial message
-   * @param myPid protocol pid
-   */
-  protected void startRowsandColumnsSampling() {
-    logger.warning(
-        "Starting rows and columns fetch "
-            + rowWithHighestNumSamples()
-            + " "
-            + row[rowWithHighestNumSamples()]
-            + " "
-            + columnWithHighestNumSamples()
-            + " "
-            + column[columnWithHighestNumSamples()]);
-
-    // start 2 row 2 column Validator operation (1 row/column with the highest number of samples
-    // already downloaded and another random)
-    createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
-    createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
-    createValidatorSamplingOperation(
-        CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, 0, time);
-    createValidatorSamplingOperation(
-        0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
-  }
-
-  private void createValidatorSamplingOperation(int row, int column, long timestamp) {
+  private void createValidatorSamplingOperation(
+      int row, int column, long timestamp, List<BigInteger> validatorList) {
     ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(
             this.getKademliaId(),

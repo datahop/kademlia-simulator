@@ -104,7 +104,6 @@ public class CustomDistributionDas implements peersim.core.Control {
       kadProt.setNode(node);
 
       if (i == 0) {
-
         dasProt = ((DASProtocol) (Network.get(i).getProtocol(protocolDasBuilderID)));
         builderAddress = node.getId();
         validators.add(generalNode);

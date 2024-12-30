@@ -321,7 +321,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   }
 
   // This process creates the missing samples of a row or column when already received part of it.
-  private void reconstruct(Sample s) {
+  protected void reconstruct(Sample s) {
     column[s.getColumn() - 1]++;
     row[s.getRow() - 1]++;
     if (column[s.getColumn() - 1] >= column.length / 2
@@ -429,8 +429,14 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
       transport.send(src, dest, m, myPid);
     } else {
-
-      Sample[] samples = (Sample[]) m.body;
+      Sample[] samples;
+      if (m.getType() == Message.MSG_SEED_SAMPLE) {
+        SeedingSampleBody body = (SeedingSampleBody) m.body;
+        samples = (Sample[]) body.getsamplesList();
+      } else {
+        samples = (Sample[]) m.body;
+      }
+      // Sample[] samples = (Sample[]) m.body;
       Neighbour[] nghbrs = (Neighbour[]) m.value;
       double samplesSize = 0.0;
       if (samples != null) samplesSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
@@ -636,6 +642,16 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected Message generateSeedSampleMessage(Sample[] s) {
 
     Message m = new Message(Message.MSG_SEED_SAMPLE, s);
+    m.timestamp = CommonState.getTime();
+
+    return m;
+  }
+
+  // Generating specific messages to be sent
+  protected Message generateSeedSampleMessage(
+      Sample[] s, List<BigInteger> validators, boolean isRow) {
+    SeedingSampleBody body = new SeedingSampleBody(s, validators, isRow);
+    Message m = new Message(Message.MSG_SEED_SAMPLE, body);
     m.timestamp = CommonState.getTime();
 
     return m;

@@ -1,6 +1,5 @@
 package peersim.kademlia.das;
 
-import peersim.core.CommonState;
 import peersim.kademlia.Message;
 
 public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
@@ -22,8 +21,7 @@ public class DASProtocolEvilNonValidator extends DASProtocolNonValidator {
   }
 
   protected void handleGetSample(Message m, int myPid) {
-    logger.warning("evil node nonvalidator - witholding samples "+m.body);
-
+    logger.warning("evil node nonvalidator - witholding samples " + m.body);
   }
 
   /**

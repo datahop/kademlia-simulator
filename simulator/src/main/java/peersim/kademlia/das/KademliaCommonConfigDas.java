@@ -66,4 +66,16 @@ public class KademliaCommonConfigDas {
   public static int networkSize = 0;
 
   public static long TTL = 100000;
+
+  // Builder Strategy to disseminate sample
+  // 0 == All samples
+  // 1 == Half of the samples
+  // 2 == 2 of All samples
+  public static int builderStrategy = 0;
+
+  // Validator Strategy for sampling
+  // 0 == Brute Force
+  // 1 == Initial Number of sample search at each steps
+  // 2 == Only research with a number of node equal to number of missing samples
+  public static int validatorStrategy = 0;
 }

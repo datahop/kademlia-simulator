@@ -144,7 +144,7 @@ public class TrafficGeneratorSample implements Control {
               n,
               kadpid);
 
-        if (n.getDASProtocol() instanceof DASProtocolBuilder
+        if (n.getDASProtocol() instanceof DASProtocolBuilderLegacy
             && n.getDASProtocol()
                 .getBuilderAddress()
                 .equals(n.getKademliaProtocol().getKademliaNode().getId())) {
