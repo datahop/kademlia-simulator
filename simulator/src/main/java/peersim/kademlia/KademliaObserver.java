@@ -302,6 +302,25 @@ public class KademliaObserver implements Control {
       msgs.put(msgId, result);
       msgId++;
     }
+    for (BigInteger id : msgsOut.keySet()) {
+      if (msgsIn.keySet().contains(id)) {
+        continue;
+      }
+      Map<String, Object> result = new HashMap<String, Object>();
+      result.put("id", id);
+      Node n = Util.nodeIdtoNode(id, kademliaid);
+      boolean builder = n.getDASProtocol().isBuilder();
+      boolean validator = n.getDASProtocol().isValidator();
+      result.put("msgsIn", msgsIn.get(id));
+      result.put("msgsOut", msgsOut.get(id));
+      result.put("bytesIn", bytesIn.get(id));
+      result.put("bytesOut", bytesOut.get(id));
+      if (builder) result.put("nodeType", "builder");
+      else if (validator) result.put("nodeType", "validator");
+      else result.put("nodeType", "regular");
+      msgs.put(msgId, result);
+      msgId++;
+    }
     return msgs;
   }
 }

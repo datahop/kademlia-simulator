@@ -1,7 +1,6 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
-import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -37,7 +36,10 @@ public class DASProtocolValidator extends DASProtocol {
 
   @Override
   protected void handleSeedSample(Message m, int myPid) {
-    Sample[] samples = (Sample[]) m.body;
+
+    SeedingSampleBody body = (SeedingSampleBody) m.body;
+    Sample[] samples = (Sample[]) body.getsamplesList();
+    logger.warning("Seed received " + samples.length + " samples.");
     for (Sample s : samples) {
       logger.warning(
           "Sample received "
@@ -55,10 +57,10 @@ public class DASProtocolValidator extends DASProtocol {
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
     }
-    if (!started) {
+    /*if (!started) {
       started = true;
       startRowsandColumnsSampling();
-    }
+    }*/
   }
 
   @Override
@@ -115,7 +117,7 @@ public class DASProtocolValidator extends DASProtocol {
     //  createValidatorSamplingOperation(
     //      0, CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1, time);
 
-    int row = searchTable.getValidatorRow(this.getKademliaId());
+    /*int row = searchTable.getValidatorRow(this.getKademliaId());
     if (row == 0) {
       row = CommonState.r.nextInt(currentBlock.getSize()) + 1;
     }
@@ -123,7 +125,8 @@ public class DASProtocolValidator extends DASProtocol {
     if (column == 0) {
       column = CommonState.r.nextInt(currentBlock.getSize()) + 1;
     }
-    createValidatorSamplingOperation(row, 0, time);
+
+    createValidatorSamplingOperation(row, 0, time);*/
     // createValidatorSamplingOperation(0, column, time);
   }
 

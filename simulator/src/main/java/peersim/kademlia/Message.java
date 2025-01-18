@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import peersim.kademlia.das.Sample;
+import peersim.kademlia.das.SeedingSampleBody;
 
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
@@ -151,6 +152,13 @@ public class Message extends SimpleEvent {
       size += 4; // msg type
     } else if (body instanceof Sample[]) {
       Sample[] samples = (Sample[]) body;
+      size += 512 * samples.length; // samples
+      size += 15 * 32; // neighbours
+      size += 64; // src dst id
+      size += 4; // message type
+    } else if (body instanceof SeedingSampleBody) {
+      SeedingSampleBody ssb = (SeedingSampleBody) body;
+      Sample[] samples = (Sample[]) ssb.getsamplesList();
       size += 512 * samples.length; // samples
       size += 15 * 32; // neighbours
       size += 64; // src dst id

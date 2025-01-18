@@ -179,7 +179,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       // m.dst = this.kadProtocol.getKademliaNode();
       if (msgReport
           && (m.getType() == Message.MSG_GET_SAMPLE
-              || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE))
+              || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE
+              || m.getType() == Message.MSG_SEED_SAMPLE))
         KademliaObserver.reportMsg(m, false, this.getKademliaId());
       /*if (m.src != null) {
         Node n = Util.nodeIdtoNode(m.src.getId(), kademliaId);
@@ -651,7 +652,8 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
     if (msgReport
         && (m.getType() == Message.MSG_GET_SAMPLE
-            || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE))
+            || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE
+            || m.getType() == Message.MSG_SEED_SAMPLE))
       KademliaObserver.reportMsg(m, true, this.getKademliaId());
 
     if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
@@ -660,7 +662,14 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       // Send message taking into account the transmission delay and the availability of upload
       // interface
       // Timeout t = new Timeout(destId, m.id, m.operationId);
-      Sample[] samples = (Sample[]) m.body;
+      Sample[] samples;
+      if (m.getType() == Message.MSG_SEED_SAMPLE) {
+        SeedingSampleBody body = (SeedingSampleBody) m.body;
+        samples = (Sample[]) body.getsamplesList();
+      } else {
+        samples = (Sample[]) m.body;
+      }
+      // Sample[] samples = (Sample[]) m.body;
       // Neighbour[] nghbrs = (Neighbour[]) m.value;
       double samplesSize = 0.0;
       if (samples != null) samplesSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
@@ -912,20 +921,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     logger.info("Missing nodes for sample " + sample + " " + kadOps.size());
     // missing = true;
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * generates a GET message for a specific sample.
-   *
-   * @return Message
-   */
-  protected Message generateSeedSampleMessage(Sample[] s) {
-
-    Message m = new Message(Message.MSG_SEED_SAMPLE, s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
   }
 
   // ______________________________________________________________________________________________
