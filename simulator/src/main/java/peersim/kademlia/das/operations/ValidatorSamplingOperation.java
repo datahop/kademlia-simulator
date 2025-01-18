@@ -24,6 +24,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
   // private RoutingTable rou;
   protected int row, column;
   protected HashMap<BigInteger, Integer> extras;
+  protected List<BigInteger> validatorList;
   /**
    * default constructor
    *
@@ -40,6 +41,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       int column,
       boolean isValidator,
       int numValidators,
+      List<BigInteger> validatorList,
       MissingNode callback) {
     super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
 
@@ -60,7 +62,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     }
     this.searchTable = searchTable;
     this.extras = new HashMap<>();
-    // createNodes();
+    this.validatorList = validatorList;
+    createNodes();
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -171,7 +174,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       if (!samples.get(sample).isDownloaded()) {
 
         List<BigInteger> nodesBySample = new ArrayList<>();
-        if (row > 0) {
+        /*if (row > 0) {
           // BigInteger radiusUsed = radiusValidator;
           // while (nodesBySample.isEmpty() && radiusUsed.compareTo(Block.MAX_KEY) == -1) {
           // nodesBySample.addAll(
@@ -198,7 +201,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
 
           // radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           // }
-        }
+        }*/
+        nodesBySample.addAll(validatorList);
         boolean found = false;
         nodesBySample.removeAll(askedNodes);
         if (nodesBySample != null && nodesBySample.size() > 0) {

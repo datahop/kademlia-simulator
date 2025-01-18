@@ -1,6 +1,8 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import peersim.core.Node;
 import peersim.kademlia.Message;
 import peersim.kademlia.Util;
@@ -56,6 +58,13 @@ public class DASProtocolValidator extends DASProtocol {
       // kv.add((BigInteger) s.getIdByColumn(), s);
       // count # of samples for each row and column and reconstruct if more than half received
       reconstruct(s);
+    }
+    List<BigInteger> validatorList = body.getValidators();
+    boolean isRow = body.getIsRow();
+    if (isRow) {
+      createValidatorSamplingOperation(samples[0].getRow(), 0, time, validatorList);
+    } else {
+      createValidatorSamplingOperation(0, samples[0].getColumn(), time, validatorList);
     }
     /*if (!started) {
       started = true;
@@ -130,7 +139,8 @@ public class DASProtocolValidator extends DASProtocol {
     // createValidatorSamplingOperation(0, column, time);
   }
 
-  private void createValidatorSamplingOperation(int row, int column, long timestamp) {
+  private void createValidatorSamplingOperation(
+      int row, int column, long timestamp, List<BigInteger> validatorList) {
     ValidatorSamplingOperation op =
         new ValidatorSamplingOperation(
             this.getKademliaId(),
@@ -141,10 +151,28 @@ public class DASProtocolValidator extends DASProtocol {
             column,
             this.isValidator,
             KademliaCommonConfigDas.validatorsSize,
+            validatorList,
             this);
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId());
 
+    List<Sample> samplesFound = new ArrayList<>();
+    if (row > 0) {
+      Sample[] samples = currentBlock.getSamplesByRow(row);
+      for (Sample s : samples) {
+        if (kv.contains(s.getIdByRow())) {
+          samplesFound.add(s);
+        }
+      }
+    } else {
+      Sample[] samples = currentBlock.getSamplesByColumn(column);
+      for (Sample s : samples) {
+        if (kv.contains(s.getIdByColumn())) {
+          samplesFound.add(s);
+        }
+      }
+    }
+    op.elaborateResponse(samplesFound.toArray(new Sample[0]));
     // op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     doSampling(op);
   }

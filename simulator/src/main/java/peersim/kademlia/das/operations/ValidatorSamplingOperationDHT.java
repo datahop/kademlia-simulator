@@ -23,9 +23,19 @@ public class ValidatorSamplingOperationDHT extends ValidatorSamplingOperation {
       int column,
       boolean isValidator,
       int numValidators,
+      List<BigInteger> validatorList,
       MissingNode callback) {
     super(
-        srcNode, timestamp, block, searchTable, row, column, isValidator, numValidators, callback);
+        srcNode,
+        timestamp,
+        block,
+        searchTable,
+        row,
+        column,
+        isValidator,
+        numValidators,
+        validatorList,
+        callback);
 
     // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";

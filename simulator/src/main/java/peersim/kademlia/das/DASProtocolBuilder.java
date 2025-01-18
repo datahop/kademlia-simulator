@@ -47,8 +47,8 @@ public class DASProtocolBuilder extends DASProtocol {
     return m;
   }
 
-  private void rowSeeding(){
-        // ===============
+  private void rowSeeding() {
+    // ===============
     // Row Seeding
     // ===============
     int actualRow = 1;
@@ -133,23 +133,24 @@ public class DASProtocolBuilder extends DASProtocol {
           msg.src = this.getKademliaProtocol().getKademliaNode();
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, dasProt.getDASProtocolID());
-          //samplesValidators++;
+          // samplesValidators++;
         }
       }
 
-      //samplesWithinRegion += sampleRow.length;
+      // samplesWithinRegion += sampleRow.length;
       actualRow++;
     }
   }
 
-  private void columnSeeding(){
+  private void columnSeeding() {
     // ===============
     // Column Seeding
     // ===============
     int actualColumn = 1;
     while (currentBlock.getSize() >= actualColumn) {
 
-      Sample[] sampleColumn= currentBlock.getSamplesByColumn(actualColumn); // get all sample of the column
+      Sample[] sampleColumn =
+          currentBlock.getSamplesByColumn(actualColumn); // get all sample of the column
       BigInteger radiusValidator =
           currentBlock.computeRegionRadius(1, searchTable.getValidatorsIndexed().size());
 
@@ -223,16 +224,16 @@ public class DASProtocolBuilder extends DASProtocol {
         if (dasProt.isBuilder()) continue;
         if (n.isUp()) {
           Sample[] samples = validatorParcel;
-          Message msg = generateSeedSampleMessage(samples, idsValidators, true);
+          Message msg = generateSeedSampleMessage(samples, idsValidators, false);
           msg.operationId = -1;
           msg.src = this.getKademliaProtocol().getKademliaNode();
           msg.dst = n.getKademliaProtocol().getKademliaNode();
           sendMessage(msg, id, dasProt.getDASProtocolID());
-          //samplesValidators++;
+          // samplesValidators++;
         }
       }
 
-      //samplesWithinRegion += sampleRow.length;
+      // samplesWithinRegion += sampleRow.length;
       actualColumn++;
     }
   }
