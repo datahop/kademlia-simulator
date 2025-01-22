@@ -119,6 +119,7 @@ public class DASProtocolValidator extends DASProtocol {
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
     doRowColumnSampling(op);
+    doRandomSampling(op);
   }
 
   /**

@@ -23,6 +23,9 @@ public class DASProtocolBuilder extends DASProtocol {
     DASProtocolBuilder.prefix = prefix;
     KademliaCommonConfigDas.builderStrategy =
         Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderStrategy);
+    
+    KademliaCommonConfigDas.builderRedundancy =
+        Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderRedundancy);
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
@@ -94,7 +97,7 @@ public class DASProtocolBuilder extends DASProtocol {
       sizeParcels = (currentBlock.getSize() / numberValidatorRow);
       int redundancyFactor = 1;
       if (KademliaCommonConfigDas.builderStrategy == 2) {
-        redundancyFactor = 2;
+        redundancyFactor = KademliaCommonConfigDas.builderRedundancy;
       }
 
       int indexSampleList = 0;
@@ -183,7 +186,7 @@ public class DASProtocolBuilder extends DASProtocol {
       sizeParcels = (currentBlock.getSize() / numberValidatorColumn);
       int redundancyFactor = 1;
       if (KademliaCommonConfigDas.builderStrategy == 2) {
-        redundancyFactor = 2;
+        redundancyFactor = KademliaCommonConfigDas.builderRedundancy;
       }
 
       int indexSampleList = 0;

@@ -10,7 +10,7 @@ import peersim.kademlia.KademliaCommonConfig;
  */
 public class KademliaCommonConfigDas {
 
-  public static int ALPHA = 20; // number of simultaneous lookup messages
+  public static int ALPHA = 75; // number of simultaneous lookup messages
 
   /** Different ways of mapping samples to DHT keyspace */
   public static int SAMPLE_MAPPING_RANDOM = 1;
@@ -71,7 +71,7 @@ public class KademliaCommonConfigDas {
   // 2 == 2 of All samples
 
   public static int builderStrategy = 0;
-
+  public static int builderRedundancy = 8;
   // Validator Strategy for sampling
   // 0 == Brute Force
   // 1 == Initial Number of sample search at each steps

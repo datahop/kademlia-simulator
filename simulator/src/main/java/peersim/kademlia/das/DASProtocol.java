@@ -396,6 +396,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
                   && (CommonState.getTime() - op.getTimestamp())
                       <= KademliaCommonConfigDas.RANDOM_SAMPLING_DEADLINE)) {
         doRowColumnSampling(op);
+        doRandomSampling(op);
       } else {
         logger.warning("Operation completed");
         samplingOp.remove(m.operationId);
@@ -472,7 +473,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
-      Timeout t = new Timeout(destId, m.id, m.operationId, timeout);
+      Timeout t = new Timeout(destId, m.id, m.operationId, 0);
       long latency = transport.getLatency(src, dest);
       logger.warning("Send message added " + m.id + " " + latency);
 
@@ -615,7 +616,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       return success;
     }
   }
-
   protected boolean doRowColumnSampling(SamplingOperation sop) {
 
     if (sop.completed()) {
@@ -652,6 +652,9 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
           sop.addMessage(msg.id);
           sendMessage(msg, nextNode, dasID, sop.getTimeout());
           sop.getMessages();
+        }
+        if (sop.getStrategy() == 3) {
+          sop.updateTimeout(sop.getTimeout() / 2);
         }
         if (!success) {
           if (sop instanceof ValidatorSamplingOperation)
