@@ -23,7 +23,7 @@ public class DASProtocolBuilder extends DASProtocol {
     DASProtocolBuilder.prefix = prefix;
     KademliaCommonConfigDas.builderStrategy =
         Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderStrategy);
-    
+
     KademliaCommonConfigDas.builderRedundancy =
         Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderRedundancy);
     DASProtocolBuilder.prefix = prefix;

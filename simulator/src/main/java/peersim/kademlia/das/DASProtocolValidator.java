@@ -118,8 +118,8 @@ public class DASProtocolValidator extends DASProtocol {
     logger.warning("Sampling operation started validator " + op.getId());
 
     op.elaborateResponse(kv.getAll().toArray(new Sample[0]));
-    doRowColumnSampling(op);
-    doRandomSampling(op);
+    // doRowColumnSampling(op);
+    // doRandomSampling(op);
   }
 
   /**

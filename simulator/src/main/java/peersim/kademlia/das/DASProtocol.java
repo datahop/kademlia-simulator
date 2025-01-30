@@ -187,7 +187,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
             if (!sop.completed()) {
               logger.warning("Samping operation found");
 
-              doSampling(sop);
+              doRandomSampling(sop);
             }
           }
         }
@@ -473,7 +473,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
-      Timeout t = new Timeout(destId, m.id, m.operationId, 0);
+      Timeout t = new Timeout(destId, m.id, m.operationId, timeout);
       long latency = transport.getLatency(src, dest);
       logger.warning("Send message added " + m.id + " " + latency);
 
@@ -508,10 +508,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
 
     if (sop.completed()) {
       samplingOp.remove(sop.getId());
-      KademliaObserver.reportOperation(sop);
       if (sop instanceof ValidatorSamplingOperation)
         logger.warning("Sampling operation finished validator dosampling " + sop.getId());
       else logger.warning("Sampling operation finished random dosampling " + sop.getId());
+      KademliaObserver.reportOperation(sop);
+
       return true;
     } else {
       boolean success = false;
@@ -562,11 +563,11 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
   protected boolean doRandomSampling(SamplingOperation sop) {
 
     if (sop.completed()) {
-      samplingOp.remove(sop.getId());
-      KademliaObserver.reportOperation(sop);
       if (sop instanceof ValidatorSamplingOperation)
         logger.warning("Sampling operation finished validator dosampling " + sop.getId());
       else logger.warning("Sampling operation finished random dosampling " + sop.getId());
+      samplingOp.remove(sop.getId());
+      KademliaObserver.reportOperation(sop);
       return true;
     } else {
       boolean success = false;
@@ -616,14 +617,16 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       return success;
     }
   }
+
   protected boolean doRowColumnSampling(SamplingOperation sop) {
 
     if (sop.completed()) {
-      samplingOp.remove(sop.getId());
-      KademliaObserver.reportOperation(sop);
       if (sop instanceof ValidatorSamplingOperation)
         logger.warning("Sampling operation finished validator dosampling " + sop.getId());
       else logger.warning("Sampling operation finished random dosampling " + sop.getId());
+
+      samplingOp.remove(sop.getId());
+      KademliaObserver.reportOperation(sop);
       return true;
     } else {
       boolean success = false;
