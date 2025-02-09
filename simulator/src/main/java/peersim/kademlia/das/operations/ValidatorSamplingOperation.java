@@ -2,10 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
@@ -64,6 +61,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.extras = new HashMap<>();
     this.validatorList = validatorList;
     createNodes();
+    if (nodes.size() == 0) {
+      System.err.println(
+          "Nodes not found. Row:" + row + "Column:" + column + " op:" + this.getId());
+      System.exit(-1);
+    }
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -258,7 +260,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
     if (CommonState.getTime() - this.getTimestamp() > 2000)*/
     // aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
-    int globalcount = 0;
+    /*int globalcount = 0;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     // int totalcount = 0;
@@ -324,7 +326,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         }
       }
       if (globalcount > 256) break;
-    }
+    }*/
   }
 
   public Map<String, Object> toMap() {

@@ -21,9 +21,14 @@ import peersim.kademlia.Message;
 public class TrafficGeneratorSample implements Control {
 
   /** MSPastry Protocol ID to act */
-  private final int kadpid;
+  private final int dasbuildpid;
 
-  private static final String PAR_KADPROT = "kadprotocol";
+  private final int dasvalpid;
+  private final int dasnonvalpid;
+
+  private static final String PAR_DASBUILDPROT = "dasbuildprotocol";
+  private static final String PAR_DASVALPROT = "dasvalprotocol";
+  private static final String PAR_DASNONVALPROT = "dasnonprotocol";
 
   /** Mapping function for samples */
   final String PAR_MAP_FN = "mapping_fn";
@@ -43,7 +48,9 @@ public class TrafficGeneratorSample implements Control {
 
   // ______________________________________________________________________________________________
   public TrafficGeneratorSample(String prefix) {
-    kadpid = Configuration.getPid(prefix + "." + PAR_KADPROT);
+    dasbuildpid = Configuration.getPid(prefix + "." + PAR_DASBUILDPROT);
+    dasvalpid = Configuration.getPid(prefix + "." + PAR_DASVALPROT);
+    dasnonvalpid = Configuration.getPid(prefix + "." + PAR_DASNONVALPROT);
 
     KademliaCommonConfigDas.MAPPING_FN = Configuration.getInt(prefix + "." + PAR_MAP_FN);
     KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER =
@@ -81,7 +88,27 @@ public class TrafficGeneratorSample implements Control {
     for (int i = 0; i < Network.size(); i++) {
       Node n = Network.get(i);
       if (n.isUp()) {
-        EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        // EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
+        // boolean successful = false;
+        try {
+          EDSimulator.add(0, generateNewBlockMessage(b), n, dasbuildpid);
+          // successful = true;
+        } catch (Exception e) {
+          System.out.println("Traffic error " + e);
+        }
+        /*if (!successful) {
+          try {
+            EDSimulator.add(0, generateNewBlockMessage(b), n, dasvalpid);
+            successful = true;
+          } catch (Exception e) {
+          }
+        }
+        if (!successful) {
+          try {
+            EDSimulator.add(0, generateNewBlockMessage(b), n, dasnonvalpid);
+          } catch (Exception e) {
+          }
+        }*/
       }
     }
     ID_GENERATOR++;

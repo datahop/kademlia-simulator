@@ -21,6 +21,8 @@ package peersim.core;
 import peersim.config.*;
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.das.DASProtocol;
+import peersim.kademlia.das.PeerDAS;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /** This is the default {@link Node} class that is used to compose the {@link Network}. */
 public class GeneralNode implements Node {
@@ -54,6 +56,9 @@ public class GeneralNode implements Node {
 
   /** The DASProtocol instance that this node is running. */
   private DASProtocol dasProtocol;
+
+  private GossipSubProtocol gossipProtocol;
+  private PeerDAS peerDasProtocol;
 
   // ================ constructor and initialization =================
   // =================================================================
@@ -193,6 +198,22 @@ public class GeneralNode implements Node {
 
   public DASProtocol getDASProtocol() {
     return this.dasProtocol;
+  }
+
+  public void setGossipProtocol(GossipSubProtocol proto) {
+    this.gossipProtocol = proto;
+  }
+
+  public GossipSubProtocol getGossipProtocol() {
+    return this.gossipProtocol;
+  }
+
+  public void setPeerDASProtocol(PeerDAS proto) {
+    this.peerDasProtocol = proto;
+  }
+
+  public PeerDAS getPeerDASProtocol() {
+    return this.peerDasProtocol;
   }
 
   // ------------------------------------------------------------------

@@ -2,6 +2,7 @@ package peersim.kademlia;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SeedingSampleBody;
@@ -80,6 +81,23 @@ public class Message extends SimpleEvent {
   public static final int MSG_SEED_SAMPLE = 17;
 
   public static final int MSG_CANCEL_SAMPLE = 18;
+
+  /** Message Type: Gossipsub */
+  public static final int MSG_PRUNE = 19;
+
+  public static final int MSG_IHAVE = 20;
+
+  public static final int MSG_IWANT = 21;
+
+  public static final int MSG_JOIN = 22;
+
+  public static final int MSG_LEAVE = 23;
+
+  public static final int MSG_PUBLISH = 24;
+
+  public static final int MSG_MESSAGE = 25;
+
+  public static final int MSG_GRAFT = 26;
 
   /**
    * Message Type: INIT_FIND_REGION_BASED (command to a node to start looking for node within a
@@ -256,6 +274,37 @@ public class Message extends SimpleEvent {
     return new Message(MSG_CANCEL_SAMPLE, body);
   }
 
+  public static final Message makeInitJoinMessage(Object body) {
+    return new Message(MSG_JOIN, body);
+  }
+
+  public static final Message makeGraftMessage(String topic) {
+    return new Message(MSG_GRAFT, topic);
+  }
+
+  public static final Message makeIHaveMessage(String topic, List<BigInteger> ids) {
+    return new Message(MSG_IHAVE, topic, ids);
+  }
+
+  public static final Message makeIWantMessage(String topic, List<BigInteger> ids) {
+    return new Message(MSG_IWANT, topic, ids);
+  }
+
+  public static final Message makePruneMessage(String topic) {
+    return new Message(MSG_PRUNE, topic);
+  }
+
+  public static final Message makePublishMessage(String topic, Object value) {
+    return new Message(MSG_PUBLISH, topic, value);
+  }
+
+  public static final Message makeMessage(String topic, Object value) {
+    return new Message(MSG_MESSAGE, topic, value);
+  }
+
+  public static final Message makeLeaveMessage(Object body) {
+    return new Message(MSG_LEAVE, body);
+  }
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request

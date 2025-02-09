@@ -52,6 +52,8 @@ public class DASProtocolBuilder extends DASProtocol {
     // Row Seeding
     // ===============
     int actualRow = 1;
+    HashSet<BigInteger> assignedValidators = new HashSet<>();
+
     while (currentBlock.getSize() >= actualRow) {
 
       Sample[] sampleRow = currentBlock.getSamplesByRow(actualRow); // get all sample of the row
@@ -96,7 +98,14 @@ public class DASProtocolBuilder extends DASProtocol {
 
       int indexSampleList = 0;
 
+      List<BigInteger> toRemove = new ArrayList<>();
       for (BigInteger id : idsValidators) {
+        if (assignedValidators.contains(id)) toRemove.add(id);
+      }
+      idsValidators.removeAll(toRemove);
+
+      for (BigInteger id : idsValidators) {
+        assignedValidators.add(id);
 
         // --------------------------
         // Create Row Parcels to send
@@ -147,6 +156,8 @@ public class DASProtocolBuilder extends DASProtocol {
     // Column Seeding
     // ===============
     int actualColumn = 1;
+
+    HashSet<BigInteger> assignedValidators = new HashSet<>();
     while (currentBlock.getSize() >= actualColumn) {
 
       Sample[] sampleColumn =
@@ -189,11 +200,16 @@ public class DASProtocolBuilder extends DASProtocol {
       int sizeParcels = 0;
       sizeParcels = (currentBlock.getSize() / numberValidatorColumn);
       int redundancyFactor = 1;
-
       int indexSampleList = 0;
 
+      List<BigInteger> toRemove = new ArrayList<>();
       for (BigInteger id : idsValidators) {
+        if (assignedValidators.contains(id)) toRemove.add(id);
+      }
+      idsValidators.removeAll(toRemove);
 
+      for (BigInteger id : idsValidators) {
+        assignedValidators.add(id);
         // --------------------------
         // Create column Parcels to send
         // --------------------------
