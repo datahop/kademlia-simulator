@@ -333,7 +333,7 @@ public class Message extends SimpleEvent {
     dolly.dst = this.dst;
     dolly.operationId = this.operationId;
     dolly.body = this.body; // deep cloning?
-
+    dolly.value = this.value;
     return dolly;
   }
 

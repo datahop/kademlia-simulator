@@ -117,7 +117,10 @@ public class PeerDASValidator extends PeerDAS {
       SamplingOperation op = samplingOp.get(id);
       op.elaborateResponse(samples);
       logger.warning("Operation found:" + op.getSamples().length);
-      if (op.completed()) KademliaObserver.reportOperation(op);
+      if (op.completed()) {
+        KademliaObserver.reportOperation(op);
+        logger.warning("Sampling operation completed " + op.getId());
+      }
     }
   }
 }

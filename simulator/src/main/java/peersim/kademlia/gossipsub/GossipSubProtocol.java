@@ -412,15 +412,15 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
               found = true;
             }
           }
-          // logger.warning("Sending gossip to " + id + " " + !found);
+          logger.warning("Sending gossip to " + id + " " + !found);
 
-          /*if (!found) {
+          if (!found) {
             logger.warning("Sending gossip to " + id);
             sendIHaveMessage(topic, id, msgs);
             sent++;
           }
           if (sent == GossipCommonConfig.D) break;
-          found = false;*/
+          found = false;
         }
       }
     }
@@ -569,7 +569,15 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     Sample[] samples = (Sample[]) m.value;
     mCache.put(samples[0].getId(), samples);
 
-    logger.warning("handleMessage received " + topic + " " + m.id + " " + m.src.getId());
+    logger.warning(
+        "handleMessage received "
+            + topic
+            + " "
+            + m.id
+            + " "
+            + m.src.getId()
+            + " "
+            + samples.length);
 
     if (seen.get(topic) == null) seen.put(topic, new ArrayList<BigInteger>());
     if (seen.get(topic).contains(samples[0].getId())) return;
