@@ -4,8 +4,13 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.kademlia.KademliaObserver;
@@ -125,8 +130,32 @@ public abstract class PeerDAS implements Cloneable, EDProtocol, GossipEvent {
    */
   public void setGossipProtocol(GossipSubProtocol prot) {
     this.gossipsub = prot;
-    this.logger = prot.getLogger();
+    // this.logger = prot.getLogger();
     this.gossipsub.setEventsCallback(this);
+    // Initialize the logger with the node ID as its name
+    this.logger = Logger.getLogger(this.getNodeId().toString());
+
+    // Disable the logger's parent handlers to avoid duplicate output
+    this.logger.setUseParentHandlers(false);
+
+    // Set the logger's level to WARNING
+    this.logger.setLevel(Level.WARNING);
+    // logger.setLevel(Level.ALL);
+
+    // Create a console handler for the logger
+    ConsoleHandler handler = new ConsoleHandler();
+    // Set the handler's formatter to a custom format that includes the time and logger name
+    handler.setFormatter(
+        new SimpleFormatter() {
+          private static final String format = "[%d][%s] %3$s %n";
+
+          @Override
+          public synchronized String format(LogRecord lr) {
+            return String.format(format, CommonState.getTime(), logger.getName(), lr.getMessage());
+          }
+        });
+    // Add the console handler to the logger
+    this.logger.addHandler(handler);
     /*searchTable = new SearchTable(currentBlock, this.getKademliaId());*/
   }
 
