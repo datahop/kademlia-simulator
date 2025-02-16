@@ -91,6 +91,7 @@ public class TrafficGeneratorSample implements Control {
         // EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
         // boolean successful = false;
         try {
+          System.out.println("New block " + CommonState.getTime() + " " + b.getBlockId());
           EDSimulator.add(0, generateNewBlockMessage(b), n, dasbuildpid);
           // successful = true;
         } catch (Exception e) {

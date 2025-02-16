@@ -251,7 +251,7 @@ public class KademliaObserver implements Control {
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
     // Calculate the operation stop time and then add the opearation to the operation log.
-    assert (!operations.keySet().contains(op.getId()));
+    if (operations.keySet().contains(op.getId())) return;
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     operations.put(op.getId(), op.toMap());
   }

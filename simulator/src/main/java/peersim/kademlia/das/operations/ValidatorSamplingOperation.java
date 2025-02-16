@@ -42,7 +42,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       MissingNode callback) {
     super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
 
-    // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
     assert (!(row == 0 && column == 0)) : "Both row or column are set";
 
@@ -61,11 +60,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.extras = new HashMap<>();
     this.validatorList = validatorList;
     createNodes();
-    if (nodes.size() == 0) {
+    /*if (nodes.size() == 0) {
       System.err.println(
           "Nodes not found. Row:" + row + "Column:" + column + " op:" + this.getId());
       System.exit(-1);
-    }
+    }*/
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -204,7 +203,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           // radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           // }
         }*/
-        nodesBySample.addAll(validatorList);
+        if (validatorList != null) nodesBySample.addAll(validatorList);
         boolean found = false;
         nodesBySample.removeAll(askedNodes);
         if (nodesBySample != null && nodesBySample.size() > 0) {
