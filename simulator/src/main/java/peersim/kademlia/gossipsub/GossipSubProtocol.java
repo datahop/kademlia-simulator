@@ -524,9 +524,9 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
         Message msg = Message.makeMessage((String) m.body, mCache.get(id));
         msg.src = this.node;
         msg.dst = m.src;
-        BigInteger cid = ((Sample) msg.value).getId();
+        // BigInteger cid = ((Sample[]) msg.value)[0].getId();
 
-        logger.info("sending message iwant " + cid + " " + msg.id + " to " + msg.dst.getId());
+        // logger.info("sending message iwant " + cid + " " + msg.id + " to " + msg.dst.getId());
 
         sendMessage(msg, m.src.getId(), myPid);
       }

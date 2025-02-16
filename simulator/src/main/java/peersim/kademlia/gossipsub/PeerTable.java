@@ -34,6 +34,7 @@ public class PeerTable {
       HashSet<BigInteger> topicPeers = peerMap.get(topic);
       for (BigInteger id : topicPeers) {
         if (!peers.contains(id)) nodes.add(id);
+        if (nodes.size()==n) break;
       }
     }
 
