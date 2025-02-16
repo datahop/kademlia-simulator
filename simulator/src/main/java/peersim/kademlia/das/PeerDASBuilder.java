@@ -48,18 +48,15 @@ public class PeerDASBuilder extends PeerDAS {
       for (int i = 1; i <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; i++) {
         Sample[] samples = currentBlock.getSamplesByRow(i);
         String topic = "Row" + i;
-        for (Sample s : samples) {
-          Message msg = Message.makePublishMessage(topic, s);
-          msg.src = this.gossipsub.node;
-          gossipsub.Publish(msg, myPid);
-        }
+        Message msg = Message.makePublishMessage(topic, samples);
+        msg.src = this.gossipsub.node;
+        gossipsub.Publish(msg, myPid);
+
         samples = currentBlock.getSamplesByColumn(i);
         topic = "Column" + i;
-        for (Sample s : samples) {
-          Message msg = Message.makePublishMessage(topic, s);
-          msg.src = this.gossipsub.node;
-          gossipsub.Publish(msg, myPid);
-        }
+        msg = Message.makePublishMessage(topic, samples);
+        msg.src = this.gossipsub.node;
+        gossipsub.Publish(msg, myPid);
       }
     }
   }

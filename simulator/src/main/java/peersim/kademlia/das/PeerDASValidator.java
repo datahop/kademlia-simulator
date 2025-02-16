@@ -102,20 +102,21 @@ public class PeerDASValidator extends PeerDAS {
   public void messageReceived(Message m) {
     // TODO Auto-generated method stub
     // throw new UnsupportedOperationException("Unimplemented method 'messageReceived'");
-    Sample s = (Sample) m.value;
-    logger.info("Sample received row:" + s.getRow() + " column:" + s.getColumn());
-    if (samplingOp.get((long) s.getRow()) != null) {
-      SamplingOperation op = samplingOp.get((long) s.getRow());
-      Sample[] samples = {s};
-      op.elaborateResponse(samples);
-      logger.info("Operation found:" + op.getSamples().length);
-      if (op.completed()) KademliaObserver.reportOperation(op);
+    Sample[] samples = (Sample[]) m.value;
+    String topic = (String) m.body;
+
+    long id;
+    if (topic.contains("Column")) {
+      id = Long.parseLong(topic.replace("Column", ""));
+    } else {
+      id = Long.parseLong(topic.replace("Row", ""));
     }
-    if (samplingOp.get((long) s.getColumn()) != null) {
-      SamplingOperation op = samplingOp.get((long) s.getColumn());
-      Sample[] samples = {s};
+
+    // logger.info("Sample received row:" + s.getRow() + " column:" + s.getColumn());
+    if (samplingOp.get(id) != null) {
+      SamplingOperation op = samplingOp.get(id);
       op.elaborateResponse(samples);
-      logger.info("Operation found:" + op.getSamples().length);
+      logger.warning("Operation found:" + op.getSamples().length);
       if (op.completed()) KademliaObserver.reportOperation(op);
     }
   }

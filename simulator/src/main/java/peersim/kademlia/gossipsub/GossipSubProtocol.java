@@ -537,26 +537,16 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   public void Publish(Message m, int myPid) {
 
     String topic = (String) m.body;
-    Sample s = (Sample) m.value;
+    Sample[] samples = (Sample[]) m.value;
     // BigInteger id = (BigInteger) m.value;
-    logger.warning(
-        "Publish message "
-            + topic
-            + " "
-            + s.getId()
-            + " "
-            // + mesh.get(topic).size()
-            // + " "
-            // + s.getId()
-            + " "
-            + gossipid);
+    logger.warning("Publish message " + topic + " " + gossipid);
 
     if (seen.get(topic) == null) seen.put(topic, new ArrayList<BigInteger>());
 
     // BigInteger cid = getValueId(m.value);
     // BigInteger cid = s.getId();
-    seen.get(topic).add(s.getId());
-    mCache.put(s.getId(), s);
+    seen.get(topic).add(samples[0].getId());
+    mCache.put(samples[0].getId(), samples);
 
     // mCache.put(s.getIdByColumn(), s);
     if (mesh.get(topic) != null) {
@@ -564,7 +554,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       nodesToSend.remove(this.node.getId());
       for (BigInteger n : nodesToSend) {
 
-        Message msg = Message.makeMessage(topic, s);
+        Message msg = Message.makeMessage(topic, samples);
         msg.src = this.node;
         msg.dst = nodeIdtoNode(n, gossipid).getGossipProtocol().getGossipNode();
         sendMessage(msg, n, gossipid);
@@ -576,17 +566,16 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
     String topic = (String) m.body;
 
-    Sample s = (Sample) m.value;
-    mCache.put(s.getId(), s);
+    Sample[] samples = (Sample[]) m.value;
+    mCache.put(samples[0].getId(), samples);
 
-    logger.warning(
-        "handleMessage received " + topic + " " + s.getId() + " " + m.id + " " + m.src.getId());
+    logger.warning("handleMessage received " + topic + " " + m.id + " " + m.src.getId());
 
     if (seen.get(topic) == null) seen.put(topic, new ArrayList<BigInteger>());
-    if (seen.get(topic).contains(s.getId())) return;
+    if (seen.get(topic).contains(samples[0].getId())) return;
 
     this.callback.messageReceived(m);
-    seen.get(topic).add(s.getId());
+    seen.get(topic).add(samples[0].getId());
 
     if (mesh.get(topic) != null) {
       HashSet<BigInteger> nodesToSend = mesh.get(topic);
