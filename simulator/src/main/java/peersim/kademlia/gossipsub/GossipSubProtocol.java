@@ -118,7 +118,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    * @param searchNodeId the ID of the node to search for
    * @return the node with the given ID, or null if not found
    */
-  protected static Node nodeIdtoNode(BigInteger searchNodeId, int myPid) {
+  public static Node nodeIdtoNode(BigInteger searchNodeId, int myPid) {
     // If the given searchNodeId is null, return null
     if (searchNodeId == null) return null;
 

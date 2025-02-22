@@ -92,43 +92,44 @@ public class CustomDistributionPeerDas implements peersim.core.Control {
       node = new KademliaNode(id, "0.0.0.0", 0);
 
       GossipSubProtocol gossipProt = null;
-      PeerDAS dasProt = null;
+      GossipDAS dasProt = null;
 
       gossipProt = ((GossipSubProtocol) (Network.get(i).getProtocol(protocolKadID)));
       gossipProt.setProtocolID(protocolKadID);
       gossipProt.setNode(node);
 
       if (i == 0) {
-        dasProt = ((PeerDAS) (Network.get(i).getProtocol(protocolDasBuilderID)));
+        dasProt = ((GossipDAS) (Network.get(i).getProtocol(protocolDasBuilderID)));
         builderAddress = node.getId();
         validators.add(generalNode);
       } else if ((i > 0) && (i < (numEvilValidatorNodes + 1))) {
-        dasProt = ((PeerDAS) (Network.get(i).getProtocol(protocolEvilValDasID)));
+        dasProt = ((GossipDAS) (Network.get(i).getProtocol(protocolEvilValDasID)));
         validatorsIds.add(gossipProt.getGossipNode().getId());
         evilNodes.add(generalNode);
         evilIds.add(id);
       } else if ((i > numEvilValidatorNodes)
           && (i < (numEvilValidatorNodes + numEvilNonValidatorNodes + 1))) {
-        dasProt = ((PeerDAS) (Network.get(i).getProtocol(protocolEvilDasID)));
+        dasProt = ((GossipDAS) (Network.get(i).getProtocol(protocolEvilDasID)));
         nonValidatorsIds.add(gossipProt.getGossipNode().getId());
         evilNodes.add(generalNode);
         evilIds.add(id);
       } else if (i > (numEvilValidatorNodes + numEvilNonValidatorNodes)
           && i < (numEvilValidatorNodes + numEvilNonValidatorNodes + (numValidators) + 1)) {
-        dasProt = ((PeerDAS) (Network.get(i).getProtocol(protocolDasValidatorID)));
+        dasProt = ((GossipDAS) (Network.get(i).getProtocol(protocolDasValidatorID)));
         validatorsIds.add(gossipProt.getGossipNode().getId());
       } else {
-        dasProt = ((PeerDAS) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
+        dasProt = ((GossipDAS) (Network.get(i).getProtocol(protocolDasNonValidatorID)));
         nonValidatorsIds.add(gossipProt.getGossipNode().getId());
       }
 
       dasProt.setGossipProtocol(gossipProt);
+      dasProt.setProtocolId(protocolDasBuilderID);
       // gossipProt.setEventsCallback(dasProt);
 
-      if (dasProt instanceof PeerDASBuilder) System.out.println("DASProtocol Builder " + i);
+      if (dasProt instanceof GossipDASBuilder) System.out.println("DASProtocol Builder " + i);
       generalNode.setProtocol(protocolKadID, gossipProt);
       generalNode.setGossipProtocol(gossipProt);
-      generalNode.setPeerDASProtocol(dasProt);
+      generalNode.setGossipDASProtocol(dasProt);
       // dasProt.setDASProtocolID(protocolDasBuilderID);
 
       generalNode.setProtocol(protocolDasBuilderID, dasProt);
@@ -137,8 +138,8 @@ public class CustomDistributionPeerDas implements peersim.core.Control {
       generalNode.setProtocol(protocolDasValidatorID, null);
       generalNode.setProtocol(protocolDasNonValidatorID, null);
 
-      generalNode.getPeerDASProtocol().setSearchTable(searchTable);
-      // generalNode.getPeerDASProtocol().setBuilderAddress(builderAddress);
+      generalNode.getGossipDASProtocol().setSearchTable(searchTable);
+      generalNode.getGossipDASProtocol().setBuilderAddress(builderAddress);
     }
 
     System.out.println("Validators " + validatorsIds.size());

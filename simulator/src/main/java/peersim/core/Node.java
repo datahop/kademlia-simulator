@@ -20,7 +20,7 @@ package peersim.core;
 
 import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.das.DASProtocol;
-import peersim.kademlia.das.PeerDAS;
+import peersim.kademlia.das.GossipDAS;
 import peersim.kademlia.gossipsub.GossipSubProtocol;
 
 /**
@@ -114,7 +114,7 @@ public interface Node extends Fallible, Cloneable {
 
   public void setGossipProtocol(GossipSubProtocol proto);
 
-  public PeerDAS getPeerDASProtocol();
+  public GossipDAS getGossipDASProtocol();
 
-  public void setPeerDASProtocol(PeerDAS proto);
+  public void setGossipDASProtocol(GossipDAS proto);
 }
