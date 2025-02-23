@@ -122,8 +122,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();
-
-    // System.out.println("New kademliaprotocol");
   }
 
   /**

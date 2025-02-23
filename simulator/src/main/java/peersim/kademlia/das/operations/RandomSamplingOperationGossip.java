@@ -36,7 +36,6 @@ public class RandomSamplingOperationGossip extends SamplingOperation {
       BigInteger builderAddress) {
     super(srcNode, destNode, timestamp, currentBlock, isValidator, numValidators);
     this.builderAddress = builderAddress;
-    System.out.println("New RandomSampling ");
     Sample[] randomSamples = currentBlock.getNRandomSamples(KademliaCommonConfigDas.N_SAMPLES);
     for (Sample rs : randomSamples) {
       FetchingSample s = new FetchingSample(rs);
@@ -73,9 +72,9 @@ public class RandomSamplingOperationGossip extends SamplingOperation {
             }
           }
         }
-        // if (!found) {
-        // throw new UnsupportedOperationException("no validators found");
-        // }
+        if (!found) {
+          throw new UnsupportedOperationException("no validators found");
+        }
       }
     }
   }

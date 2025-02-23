@@ -135,7 +135,6 @@ public class Block implements Iterator<Sample>, Cloneable {
       for (int j = 0; j < blockSamples.length; j++) {
         samples.push(blockSamples[i][j]);
         samplesNum++;
-        // System.out.println("Samples size " + samples.size() + " " + parcelSize);
         if (samplesNum == parcelSize) {
           Parcel p = new Parcel(parcelSize);
           for (Sample s : samples) {
@@ -145,10 +144,8 @@ public class Block implements Iterator<Sample>, Cloneable {
           samplesNum = 0;
           samples.clear();
           l.add(p);
-          // System.out.println("Column " + i + " parcel " + l.size());
         }
       }
-      // System.out.println("New parcel row " + i);
       parcelByRow.put(i, l);
     }
   }
@@ -173,7 +170,6 @@ public class Block implements Iterator<Sample>, Cloneable {
           l.add(p);
         }
       }
-      // System.out.println("New parcel column " + i);
       parcelByColumn.put(i, l);
     }
   }
@@ -267,39 +263,6 @@ public class Block implements Iterator<Sample>, Cloneable {
     }
     return samples;
   }
-
-  /*public int findClosestRow(BigInteger nodeid, BigInteger radius) {
-    BigInteger bottom = nodeid.subtract(radius);
-    if (radius.compareTo(nodeid) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = nodeid.add(radius);
-    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
-
-    Collection<BigInteger> subSet = samplesByRow.subSet(bottom, true, top, true);
-    List<Integer> rows = new ArrayList<>();
-    for (BigInteger id : subSet) {
-      rows.add(sampleMap.get(id).getRow());
-    }
-    // System.out.println(rows.size() + " " + KademliaCommonConfigDas.validatorsSize + " " +
-    // radius);
-    return Util.mostCommon(rows);
-  }
-
-  public int findClosestColumn(BigInteger nodeid, BigInteger radius) {
-
-    BigInteger bottom = nodeid.subtract(radius);
-    if (radius.compareTo(nodeid) == 1) bottom = BigInteger.ZERO;
-
-    BigInteger top = nodeid.add(radius);
-    if (top.compareTo(Block.MAX_KEY) == 1) top = Block.MAX_KEY;
-
-    Collection<BigInteger> subSet = samplesByColumn.subSet(bottom, true, top, true);
-    List<Integer> column = new ArrayList<>();
-    for (BigInteger id : subSet) {
-      column.add(sampleMap.get(id).getColumn());
-    }
-    return Util.mostCommon(column);
-  }*/
 
   /* Returns  n random selected samples */
   public Sample[] getNRandomSamples(int n) {

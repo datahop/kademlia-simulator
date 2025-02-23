@@ -1,7 +1,6 @@
 package peersim.kademlia.gossipsub;
 
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
@@ -22,7 +21,6 @@ public class GossipHeartBeat implements Control {
 
   // ______________________________________________________________________________________________
   public boolean execute() {
-    System.out.println("GossipHeartBeat execute " + CommonState.getTime());
 
     for (int i = 0; i < Network.size(); i++) {
       Node iNode = Network.get(i);

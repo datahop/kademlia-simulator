@@ -79,27 +79,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         }
       }
       this.extras.remove(s.getId());
-      /*} else {
-        if (samples.containsKey(s.getIdByColumn())) {
-          FetchingSample fs = samples.get(s.getIdByColumn());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
-          }
-        }
-      }*/
     }
-    /*System.out.println(
-    "["
-        + CommonState.getTime()
-        + "]["
-        + srcNode
-        + "] Completed operation "
-        + this.getId()
-        + " "
-        + samplesCount
-        + " "
-        + samples.size());*/
+
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 

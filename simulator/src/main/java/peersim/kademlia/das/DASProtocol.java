@@ -129,7 +129,6 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     reportDiscovery = Configuration.getBoolean(prefix + "." + PAR_DISC, false);
     msgReport = Configuration.getBoolean(prefix + "." + PAR_MSG, false);
 
-    // System.out.println("Msgreport " + msgReport + " " + prefix);
     // kv = new KeyValueStore();
     kv = new HashSet<>();
     samplingOp = new LinkedHashMap<Long, SamplingOperation>();
