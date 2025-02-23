@@ -2,6 +2,7 @@ package peersim.kademlia;
 
 import java.util.HashMap;
 import java.util.Map;
+import peersim.kademlia.das.Sample;
 
 /**
  * Message class provide all functionalities to magage the various messages, principally LOOKUP
@@ -291,6 +292,23 @@ public class Message extends SimpleEvent {
         return "MSG_SEED_SAMPLE";
       default:
         return "UNKNOW:" + type;
+    }
+  }
+
+  public int getSize() {
+    switch (type) {
+      case MSG_SEED_SAMPLE:
+        if (this.body instanceof Sample || this.value instanceof Sample) {
+          return 512;
+        }
+        if (this.body instanceof Sample[]) {
+          return ((Sample[]) this.body).length * 512;
+        }
+        if (this.value instanceof Sample[]) {
+          return ((Sample[]) this.body).length * 512;
+        }
+      default:
+        return 0;
     }
   }
 
