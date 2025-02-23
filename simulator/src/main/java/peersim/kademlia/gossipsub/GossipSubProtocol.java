@@ -20,7 +20,7 @@ import peersim.kademlia.KademliaNode;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.Sample;
-import peersim.transport.UnreliableTransport;
+import peersim.transport.Transport;
 
 public class GossipSubProtocol implements Cloneable, EDProtocol {
 
@@ -28,7 +28,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
   protected static String prefix = null;
 
   /** UnreliableTransport object used for communication. */
-  protected UnreliableTransport transport;
+  protected Transport transport;
 
   /** The parameter name for transport. */
   private static final String PAR_TRANSPORT = "transport";
@@ -249,7 +249,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
         + m.getType());*/
     // Get the transport protocol
     // m.nrHops++;
-    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+    if (transport == null) transport = (Transport) (Network.prototype).getProtocol(tid);
 
     // Send the message
     transport.send(src, dest, m, gossipid);
@@ -283,6 +283,10 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
    */
   public Logger getLogger() {
     return this.logger;
+  }
+
+  public void setTransport(Transport transport) {
+    this.transport = transport;
   }
 
   @Override

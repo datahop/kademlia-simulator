@@ -50,9 +50,7 @@ public abstract class SamplingOperation extends FindOperation {
     completed = false;
     this.isValidator = isValidator;
     currentBlock = block;
-    radiusValidator =
-        currentBlock.computeRegionRadius(
-            KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER, numValidators);
+
     radiusNonValidator =
         currentBlock.computeRegionRadius(KademliaCommonConfigDas.NUM_SAMPLE_COPIES_PER_PEER);
     samples = new HashMap<>();

@@ -8,6 +8,8 @@ import peersim.kademlia.Message;
 import peersim.kademlia.Util;
 import peersim.kademlia.das.operations.ValidatorSamplingOperation;
 
+// DAS Protocol process functions executed only by validators. It stores samples received by the
+// builder, and it starts random sampling and row/column fetching every block.
 public class DASProtocolValidator extends DASProtocol {
 
   protected static String prefix = null;

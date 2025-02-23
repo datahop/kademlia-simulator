@@ -118,6 +118,14 @@ public class RandomSamplingOperation extends SamplingOperation {
              }*/
         }
       }
+      /*if (samples.containsKey(s.getIdByColumn())) {
+        FetchingSample fs = samples.get(s.getIdByColumn());
+        if (!fs.isDownloaded()) {
+          samplesCount++;
+          fs.setDownloaded();
+          fs.removeFetchingNode(nodes.get(node));
+        }
+      }*/
     }
     nodes.remove(node);
     // askedNodes.add(node);

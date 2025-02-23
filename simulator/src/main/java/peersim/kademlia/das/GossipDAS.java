@@ -22,7 +22,7 @@ import peersim.kademlia.Timeout;
 import peersim.kademlia.das.operations.SamplingOperation;
 import peersim.kademlia.gossipsub.GossipEvent;
 import peersim.kademlia.gossipsub.GossipSubProtocol;
-import peersim.transport.UnreliableTransport;
+import peersim.transport.BwTransport;
 
 public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
 
@@ -44,7 +44,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
   protected Block currentBlock;
   protected SearchTable searchTable;
   protected LinkedHashMap<Long, SamplingOperation> samplingOp;
-  private UnreliableTransport transport;
+  private BwTransport transport;
   private int tid;
   private long uploadInterfaceBusyUntil;
   protected int protocolId;
@@ -145,6 +145,13 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
    */
   public void setGossipProtocol(GossipSubProtocol prot) {
     this.gossipsub = prot;
+    transport = (BwTransport) (Network.prototype).getProtocol(tid);
+    if (this.isBuilder) {
+      transport.setBw(KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
+    } else {
+      transport.setBw(KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
+    }
+    this.gossipsub.setTransport(this.transport);
     // this.logger = prot.getLogger();
     this.gossipsub.setEventsCallback(this);
     // Initialize the logger with the node ID as its name
@@ -223,7 +230,6 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
     Node src = this.gossipsub.getNode();
     Node dest = GossipSubProtocol.nodeIdtoNode(destId, this.gossipsub.getProtocolID());
 
-    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
     if (msgReport
         && (m.getType() == Message.MSG_GET_SAMPLE
             || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE

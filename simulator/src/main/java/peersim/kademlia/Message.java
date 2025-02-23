@@ -163,24 +163,20 @@ public class Message extends SimpleEvent {
     this.id = (ID_GENERATOR++);
     this.body = body;
 
+    size += 64; // src / dst ids
+    size += 4; // msg type
     if (body instanceof BigInteger[]) {
       BigInteger[] reqs = (BigInteger[]) body;
       size += 32 * reqs.length; // req size
-      size += 64; // src / dst ids
-      size += 4; // msg type
     } else if (body instanceof Sample[]) {
       Sample[] samples = (Sample[]) body;
       size += 512 * samples.length; // samples
-      size += 15 * 32; // neighbours
-      size += 64; // src dst id
-      size += 4; // message type
+      // size += 15 * 32; // neighbours
     } else if (body instanceof SeedingSampleBody) {
       SeedingSampleBody ssb = (SeedingSampleBody) body;
       Sample[] samples = (Sample[]) ssb.getsamplesList();
       size += 512 * samples.length; // samples
-      size += 15 * 32; // neighbours
-      size += 64; // src dst id
-      size += 4; // message type
+      // size += 15 * 32; // neighbours
     }
   }
 
