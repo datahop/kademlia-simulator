@@ -192,6 +192,17 @@ public class Message extends SimpleEvent {
     this.id = (ID_GENERATOR++);
     this.body = body;
     this.value = value;
+
+    size += 64; // src / dst ids
+    size += 4; // msg type
+    if (value instanceof BigInteger[]) {
+      BigInteger[] reqs = (BigInteger[]) value;
+      size += 32 * reqs.length; // req size
+    } else if (value instanceof Sample[]) {
+      Sample[] samples = (Sample[]) value;
+      size += 512 * samples.length; // samples
+      // size += 15 * 32; // neighbours
+    }
   }
   // ______________________________________________________________________________________________
   /**

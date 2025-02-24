@@ -143,13 +143,13 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
    *
    * @param prot GossipSubProtocol
    */
-  public void setGossipProtocol(GossipSubProtocol prot) {
+  public void setGossipProtocol(Node node, GossipSubProtocol prot) {
     this.gossipsub = prot;
     transport = (BwTransport) (Network.prototype).getProtocol(tid);
     if (this.isBuilder) {
-      transport.setBw(KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
+      transport.setBw(node, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
     } else {
-      transport.setBw(KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
+      transport.setBw(node, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
     }
     this.gossipsub.setTransport(this.transport);
     // this.logger = prot.getLogger();
@@ -236,52 +236,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
             || m.getType() == Message.MSG_SEED_SAMPLE))
       KademliaObserver.reportMsg(m, true, this.getNodeId());
 
-    if (m.getType() != Message.MSG_GET_SAMPLE_RESPONSE && m.getType() != Message.MSG_SEED_SAMPLE) {
-      transport.send(src, dest, m, this.protocolId);
-    } else {
-      // Send message taking into account the transmission delay and the availability of upload
-      // interface
-      // Timeout t = new Timeout(destId, m.id, m.operationId);
-      Sample[] samples;
-      if (m.getType() == Message.MSG_SEED_SAMPLE) {
-        SeedingSampleBody body = (SeedingSampleBody) m.body;
-        samples = (Sample[]) body.getsamplesList();
-      } else {
-        samples = (Sample[]) m.body;
-      }
-      // Sample[] samples = (Sample[]) m.body;
-      // Neighbour[] nghbrs = (Neighbour[]) m.value;
-      double msgSize = 0.0;
-      if (samples != null) msgSize = samples.length * KademliaCommonConfigDas.SAMPLE_SIZE;
-      long propagationLatency = transport.getLatency(src, dest);
-      // Add the transmission time of the message (upload)
-      double transDelay = 0.0;
-      if (this.isValidator) {
-        transDelay = 1000 * msgSize / KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE;
-      } else if (this.isBuilder) {
-        transDelay = 1000 * msgSize / KademliaCommonConfigDas.BUILDER_UPLOAD_RATE;
-      } else {
-        transDelay = 1000 * msgSize / KademliaCommonConfigDas.NON_VALIDATOR_UPLOAD_RATE;
-      }
-      // If the interface is busy, incorporate the additional delay
-      // also update the time when interface is available again
-      long timeNow = CommonState.getTime();
-      long latency = propagationLatency;
-      logger.info("Transmission propagationLatency " + latency);
-      latency += (long) transDelay; // truncated value
-      logger.info("Transmission total latency " + latency);
-      if (this.uploadInterfaceBusyUntil > timeNow) {
-        latency += this.uploadInterfaceBusyUntil - timeNow;
-        this.uploadInterfaceBusyUntil += (long) transDelay; // truncated value
-
-      } else {
-        this.uploadInterfaceBusyUntil = timeNow + (long) transDelay; // truncated value
-      }
-      logger.info("Transmission " + latency + " " + transDelay);
-      // add to sent msg
-      // this.sentMsg.put(m.id, m.timestamp);
-      EDSimulator.add(latency, m, dest, this.protocolId);
-    }
+    transport.send(src, dest, m, this.protocolId);
 
     // Setup timeout
     if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
