@@ -86,6 +86,7 @@ public class KademliaObserver implements Control {
 
     logFolderName = Configuration.getString(prefix + "." + PAR_FOLDER, "./logs");
     kademliaid = Configuration.getPid(prefix + "." + PAR_PROTOCOL);
+
     // System.out.println("Logfolder: " + logFolderName);
   }
 
@@ -291,8 +292,16 @@ public class KademliaObserver implements Control {
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
       Node n = GossipSubProtocol.nodeIdtoNode(id, kademliaid);
-      boolean builder = n.getDASProtocol().isBuilder();
-      boolean validator = n.getDASProtocol().isValidator();
+      boolean builder;
+      boolean validator;
+      if (n == null) {
+        builder = false;
+        validator = true;
+      } else {
+        builder = n.getDASProtocol().isBuilder();
+        validator = n.getDASProtocol().isValidator();
+      }
+
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));

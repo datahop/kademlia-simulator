@@ -134,8 +134,9 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       m = (inf + sup) / 2;
 
       // Get the ID of the node at the midpoint
-      BigInteger mId =
-          ((GossipSubProtocol) Network.get(m).getProtocol(myPid)).getGossipNode().getId();
+      GossipSubProtocol prot = (GossipSubProtocol) Network.get(m).getProtocol(myPid);
+      if (prot == null) return null;
+      BigInteger mId = prot.getGossipNode().getId();
 
       // If the midpoint node has the desired ID, return it
       if (mId.equals(searchNodeId)) return Network.get(m);
@@ -307,8 +308,6 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
         logger.warning("Message received " + m.getType() + " from " + m.src.getId());
       else logger.warning("Message src null " + m.getType());
       KademliaObserver.reportMsg(m, false, this.getGossipNode().getId());
-
-      
     }
 
     // Handle the event based on its type.

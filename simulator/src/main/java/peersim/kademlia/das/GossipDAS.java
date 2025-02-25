@@ -234,7 +234,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
         && (m.getType() == Message.MSG_GET_SAMPLE
             || m.getType() == Message.MSG_GET_SAMPLE_RESPONSE
             || m.getType() == Message.MSG_SEED_SAMPLE))
-    KademliaObserver.reportMsg(m, true, this.getNodeId());
+      KademliaObserver.reportMsg(m, true, this.getNodeId());
 
     transport.send(src, dest, m, this.protocolId);
 
