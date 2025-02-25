@@ -698,7 +698,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
     }
 
     // Setup timeout
-    if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
+    /*if (m.getType() == Message.MSG_GET_SAMPLE) { // is a request
       Timeout t = new Timeout(destId, m.id, m.operationId);
       long latency = transport.getLatency(src, dest);
       logger.info("Send message added " + m.id + " " + latency + " " + destId);
@@ -710,7 +710,7 @@ public abstract class DASProtocol implements Cloneable, EDProtocol, KademliaEven
       long timeout = latency * 2 * 4; // 4 RTT
       if (timeout < 250) timeout = 250;
       EDSimulator.add(timeout, t, src, myPid); // set delay = 2*RTT
-    }
+    }*/
   }
 
   // ______________________________________________________________________________________________
