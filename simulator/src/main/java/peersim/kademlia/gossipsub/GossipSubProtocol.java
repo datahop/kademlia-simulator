@@ -17,6 +17,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.kademlia.KademliaNode;
+import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
 import peersim.kademlia.SimpleEvent;
 import peersim.kademlia.das.Sample;
@@ -231,6 +232,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
     // Get source and destination nodes
     Node src = nodeIdtoNode(this.getGossipNode().getId(), gossipid);
     Node dest = nodeIdtoNode(destId, gossipid);
+    KademliaObserver.reportMsg(m, true, this.getGossipNode().getId());
 
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
@@ -304,6 +306,9 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
       if (m.src != null)
         logger.warning("Message received " + m.getType() + " from " + m.src.getId());
       else logger.warning("Message src null " + m.getType());
+      KademliaObserver.reportMsg(m, false, this.getGossipNode().getId());
+
+      
     }
 
     // Handle the event based on its type.
