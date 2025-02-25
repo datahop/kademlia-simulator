@@ -181,6 +181,13 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
     /*searchTable = new SearchTable(currentBlock, this.getKademliaId());*/
   }
 
+  public boolean isBuilder(){
+    return isBuilder;
+  }
+  public boolean isValidator(){
+    return isValidator;
+  }
+
   public BigInteger getNodeId() {
     return this.gossipsub.getGossipNode().getId();
   }

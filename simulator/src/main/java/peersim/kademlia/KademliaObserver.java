@@ -298,8 +298,8 @@ public class KademliaObserver implements Control {
         builder = false;
         validator = true;
       } else {
-        builder = n.getDASProtocol().isBuilder();
-        validator = n.getDASProtocol().isValidator();
+        builder = n.getGossipDASProtocol().isBuilder();
+        validator = n.getGossipDASProtocol().isValidator();
       }
 
       result.put("msgsIn", msgsIn.get(id));
