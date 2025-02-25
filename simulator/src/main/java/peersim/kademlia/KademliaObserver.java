@@ -318,9 +318,16 @@ public class KademliaObserver implements Control {
       }
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = Util.nodeIdtoNode(id, kademliaid);
-      boolean builder = n.getDASProtocol().isBuilder();
-      boolean validator = n.getDASProtocol().isValidator();
+      Node n = GossipSubProtocol.nodeIdtoNode(id, kademliaid);
+      boolean builder;
+      boolean validator;
+      if (n == null) {
+        builder = false;
+        validator = true;
+      } else {
+        builder = n.getGossipDASProtocol().isBuilder();
+        validator = n.getGossipDASProtocol().isValidator();
+      }
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));
