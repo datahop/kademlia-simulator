@@ -15,6 +15,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.kademlia.das.Neighbour;
 import peersim.kademlia.das.SearchTable;
+import peersim.kademlia.gossipsub.GossipSubProtocol;
 import peersim.kademlia.operations.Operation;
 import peersim.util.IncrementalStats;
 
@@ -289,7 +290,7 @@ public class KademliaObserver implements Control {
       // System.out.println("Writing messages log " + id);
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = Util.nodeIdtoNode(id, kademliaid);
+      Node n = GossipSubProtocol.nodeIdtoNode(id, kademliaid);
       boolean builder = n.getDASProtocol().isBuilder();
       boolean validator = n.getDASProtocol().isValidator();
       result.put("msgsIn", msgsIn.get(id));
