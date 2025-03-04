@@ -12,10 +12,8 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.kademlia.das.Neighbour;
 import peersim.kademlia.das.SearchTable;
-import peersim.kademlia.gossipsub.GossipSubProtocol;
 import peersim.kademlia.operations.Operation;
 import peersim.util.IncrementalStats;
 
@@ -72,6 +70,9 @@ public class KademliaObserver implements Control {
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
 
+  private static BigInteger builderId =
+      new BigInteger(
+          "83814183170291850251680823880522715558189094423550585243365458794131648333116");
   /** The time granularity of reporting metrics */
   private static int observerStep;
 
@@ -291,15 +292,9 @@ public class KademliaObserver implements Control {
       // System.out.println("Writing messages log " + id);
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = GossipSubProtocol.nodeIdtoNode(id, kademliaid);
-      boolean builder;
-      boolean validator;
-      if (n == null) {
-        builder = false;
-        validator = true;
-      } else {
-        builder = n.getGossipDASProtocol().isBuilder();
-        validator = n.getGossipDASProtocol().isValidator();
+      boolean builder = false;
+      if (id.compareTo(builderId) == 0) {
+        builder = true;
       }
 
       result.put("msgsIn", msgsIn.get(id));
@@ -307,8 +302,8 @@ public class KademliaObserver implements Control {
       result.put("bytesIn", bytesIn.get(id));
       result.put("bytesOut", bytesOut.get(id));
       if (builder) result.put("nodeType", "builder");
-      else if (validator) result.put("nodeType", "validator");
-      else result.put("nodeType", "regular");
+      else result.put("nodeType", "validator");
+      // else result.put("nodeType", "regular");
       msgs.put(msgId, result);
       msgId++;
     }
@@ -318,23 +313,17 @@ public class KademliaObserver implements Control {
       }
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = GossipSubProtocol.nodeIdtoNode(id, kademliaid);
-      boolean builder;
-      boolean validator;
-      if (n == null) {
-        builder = false;
-        validator = true;
-      } else {
-        builder = n.getGossipDASProtocol().isBuilder();
-        validator = n.getGossipDASProtocol().isValidator();
+      boolean builder = false;
+      if (id.compareTo(builderId) == 0) {
+        builder = true;
       }
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));
       result.put("bytesOut", bytesOut.get(id));
       if (builder) result.put("nodeType", "builder");
-      else if (validator) result.put("nodeType", "validator");
-      else result.put("nodeType", "regular");
+      else result.put("nodeType", "validator");
+      // else result.put("nodeType", "regular");
       msgs.put(msgId, result);
       msgId++;
     }
