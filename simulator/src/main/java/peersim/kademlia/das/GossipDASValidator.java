@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
@@ -26,6 +27,7 @@ public class GossipDASValidator extends GossipDAS {
     isBuilder = false;
     row = column = 0;
     missingSamples = new HashMap<>();
+    bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
   }
 
   @Override
@@ -85,6 +87,9 @@ public class GossipDASValidator extends GossipDAS {
     // throw new UnsupportedOperationException("Unimplemented method 'messageReceived'");
     Sample[] samples = (Sample[]) m.value;
     String topic = (String) m.body;
+    logger.warning(
+        "Samples received " + samples.length + " topic " + topic + " from " + m.src.getId());
+
     for (Sample s : samples) {
       reconstruct(s);
     }
@@ -207,7 +212,7 @@ public class GossipDASValidator extends GossipDAS {
 
   protected void handleGetSample(Message m, int myPid) {
     // kv is for storing the sample you have
-    logger.info("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
+    logger.warning("KV size " + kv.size() + " from:" + m.src.getId() + " " + m.id);
     // sample IDs that are requested in the message
     List<BigInteger> samples = Arrays.asList((BigInteger[]) m.body);
 

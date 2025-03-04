@@ -1,5 +1,7 @@
 package peersim.kademlia.das;
 
+import java.util.Arrays;
+import peersim.config.Configuration;
 import peersim.kademlia.Message;
 import peersim.kademlia.gossipsub.GossipSubProtocol;
 
@@ -10,16 +12,7 @@ public class GossipDASBuilder extends GossipDAS {
   public GossipDASBuilder(String prefix) {
     super(prefix);
     started = false;
-    /*for (int l = 1; l < Network.size(); l++) {
-      Node n2 = Network.get(l);
-      GossipSubProtocol prot2 = (GossipSubProtocol) n2.getGossipProtocol();
-      for (int j = 1; j <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; j++) {
-        String topic = "Row" + j;
-        prot2.getTable().addPeer(topic, this.getNodeId());
-        topic = "Column" + j;
-        prot2.getTable().addPeer(topic, this.getNodeId());
-      }
-    }*/
+    bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
   }
 
   @Override
@@ -48,13 +41,14 @@ public class GossipDASBuilder extends GossipDAS {
       for (int i = 1; i <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; i++) {
         Sample[] samples = currentBlock.getSamplesByRow(i);
         String topic = "Row" + i;
-        Message msg = Message.makePublishMessage(topic, samples);
+        Message msg =
+            Message.makePublishMessage(topic, Arrays.copyOfRange(samples, 0, samples.length / 2));
         msg.src = this.gossipsub.node;
         gossipsub.Publish(msg, myPid);
 
         samples = currentBlock.getSamplesByColumn(i);
         topic = "Column" + i;
-        msg = Message.makePublishMessage(topic, samples);
+        msg = Message.makePublishMessage(topic, Arrays.copyOfRange(samples, 0, samples.length / 2));
         msg.src = this.gossipsub.node;
         gossipsub.Publish(msg, myPid);
       }

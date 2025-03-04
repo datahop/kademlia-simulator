@@ -38,6 +38,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
   protected Logger logger;
   private boolean msgReport;
   protected static final String PAR_TRANSPORT = "transport";
+  protected static final String PAR_BW = "bw";
   protected static final String PAR_GOSSIP = "gossipsub";
   protected static final String PAR_MSG = "reportMsg";
   protected TreeMap<Long, Message> sentMsg;
@@ -45,8 +46,8 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
   protected SearchTable searchTable;
   protected LinkedHashMap<Long, SamplingOperation> samplingOp;
   private BwTransport transport;
+  protected int bw;
   private int tid;
-  private long uploadInterfaceBusyUntil;
   protected int protocolId;
   protected boolean isBuilder, isValidator;
 
@@ -146,11 +147,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
   public void setGossipProtocol(Node node, GossipSubProtocol prot) {
     this.gossipsub = prot;
     transport = (BwTransport) (Network.prototype).getProtocol(tid);
-    if (this.isBuilder) {
-      transport.setBw(node, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
-    } else {
-      transport.setBw(node, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
-    }
+    transport.setBw(node, bw);
     this.gossipsub.setTransport(this.transport);
     // this.logger = prot.getLogger();
     this.gossipsub.setEventsCallback(this);

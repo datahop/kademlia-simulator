@@ -341,6 +341,7 @@ public class Message extends SimpleEvent {
     dolly.operationId = this.operationId;
     dolly.body = this.body; // deep cloning?
     dolly.value = this.value;
+    dolly.size = this.size;
     return dolly;
   }
 

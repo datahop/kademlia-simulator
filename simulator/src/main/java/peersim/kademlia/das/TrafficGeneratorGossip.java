@@ -45,6 +45,8 @@ public class TrafficGeneratorGossip implements Control {
   Block b;
   private long ID_GENERATOR = 0;
   long lastTime = 0;
+  boolean first = true;
+  boolean second = false;
 
   // ______________________________________________________________________________________________
   public TrafficGeneratorGossip(String prefix) {
@@ -84,12 +86,20 @@ public class TrafficGeneratorGossip implements Control {
    */
   public boolean execute() {
     Block b = new Block(KademliaCommonConfigDas.BLOCK_DIM_SIZE, ID_GENERATOR);
-
+    if (first) {
+      first = false;
+      second = true;
+    } else {
+      if (!second) {
+        return true;
+      } else {
+        second = false;
+      }
+    }
     for (int i = 0; i < Network.size(); i++) {
       Node n = Network.get(i);
       if (n.isUp()) {
-        // EDSimulator.add(0, generateNewBlockMessage(b), n, n.getDASProtocol().getDASProtocolID());
-        // boolean successful = false;
+
         try {
           System.out.println("New block " + CommonState.getTime() + " " + b.getBlockId());
           EDSimulator.add(0, generateNewBlockMessage(b), n, dasbuildpid);
@@ -97,19 +107,6 @@ public class TrafficGeneratorGossip implements Control {
         } catch (Exception e) {
           System.out.println("Traffic error " + e);
         }
-        /*if (!successful) {
-          try {
-            EDSimulator.add(0, generateNewBlockMessage(b), n, dasvalpid);
-            successful = true;
-          } catch (Exception e) {
-          }
-        }
-        if (!successful) {
-          try {
-            EDSimulator.add(0, generateNewBlockMessage(b), n, dasnonvalpid);
-          } catch (Exception e) {
-          }
-        }*/
       }
     }
     ID_GENERATOR++;
