@@ -128,6 +128,7 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   public void generateRowParcels(int parcelSize) {
+    if (parcelMap.size() > 0) return;
     int samplesNum = 0;
     Stack<Sample> samples = new Stack<>();
     for (int i = 0; i < blockSamples.length; i++) {

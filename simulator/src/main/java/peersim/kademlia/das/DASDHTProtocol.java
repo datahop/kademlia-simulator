@@ -29,8 +29,14 @@ public class DASDHTProtocol extends DASProtocol {
    * @param myPid the sender Pid
    */
   protected void handleInitNewBlock(Message m, int myPid) {
+
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
+
+    currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
+    currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
     // kv.erase();
     kv.clear();
     // samplesRequested = 0;

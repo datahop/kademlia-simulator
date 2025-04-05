@@ -32,10 +32,6 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
     logger.warning("Builder new block:" + currentBlock.getBlockId());
     // startRandomSampling();
 
-    currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
-
-    currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
-
     for (int i = 1; i <= currentBlock.getSize(); i++) {
       List<Parcel> list = currentBlock.getParcelByRow(i);
       logger.warning("Parcel row " + i + " " + list.size());

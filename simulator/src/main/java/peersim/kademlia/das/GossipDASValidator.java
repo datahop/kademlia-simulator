@@ -17,7 +17,7 @@ import peersim.kademlia.gossipsub.GossipSubProtocol;
 public class GossipDASValidator extends GossipDAS {
 
   protected boolean started;
-  int row1, column1, row2,column2;
+  int row1, column1, row2, column2;
   protected HashMap<BigInteger, List<Message>> missingSamples;
 
   public GossipDASValidator(String prefix) {
