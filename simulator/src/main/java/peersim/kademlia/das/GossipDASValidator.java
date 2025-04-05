@@ -17,7 +17,7 @@ import peersim.kademlia.gossipsub.GossipSubProtocol;
 public class GossipDASValidator extends GossipDAS {
 
   protected boolean started;
-  int row, column;
+  int row1, column1, row2,column2;
   protected HashMap<BigInteger, List<Message>> missingSamples;
 
   public GossipDASValidator(String prefix) {
@@ -25,7 +25,7 @@ public class GossipDASValidator extends GossipDAS {
     started = false;
     isValidator = true;
     isBuilder = false;
-    row = column = 0;
+    row1 = column1 = row2 = column2 = 0;
     missingSamples = new HashMap<>();
     bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
   }
@@ -41,20 +41,32 @@ public class GossipDASValidator extends GossipDAS {
     logger.warning("Validator Init block");
 
     if (!started) {
+      String topic;
       started = true;
-      row = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      String topic = "Row" + row;
+      row1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
+      topic = "Row" + row1;
       gossipsub.Join(topic);
       GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
 
-      column = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = "Column" + column;
+      column1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
+      topic = "Column" + column1;
       gossipsub.Join(topic);
       GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
 
+      row2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
+      topic = "Row" + row2;
+      gossipsub.Join(topic);
+      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+
+      column2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
+      topic = "Column" + column2;
+      gossipsub.Join(topic);
+      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
     } else {
-      createValidatorSamplingOperation(row, 0, CommonState.getTime(), null);
-      createValidatorSamplingOperation(0, column, CommonState.getTime(), null);
+      createValidatorSamplingOperation(row1, 0, CommonState.getTime(), null);
+      createValidatorSamplingOperation(0, column1, CommonState.getTime(), null);
+      createValidatorSamplingOperation(row2, 0, CommonState.getTime(), null);
+      createValidatorSamplingOperation(0, column2, CommonState.getTime(), null);
       startRandomSampling();
     }
     super.handleInitNewBlock(m, myPid);
