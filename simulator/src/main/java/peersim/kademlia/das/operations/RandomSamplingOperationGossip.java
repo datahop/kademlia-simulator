@@ -73,7 +73,8 @@ public class RandomSamplingOperationGossip extends SamplingOperation {
           }
         }
         if (!found) {
-          throw new UnsupportedOperationException("no validators found");
+          //throw new UnsupportedOperationException("no validators found");
+          System.out.println("no validators found " + samples.get(sample).getRow()+" "+samples.get(sample).getColumn());
         }
       }
     }
