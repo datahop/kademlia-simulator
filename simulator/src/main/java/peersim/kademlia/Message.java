@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Sample;
+import peersim.kademlia.das.Parcel;
 import peersim.kademlia.das.SeedingSampleBody;
 
 /**
@@ -177,6 +178,9 @@ public class Message extends SimpleEvent {
       Sample[] samples = (Sample[]) ssb.getsamplesList();
       size += 512 * samples.length; // samples
       // size += 15 * 32; // neighbours
+    } else if (value instanceof Parcel) {
+      Parcel p = (Parcel)value;
+      size += 512 * p.getSize(); // samples
     }
   }
 
