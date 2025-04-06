@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.Parcel;
+import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SeedingSampleBody;
 
 /**
@@ -179,7 +179,7 @@ public class Message extends SimpleEvent {
       size += 512 * samples.length; // samples
       // size += 15 * 32; // neighbours
     } else if (value instanceof Parcel) {
-      Parcel p = (Parcel)value;
+      Parcel p = (Parcel) value;
       size += 512 * p.getSize(); // samples
     }
   }

@@ -36,14 +36,16 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
       List<Parcel> list = currentBlock.getParcelByRow(i);
       logger.warning("Parcel row " + i + " " + list.size());
       for (Parcel p : list) {
+        logger.warning("Sending parcel put " + p.getId());
         Message msg = generatePutMessageSample(p);
         this.kadProtocol.handleInit(msg, kademliaId);
       }
     }
     for (int i = 1; i <= currentBlock.getSize(); i++) {
       List<Parcel> list = currentBlock.getParcelByColumn(i);
-      logger.warning("Parcel row " + i + " " + list.size());
+      logger.warning("Parcel column " + i + " " + list.size());
       for (Parcel p : list) {
+        logger.warning("Sending parcel put " + p.getId());
         Message msg = generatePutMessageSample(p);
         this.kadProtocol.handleInit(msg, kademliaId);
       }

@@ -1,6 +1,8 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+
+import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
@@ -15,6 +17,8 @@ public class DASDHTProtocol extends DASProtocol {
   public DASDHTProtocol(String prefix) {
     super(prefix);
     DASDHTProtocol.prefix = prefix;
+   // bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
+
   }
 
   public Object clone() {
@@ -245,7 +249,7 @@ public class DASDHTProtocol extends DASProtocol {
    *
    * @return Message
    */
-  private Message generateGetMessageSample(BigInteger s) {
+  protected Message generateGetMessageSample(BigInteger s) {
 
     // Existing active destination node
     Message m = Message.makeInitGetValue(s);

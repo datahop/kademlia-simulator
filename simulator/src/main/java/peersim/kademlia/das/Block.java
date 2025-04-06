@@ -128,7 +128,7 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   public void generateRowParcels(int parcelSize) {
-    if (parcelMap.size() > 0) return;
+    if (parcelByRow.size() > 0) return;
     int samplesNum = 0;
     Stack<Sample> samples = new Stack<>();
     for (int i = 0; i < blockSamples.length; i++) {
@@ -140,11 +140,15 @@ public class Block implements Iterator<Sample>, Cloneable {
           Parcel p = new Parcel(parcelSize);
           for (Sample s : samples) {
             p.addSample(s);
+          }
+          for (Sample s : samples) {
             parcelMap.put(s.getId(), p);
+            // System.out.println("Adding parcel row sample " + p.getId());
           }
           samplesNum = 0;
           samples.clear();
           l.add(p);
+          System.out.println("Adding parcel row " + (i + 1) + " " + p.getId());
         }
       }
       parcelByRow.put(i, l);
@@ -152,6 +156,7 @@ public class Block implements Iterator<Sample>, Cloneable {
   }
 
   public void generateColumnParcels(int parcelSize) {
+    if (parcelByColumn.size() > 0) return;
     int samplesNum = 0;
     Stack<Sample> samples = new Stack<>();
     Parcel p;
@@ -164,11 +169,15 @@ public class Block implements Iterator<Sample>, Cloneable {
           p = new Parcel(parcelSize);
           for (Sample s : samples) {
             p.addSample(s);
-            parcelMap.put(s.getIdByColumn(), p);
           }
+          /*for (Sample s : samples) {
+            parcelMap.put(s.getIdByColumn(), p);
+            // System.out.println("Adding parcel column sample " + p.getId());
+          }*/
           samplesNum = 0;
           samples.clear();
           l.add(p);
+          System.out.println("Adding parcel column " + (i + 1) + " " + p.getId());
         }
       }
       parcelByColumn.put(i, l);

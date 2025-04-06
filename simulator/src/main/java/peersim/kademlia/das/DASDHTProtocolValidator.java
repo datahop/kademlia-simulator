@@ -77,7 +77,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             null,
             this);
 
-    // op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
+    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
@@ -125,21 +125,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
       }
       return success;
     }
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * Generates a PUT message for t1 key and string message
-   *
-   * @return Message
-   */
-  private Message generateGetMessageSample(BigInteger s) {
-
-    // Existing active destination node
-    Message m = Message.makeInitGetValue(s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
   }
 
   /**

@@ -22,12 +22,13 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
+import peersim.kademlia.das.KademliaCommonConfigDas;
 import peersim.kademlia.operations.FindOperation;
 import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
 import peersim.kademlia.operations.RegionBasedFindOperation;
-import peersim.transport.UnreliableTransport;
+import peersim.transport.Transport;
 
 /**
  * KademliaProtocol is a class that builds ontop of the EDProtocol interface to implement the
@@ -55,7 +56,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private static String prefix = null;
 
   /** UnreliableTransport object used for communication. */
-  private UnreliableTransport transport;
+  private Transport transport;
 
   /** Identifier for the tranport protocol (used in the sendMessage method) */
   private int tid;
@@ -518,7 +519,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
     // Get the transport protocol
-    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+    transport = (Transport) (Network.prototype).getProtocol(tid);
 
     // Send the message
     transport.send(src, dest, m, kademliaid);
