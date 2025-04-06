@@ -178,9 +178,6 @@ public class Message extends SimpleEvent {
       Sample[] samples = (Sample[]) ssb.getsamplesList();
       size += 512 * samples.length; // samples
       // size += 15 * 32; // neighbours
-    } else if (value instanceof Parcel) {
-      Parcel p = (Parcel) value;
-      size += 512 * p.getSize(); // samples
     }
   }
 
@@ -206,6 +203,9 @@ public class Message extends SimpleEvent {
       Sample[] samples = (Sample[]) value;
       size += 512 * samples.length; // samples
       // size += 15 * 32; // neighbours
+    } else if (value instanceof Parcel) {
+      Parcel p = (Parcel) value;
+      size += 512 * p.getSize(); // samples
     }
   }
   // ______________________________________________________________________________________________

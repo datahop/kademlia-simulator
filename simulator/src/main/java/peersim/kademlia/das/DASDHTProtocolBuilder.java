@@ -2,6 +2,7 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.List;
+import peersim.config.Configuration;
 import peersim.kademlia.Message;
 import peersim.kademlia.operations.Operation;
 
@@ -14,6 +15,7 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
     DASDHTProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
+    bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
   }
 
   public Object clone() {

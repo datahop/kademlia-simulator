@@ -130,7 +130,7 @@ public class TurbulenceDasValidator implements Control {
     newKad.setProtocolID(kademliaid);
     newKad.setEventsCallback(dasProt);
 
-    dasProt.setKademliaProtocol(newKad);
+    dasProt.setKademliaProtocol(newNode, newKad);
     dasProt.setDASProtocolID(dasprotbuildid);
 
     newNode.setKademliaProtocol(newKad);

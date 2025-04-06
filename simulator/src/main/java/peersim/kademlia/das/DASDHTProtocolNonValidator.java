@@ -1,6 +1,7 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
@@ -19,6 +20,9 @@ public class DASDHTProtocolNonValidator extends DASDHTProtocol {
     DASDHTProtocolNonValidator.prefix = prefix;
     isValidator = false;
     isBuilder = false;
+    bw =
+        Configuration.getInt(
+            prefix + "." + PAR_BW, KademliaCommonConfigDas.NON_VALIDATOR_UPLOAD_RATE);
   }
 
   public Object clone() {
