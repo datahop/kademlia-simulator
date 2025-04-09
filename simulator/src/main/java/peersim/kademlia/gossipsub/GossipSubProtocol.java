@@ -94,7 +94,7 @@ public class GossipSubProtocol implements Cloneable, EDProtocol {
 
     fanout = new HashMap<>();
 
-    mCache = new MCache();
+    mCache = new MCache(100);
 
     // System.out.println("New kademliaprotocol");
   }
