@@ -67,7 +67,7 @@ public class GossipDASValidator extends GossipDAS {
       createValidatorSamplingOperation(0, column1, CommonState.getTime(), null);
       createValidatorSamplingOperation(row2, 0, CommonState.getTime(), null);
       createValidatorSamplingOperation(0, column2, CommonState.getTime(), null);
-      startRandomSampling();
+      // startRandomSampling();
     }
     super.handleInitNewBlock(m, myPid);
   }

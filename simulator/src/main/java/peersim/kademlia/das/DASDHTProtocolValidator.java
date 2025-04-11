@@ -42,7 +42,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     // logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
-    startRandomSampling();
+    // startRandomSampling();
   }
 
   /**

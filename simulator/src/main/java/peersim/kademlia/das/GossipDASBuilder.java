@@ -36,7 +36,6 @@ public class GossipDASBuilder extends GossipDAS {
         gossipsub.Join(topic);
         GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
       }
-
     } else {
       for (int i = 1; i <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; i++) {
         Sample[] samples = currentBlock.getSamplesByRow(i);
