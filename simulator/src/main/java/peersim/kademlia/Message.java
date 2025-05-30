@@ -2,7 +2,9 @@ package peersim.kademlia;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import peersim.kademlia.das.Parcel;
 import peersim.kademlia.das.Sample;
 import peersim.kademlia.das.SeedingSampleBody;
 
@@ -81,6 +83,23 @@ public class Message extends SimpleEvent {
 
   public static final int MSG_CANCEL_SAMPLE = 18;
 
+  /** Message Type: Gossipsub */
+  public static final int MSG_PRUNE = 19;
+
+  public static final int MSG_IHAVE = 20;
+
+  public static final int MSG_IWANT = 21;
+
+  public static final int MSG_JOIN = 22;
+
+  public static final int MSG_LEAVE = 23;
+
+  public static final int MSG_PUBLISH = 24;
+
+  public static final int MSG_MESSAGE = 25;
+
+  public static final int MSG_GRAFT = 26;
+
   /**
    * Message Type: INIT_FIND_REGION_BASED (command to a node to start looking for node within a
    * region)
@@ -145,24 +164,20 @@ public class Message extends SimpleEvent {
     this.id = (ID_GENERATOR++);
     this.body = body;
 
+    size += 64; // src / dst ids
+    size += 4; // msg type
     if (body instanceof BigInteger[]) {
       BigInteger[] reqs = (BigInteger[]) body;
       size += 32 * reqs.length; // req size
-      size += 64; // src / dst ids
-      size += 4; // msg type
     } else if (body instanceof Sample[]) {
       Sample[] samples = (Sample[]) body;
       size += 512 * samples.length; // samples
-      size += 15 * 32; // neighbours
-      size += 64; // src dst id
-      size += 4; // message type
+      // size += 15 * 32; // neighbours
     } else if (body instanceof SeedingSampleBody) {
       SeedingSampleBody ssb = (SeedingSampleBody) body;
       Sample[] samples = (Sample[]) ssb.getsamplesList();
       size += 512 * samples.length; // samples
-      size += 15 * 32; // neighbours
-      size += 64; // src dst id
-      size += 4; // message type
+      // size += 15 * 32; // neighbours
     }
   }
 
@@ -178,6 +193,20 @@ public class Message extends SimpleEvent {
     this.id = (ID_GENERATOR++);
     this.body = body;
     this.value = value;
+
+    size += 64; // src / dst ids
+    size += 4; // msg type
+    if (value instanceof BigInteger[]) {
+      BigInteger[] reqs = (BigInteger[]) value;
+      size += 32 * reqs.length; // req size
+    } else if (value instanceof Sample[]) {
+      Sample[] samples = (Sample[]) value;
+      size += 512 * samples.length; // samples
+      // size += 15 * 32; // neighbours
+    } else if (value instanceof Parcel) {
+      Parcel p = (Parcel) value;
+      size += 512 * p.getSize(); // samples
+    }
   }
   // ______________________________________________________________________________________________
   /**
@@ -256,6 +285,37 @@ public class Message extends SimpleEvent {
     return new Message(MSG_CANCEL_SAMPLE, body);
   }
 
+  public static final Message makeInitJoinMessage(Object body) {
+    return new Message(MSG_JOIN, body);
+  }
+
+  public static final Message makeGraftMessage(String topic) {
+    return new Message(MSG_GRAFT, topic);
+  }
+
+  public static final Message makeIHaveMessage(String topic, List<BigInteger> ids) {
+    return new Message(MSG_IHAVE, topic, ids);
+  }
+
+  public static final Message makeIWantMessage(String topic, List<BigInteger> ids) {
+    return new Message(MSG_IWANT, topic, ids);
+  }
+
+  public static final Message makePruneMessage(String topic) {
+    return new Message(MSG_PRUNE, topic);
+  }
+
+  public static final Message makePublishMessage(String topic, Object value) {
+    return new Message(MSG_PUBLISH, topic, value);
+  }
+
+  public static final Message makeMessage(String topic, Object value) {
+    return new Message(MSG_MESSAGE, topic, value);
+  }
+
+  public static final Message makeLeaveMessage(Object body) {
+    return new Message(MSG_LEAVE, body);
+  }
   // ______________________________________________________________________________________________
   /**
    * Encapsulates the creation of a find value request
@@ -284,7 +344,8 @@ public class Message extends SimpleEvent {
     dolly.dst = this.dst;
     dolly.operationId = this.operationId;
     dolly.body = this.body; // deep cloning?
-
+    dolly.value = this.value;
+    dolly.size = this.size;
     return dolly;
   }
 

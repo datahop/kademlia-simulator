@@ -2,10 +2,7 @@ package peersim.kademlia.das.operations;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import peersim.kademlia.das.Block;
@@ -45,7 +42,6 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       MissingNode callback) {
     super(srcNode, null, timestamp, block, isValidator, numValidators, callback);
 
-    // System.out.println("Row " + row + " column " + column);
     assert (row == 0 || column == 0) : "Either row or column should be set";
     assert (!(row == 0 && column == 0)) : "Both row or column are set";
 
@@ -64,6 +60,11 @@ public class ValidatorSamplingOperation extends SamplingOperation {
     this.extras = new HashMap<>();
     this.validatorList = validatorList;
     createNodes();
+    /*if (nodes.size() == 0) {
+      System.err.println(
+          "Nodes not found. Row:" + row + "Column:" + column + " op:" + this.getId());
+      System.exit(-1);
+    }*/
   }
 
   public void elaborateResponse(Sample[] sam) {
@@ -78,27 +79,8 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         }
       }
       this.extras.remove(s.getId());
-      /*} else {
-        if (samples.containsKey(s.getIdByColumn())) {
-          FetchingSample fs = samples.get(s.getIdByColumn());
-          if (!fs.isDownloaded()) {
-            fs.setDownloaded();
-            samplesCount++;
-          }
-        }
-      }*/
     }
-    /*System.out.println(
-    "["
-        + CommonState.getTime()
-        + "]["
-        + srcNode
-        + "] Completed operation "
-        + this.getId()
-        + " "
-        + samplesCount
-        + " "
-        + samples.size());*/
+
     if (samplesCount >= samples.size() / 2) completed = true;
   }
 
@@ -202,7 +184,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
           // radiusUsed = radiusUsed.multiply(BigInteger.valueOf(2));
           // }
         }*/
-        nodesBySample.addAll(validatorList);
+        if (validatorList != null) nodesBySample.addAll(validatorList);
         boolean found = false;
         nodesBySample.removeAll(askedNodes);
         if (nodesBySample != null && nodesBySample.size() > 0) {
@@ -258,7 +240,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
       aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
     if (CommonState.getTime() - this.getTimestamp() > 2000)*/
     // aggressiveness_step = KademliaCommonConfigDas.aggressiveness_step * 4;
-    int globalcount = 0;
+    /*int globalcount = 0;
     List<BigInteger> missingSamples = Arrays.asList(getSamples());
     Collections.shuffle(missingSamples);
     // int totalcount = 0;
@@ -324,7 +306,7 @@ public class ValidatorSamplingOperation extends SamplingOperation {
         }
       }
       if (globalcount > 256) break;
-    }
+    }*/
   }
 
   public Map<String, Object> toMap() {

@@ -1,6 +1,7 @@
 package peersim.kademlia.das;
 
 import java.math.BigInteger;
+import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
 import peersim.kademlia.Message;
@@ -19,6 +20,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     DASDHTProtocolValidator.prefix = prefix;
     isValidator = true;
     isBuilder = false;
+    bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
   }
 
   @Override
@@ -40,7 +42,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
     // logger.warning("Starting validator (rows and columns) sampling");
     startRowsandColumnsSampling();
     // logger.warning("Starting random sampling");
-    startRandomSampling();
+    // startRandomSampling();
   }
 
   /**
@@ -77,7 +79,7 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
             null,
             this);
 
-    // op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
+    op.elaborateResponse(this.kadProtocol.kv.getAll().toArray(new Sample[0]));
     samplingOp.put(op.getId(), op);
     logger.warning("Sampling operation started validator " + op.getId() + " " + row + " " + column);
 
@@ -125,21 +127,6 @@ public class DASDHTProtocolValidator extends DASDHTProtocol {
       }
       return success;
     }
-  }
-
-  // ______________________________________________________________________________________________
-  /**
-   * Generates a PUT message for t1 key and string message
-   *
-   * @return Message
-   */
-  private Message generateGetMessageSample(BigInteger s) {
-
-    // Existing active destination node
-    Message m = Message.makeInitGetValue(s);
-    m.timestamp = CommonState.getTime();
-
-    return m;
   }
 
   /**

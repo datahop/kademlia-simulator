@@ -13,26 +13,7 @@ import peersim.kademlia.KademliaProtocol;
 import peersim.kademlia.UniformRandomGenerator;
 import peersim.kademlia.Util;
 
-/**
- * Turbulcen class is only for test/statistical purpose. This Control execute a node add or remove
- * (failure) with a given probability.<br>
- * The probabilities are configurabily from the parameters p_idle, p_add, p_rem.<br>
- * - p_idle (default = 0): probability that the current execution does nothing (i.e. no adding and
- * no failures).<br>
- * - p_add (default = 0.5): probability that a new node is added in this execution.<br>
- * - p_rem (deafult = 0.5): probability that this execution will result in a failure of an existing
- * node.<br>
- * If the user desire to change one probability, all the probability value MUST be indicated in the
- * configuration file. <br>
- * Other parameters:<br>
- * - maxsize (default: infinite): max size of network. If this value is reached no more add
- * operation are performed.<br>
- * - minsize (default: 1): min size of network. If this value is reached no more remove operation
- * are performed.<br>
- *
- * @author Daniele Furlan, Maurizio Bonani
- * @version 1.0
- */
+/** TurbulenceDasValidator adds/removes validators with a certain probability every step */
 public class TurbulenceDasValidator implements Control {
 
   private static final String PAR_PROT = "protocolkad";
@@ -149,7 +130,7 @@ public class TurbulenceDasValidator implements Control {
     newKad.setProtocolID(kademliaid);
     newKad.setEventsCallback(dasProt);
 
-    dasProt.setKademliaProtocol(newKad);
+    dasProt.setKademliaProtocol(newNode, newKad);
     dasProt.setDASProtocolID(dasprotbuildid);
 
     newNode.setKademliaProtocol(newKad);

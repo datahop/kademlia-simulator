@@ -15,6 +15,9 @@ public class DASDHTProtocol extends DASProtocol {
   public DASDHTProtocol(String prefix) {
     super(prefix);
     DASDHTProtocol.prefix = prefix;
+    // bw = Configuration.getInt(prefix + "." + PAR_BW,
+    // KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
+
   }
 
   public Object clone() {
@@ -29,8 +32,14 @@ public class DASDHTProtocol extends DASProtocol {
    * @param myPid the sender Pid
    */
   protected void handleInitNewBlock(Message m, int myPid) {
+
     time = CommonState.getTime();
     currentBlock = (Block) m.body;
+
+    currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
+    currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
+
     // kv.erase();
     kv.clear();
     // samplesRequested = 0;
@@ -239,7 +248,7 @@ public class DASDHTProtocol extends DASProtocol {
    *
    * @return Message
    */
-  private Message generateGetMessageSample(BigInteger s) {
+  protected Message generateGetMessageSample(BigInteger s) {
 
     // Existing active destination node
     Message m = Message.makeInitGetValue(s);

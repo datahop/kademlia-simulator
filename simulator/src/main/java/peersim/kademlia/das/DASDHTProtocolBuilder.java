@@ -2,6 +2,7 @@ package peersim.kademlia.das;
 
 import java.math.BigInteger;
 import java.util.List;
+import peersim.config.Configuration;
 import peersim.kademlia.Message;
 import peersim.kademlia.operations.Operation;
 
@@ -14,6 +15,7 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
     DASDHTProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
+    bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.BUILDER_UPLOAD_RATE);
   }
 
   public Object clone() {
@@ -32,22 +34,20 @@ public class DASDHTProtocolBuilder extends DASDHTProtocol {
     logger.warning("Builder new block:" + currentBlock.getBlockId());
     // startRandomSampling();
 
-    currentBlock.generateRowParcels(KademliaCommonConfigDas.PARCEL_SIZE);
-
-    currentBlock.generateColumnParcels(KademliaCommonConfigDas.PARCEL_SIZE);
-
     for (int i = 1; i <= currentBlock.getSize(); i++) {
       List<Parcel> list = currentBlock.getParcelByRow(i);
       logger.warning("Parcel row " + i + " " + list.size());
       for (Parcel p : list) {
+        logger.warning("Sending parcel put " + p.getId());
         Message msg = generatePutMessageSample(p);
         this.kadProtocol.handleInit(msg, kademliaId);
       }
     }
     for (int i = 1; i <= currentBlock.getSize(); i++) {
       List<Parcel> list = currentBlock.getParcelByColumn(i);
-      logger.warning("Parcel row " + i + " " + list.size());
+      logger.warning("Parcel column " + i + " " + list.size());
       for (Parcel p : list) {
+        logger.warning("Sending parcel put " + p.getId());
         Message msg = generatePutMessageSample(p);
         this.kadProtocol.handleInit(msg, kademliaId);
       }

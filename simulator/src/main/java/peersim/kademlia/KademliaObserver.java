@@ -12,7 +12,6 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.kademlia.das.Neighbour;
 import peersim.kademlia.das.SearchTable;
 import peersim.kademlia.operations.Operation;
@@ -71,6 +70,9 @@ public class KademliaObserver implements Control {
   /** Name of the folder where experiment logs are written */
   private static String logFolderName;
 
+  private static BigInteger builderId =
+      new BigInteger(
+          "83814183170291850251680823880522715558189094423550585243365458794131648333116");
   /** The time granularity of reporting metrics */
   private static int observerStep;
 
@@ -85,6 +87,7 @@ public class KademliaObserver implements Control {
 
     logFolderName = Configuration.getString(prefix + "." + PAR_FOLDER, "./logs");
     kademliaid = Configuration.getPid(prefix + "." + PAR_PROTOCOL);
+
     // System.out.println("Logfolder: " + logFolderName);
   }
 
@@ -251,7 +254,7 @@ public class KademliaObserver implements Control {
   public static void reportOperation(Operation op) {
     // messages without source are control messages sent by the traffic control
     // Calculate the operation stop time and then add the opearation to the operation log.
-    assert (!operations.keySet().contains(op.getId()));
+    if (operations.keySet().contains(op.getId())) return;
     op.setStopTime(CommonState.getTime() - op.getTimestamp());
     operations.put(op.getId(), op.toMap());
   }
@@ -289,16 +292,18 @@ public class KademliaObserver implements Control {
       // System.out.println("Writing messages log " + id);
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = Util.nodeIdtoNode(id, kademliaid);
-      boolean builder = n.getDASProtocol().isBuilder();
-      boolean validator = n.getDASProtocol().isValidator();
+      boolean builder = false;
+      if (id.compareTo(builderId) == 0) {
+        builder = true;
+      }
+
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));
       result.put("bytesOut", bytesOut.get(id));
       if (builder) result.put("nodeType", "builder");
-      else if (validator) result.put("nodeType", "validator");
-      else result.put("nodeType", "regular");
+      else result.put("nodeType", "validator");
+      // else result.put("nodeType", "regular");
       msgs.put(msgId, result);
       msgId++;
     }
@@ -308,16 +313,17 @@ public class KademliaObserver implements Control {
       }
       Map<String, Object> result = new HashMap<String, Object>();
       result.put("id", id);
-      Node n = Util.nodeIdtoNode(id, kademliaid);
-      boolean builder = n.getDASProtocol().isBuilder();
-      boolean validator = n.getDASProtocol().isValidator();
+      boolean builder = false;
+      if (id.compareTo(builderId) == 0) {
+        builder = true;
+      }
       result.put("msgsIn", msgsIn.get(id));
       result.put("msgsOut", msgsOut.get(id));
       result.put("bytesIn", bytesIn.get(id));
       result.put("bytesOut", bytesOut.get(id));
       if (builder) result.put("nodeType", "builder");
-      else if (validator) result.put("nodeType", "validator");
-      else result.put("nodeType", "regular");
+      else result.put("nodeType", "validator");
+      // else result.put("nodeType", "regular");
       msgs.put(msgId, result);
       msgId++;
     }

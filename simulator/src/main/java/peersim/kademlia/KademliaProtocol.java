@@ -27,7 +27,7 @@ import peersim.kademlia.operations.GetOperation;
 import peersim.kademlia.operations.Operation;
 import peersim.kademlia.operations.PutOperation;
 import peersim.kademlia.operations.RegionBasedFindOperation;
-import peersim.transport.UnreliableTransport;
+import peersim.transport.Transport;
 
 /**
  * KademliaProtocol is a class that builds ontop of the EDProtocol interface to implement the
@@ -48,6 +48,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** The parameter name for FINDMODE. */
   final String PAR_FINDMODE = "FINDMODE";
 
+  protected static final String PAR_MSG = "reportMsg";
+
   /** The parameter name for transport. */
   private static final String PAR_TRANSPORT = "transport";
 
@@ -55,7 +57,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   private static String prefix = null;
 
   /** UnreliableTransport object used for communication. */
-  private UnreliableTransport transport;
+  private Transport transport;
 
   /** Identifier for the tranport protocol (used in the sendMessage method) */
   private int tid;
@@ -87,6 +89,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   /** Callback for Kademlia events. */
   private KademliaEvents callback;
 
+  private boolean msgReport;
+
   /**
    * Replicate this object by returning an identical copy. It is called by the initializer and do
    * not fill any particular field.
@@ -108,6 +112,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     this.node = null; // empty nodeId
     KademliaProtocol.prefix = prefix;
     _init();
+    msgReport = Configuration.getBoolean(prefix + "." + PAR_MSG, false);
 
     routingTable =
         new RoutingTable(
@@ -122,8 +127,6 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     tid = Configuration.getPid(prefix + "." + PAR_TRANSPORT);
 
     kv = new KeyValueStore();
-
-    // System.out.println("New kademliaprotocol");
   }
 
   /**
@@ -513,6 +516,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     assert m.src != null;
     assert m.dst != null;
 
+    if (msgReport) KademliaObserver.reportMsg(m, true, this.getKademliaNode().getId());
+
     // Get source and destination nodes
     Node src = Util.nodeIdtoNode(this.getKademliaNode().getId(), kademliaid);
     Node dest = Util.nodeIdtoNode(destId, kademliaid);
@@ -520,7 +525,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // destpid = dest.getKademliaProtocol().getProtocolID();
 
     // Get the transport protocol
-    transport = (UnreliableTransport) (Network.prototype).getProtocol(tid);
+    if (transport == null) transport = (Transport) (Network.prototype).getProtocol(tid);
 
     // Send the message
     transport.send(src, dest, m, kademliaid);
@@ -557,7 +562,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     // If the event is a message, report the message to the Kademlia observer.
     if (event instanceof Message) {
       m = (Message) event;
-      // KademliaObserver.reportMsg(m, false);
+      if (msgReport) KademliaObserver.reportMsg(m, false, this.getKademliaNode().getId());
     }
 
     // Handle the event based on its type.
@@ -728,5 +733,9 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
    */
   public void setEventsCallback(KademliaEvents callback) {
     this.callback = callback;
+  }
+
+  public void setTransport(Transport transport) {
+    this.transport = transport;
   }
 }

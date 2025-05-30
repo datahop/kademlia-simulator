@@ -277,17 +277,19 @@ public class EDSimulator {
                   + " does not implement EDProtocol; "
                   + ev.event.getClass());
         }
-        /*System.out.println(
-        "Node "
-            + ev.node.getID()
-            + " "
-            + prot
-            + " "
-            + pid
-            + " "
-            + ev.node.getProtocol(4)
-            + " "
-            + ev.node.getProtocol(5));*/
+        if (prot == null) {
+          System.out.println(
+              "Node "
+                  + ev.node.getID()
+                  + " "
+                  + prot
+                  + " "
+                  + pid
+                  + " "
+                  + ev.node.getProtocol(4)
+                  + " "
+                  + ev.node.getProtocol(5));
+        }
         prot.processEvent(ev.node, pid, ev.event);
       }
     }

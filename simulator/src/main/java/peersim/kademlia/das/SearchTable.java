@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import peersim.core.Node;
 
+// SearchTable class is used by nodes as a local store to index all peers in the network discovered
 public class SearchTable {
 
   private HashMap<BigInteger, Neighbour> neighbours;
