@@ -3,3 +3,4 @@ target/
 logs/
 .vscode/
 *.code-workspace
+*.csv
