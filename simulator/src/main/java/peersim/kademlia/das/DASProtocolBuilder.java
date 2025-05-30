@@ -27,11 +27,12 @@ public class DASProtocolBuilder extends DASProtocol {
         Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderStrategy);
 
     KademliaCommonConfigDas.builderRedundancy =
-        Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderRedundancy);
+        Configuration.getInt(
+            prefix + "." + PAR_REDUNDANCY, KademliaCommonConfigDas.builderRedundancy);
 
     KademliaCommonConfigDas.validatorRowColumn =
         Configuration.getInt(
-            prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.validatorRowColumn);
+            prefix + "." + PAR_ROWCOLUMNY, KademliaCommonConfigDas.validatorRowColumn);
 
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
