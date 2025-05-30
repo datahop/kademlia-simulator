@@ -15,6 +15,8 @@ import peersim.kademlia.Util;
 public class DASProtocolBuilder extends DASProtocol {
 
   protected static final String PAR_BUILDER = "builderStrategy";
+  protected static final String PAR_REDUNDANCY = "builderRedundancy";
+  protected static final String PAR_ROWCOLUMNY = "validatorRowColumn";
 
   protected static String prefix = null;
 
@@ -26,6 +28,11 @@ public class DASProtocolBuilder extends DASProtocol {
 
     KademliaCommonConfigDas.builderRedundancy =
         Configuration.getInt(prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.builderRedundancy);
+
+    KademliaCommonConfigDas.validatorRowColumn =
+        Configuration.getInt(
+            prefix + "." + PAR_BUILDER, KademliaCommonConfigDas.validatorRowColumn);
+
     DASProtocolBuilder.prefix = prefix;
     isBuilder = true;
     isValidator = false;
@@ -70,7 +77,9 @@ public class DASProtocolBuilder extends DASProtocol {
       }
 
       BigInteger radiusValidator =
-          currentBlock.computeRegionRadius(1, searchTable.getValidatorsIndexed().size());
+          currentBlock.computeRegionRadius(
+              KademliaCommonConfigDas.validatorRowColumn,
+              searchTable.getValidatorsIndexed().size());
 
       // Get the id of all validators we need to send the message
       List<BigInteger> idsValidators = new ArrayList<>();
@@ -159,7 +168,9 @@ public class DASProtocolBuilder extends DASProtocol {
       }
 
       BigInteger radiusValidator =
-          currentBlock.computeRegionRadius(1, searchTable.getValidatorsIndexed().size());
+          currentBlock.computeRegionRadius(
+              KademliaCommonConfigDas.validatorRowColumn,
+              searchTable.getValidatorsIndexed().size());
 
       // Get the id of all validators we need to send the message
       List<BigInteger> idsValidators = new ArrayList<>();

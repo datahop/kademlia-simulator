@@ -72,11 +72,14 @@ public class KademliaCommonConfigDas {
 
   public static int builderStrategy = 0;
   public static int builderRedundancy = 8;
+
   // Validator Strategy for sampling
   // 0 == Brute Force
   // 1 == Initial Number of sample search at each steps
   // 2 == Only research with a number of node equal to number of missing samples
   public static int validatorStrategy = 0;
+
+  public static int validatorRowColumn = 2;
 
   public static long TTL = 100000;
 }
