@@ -10,6 +10,7 @@ package peersim.kademlia;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -41,6 +42,8 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
   // VARIABLE PARAMETERS
   /** The parameter name for K. */
   final String PAR_K = "K";
+  /** The parameter name for N replicas when PUT operation. */
+  final String PAR_N = "N";
   /** The parameter name for ALPHA. */
   final String PAR_ALPHA = "ALPHA";
   /** The parameter name for BITS. */
@@ -91,6 +94,7 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
 
   private boolean msgReport;
 
+  private int N;
   /**
    * Replicate this object by returning an identical copy. It is called by the initializer and do
    * not fill any particular field.
@@ -148,6 +152,10 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
     KademliaCommonConfig.FINDMODE =
         Configuration.getInt(prefix + "." + PAR_FINDMODE, KademliaCommonConfig.FINDMODE);
 
+    N = Configuration.getInt(prefix + "." + PAR_N, KademliaCommonConfig.K);
+
+    // N number of replicas in PUT_OPERATION can not be higher than K closest nodes.
+    if (N > KademliaCommonConfig.K) N = KademliaCommonConfig.K;
     _ALREADY_INSTALLED = true;
   }
 
@@ -274,8 +282,11 @@ public class KademliaProtocol implements Cloneable, EDProtocol {
             == KademliaCommonConfig.ALPHA) { // No new neighbor and no outstanding requests
           // Search operation finished
           if (fop instanceof PutOperation) {
-            // Create and send a put request to all neighbors in the neighbors list
-            for (BigInteger id : fop.getNeighboursList()) {
+            // Create and send a put request to N neighbors from the K closest in the neighbors list
+            List<BigInteger> kclosest = fop.getNeighboursList();
+            List<BigInteger> selectedNodes = kclosest.subList(0, N);
+            for (BigInteger id : selectedNodes) {
+
               // Create a put request
               Message request = new Message(Message.MSG_PUT);
               request.operationId = m.operationId;
