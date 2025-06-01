@@ -31,7 +31,7 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
   private static final String PAR_EVIL_RATIO_NONVAL = "evilNodeRatioNonValidator";
 
   private static final String PAR_VALIDATOR_RATE = "validator_rate";
-
+  private static final String PAR_ROWCOL_TOPIC = "colrow_topic";
   /** Protocol identifiers for Kademlia, DAS, etc. * */
   private int protocolKadID;
 
@@ -51,6 +51,7 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
   private BigInteger builderAddress;
   private UniformRandomGenerator urg;
 
+  private GossipTopicMap topicMap;
   public CustomDistributionGossipDas(String prefix) {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
     protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
@@ -63,6 +64,9 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
     evilRatioNonValidator = Configuration.getDouble(prefix + "." + PAR_EVIL_RATIO_NONVAL, 0.0);
     urg = new UniformRandomGenerator(KademliaCommonConfig.BITS, CommonState.r);
     validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
+    int numRowsColsTOpic = Configuration.getInt(prefix + "." + PAR_ROWCOL_TOPIC, 1);
+    topicMap = new GossipTopicMap(numRowsColsTOpic);
+
   }
 
   public boolean execute() {
