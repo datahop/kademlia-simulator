@@ -28,17 +28,17 @@ public class GossipDASBuilder extends GossipDAS {
     if (!started) {
       started = true;
 
-      String rowTopic="",columnTopic="";
+      String rowTopic = "", columnTopic = "";
       for (int j = 1; j <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; j++) {
         String topic = topicMap.getRowTopic(j);
-        if (rowTopic!=topic) {
+        if (rowTopic != topic) {
           gossipsub.Join(topic);
           GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
         }
-        rowTopic=topic;
+        rowTopic = topic;
 
         topic = topicMap.getColumnTopic(j);
-        if (columnTopic!=topic) {
+        if (columnTopic != topic) {
           gossipsub.Join(topic);
           GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
         }

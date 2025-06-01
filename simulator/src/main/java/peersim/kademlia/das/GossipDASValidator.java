@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
@@ -22,6 +21,8 @@ public class GossipDASValidator extends GossipDAS {
   protected boolean started;
   int row1, column1, row2, column2;
   protected HashMap<BigInteger, List<Message>> missingSamples;
+  protected HashMap<String, List<Long>> operationTopicMap;
+  Set<String> topics;
 
   public GossipDASValidator(String prefix) {
     super(prefix);
@@ -31,6 +32,8 @@ public class GossipDASValidator extends GossipDAS {
     row1 = column1 = row2 = column2 = 0;
     missingSamples = new HashMap<>();
     bw = Configuration.getInt(prefix + "." + PAR_BW, KademliaCommonConfigDas.VALIDATOR_UPLOAD_RATE);
+    operationTopicMap = new HashMap<>();
+    topics = new HashSet<>();
   }
 
   @Override
@@ -43,43 +46,20 @@ public class GossipDASValidator extends GossipDAS {
     currentBlock = (Block) m.body;
     logger.warning("Validator Init block");
 
-    Set<String> topics = new HashSet<>();
     if (!started) {
       started = true;
-      String topic;
+
       row1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = topicMap.getRowTopic(row1);
-      if (!topics.contains(topic)){
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
-      }
-      topics.add(topic);
+      JoinTopic(topicMap.getRowTopic(row1), row1);
 
       column1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = topicMap.getColumnTopic(column1);
-
-      if (!topics.contains(topic)){
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
-      }
-      topics.add(topic);
+      JoinTopic(topicMap.getColumnTopic(column1), column1);
 
       row2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = topicMap.getRowTopic(row2);
-
-      if (!topics.contains(topic)){
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
-      }
-      topics.add(topic);
+      JoinTopic(topicMap.getRowTopic(row2), row2);
 
       column2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = "Column" + column2;
-      if (!topics.contains(topic)){
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
-      }
-      topics.add(topic);
+      JoinTopic(topicMap.getRowTopic(column2), column2);
 
     } else {
       createValidatorSamplingOperation(row1, 0, CommonState.getTime(), null);
@@ -144,21 +124,26 @@ public class GossipDASValidator extends GossipDAS {
     }
     toSend.clear();
 
-    long id;
+    /*long id;
+    System.out.println(topic);
     if (topic.contains("Column")) {
       id = Long.parseLong(topic.replace("Column", ""));
     } else {
       id = Long.parseLong(topic.replace("Row", ""));
-    }
+    }*/
 
     // logger.info("Sample received row:" + s.getRow() + " column:" + s.getColumn());
-    if (samplingOp.get(id) != null) {
-      SamplingOperation op = samplingOp.get(id);
-      op.elaborateResponse(samples);
-      logger.warning("Operation found:" + op.getSamples().length);
-      if (op.completed()) {
-        KademliaObserver.reportOperation(op);
-        logger.warning("Sampling operation completed " + op.getId());
+    List<Long> ops = operationTopicMap.get(topic);
+
+    for (Long id : ops) {
+      if (samplingOp.get(id) != null) {
+        SamplingOperation op = samplingOp.get(id);
+        op.elaborateResponse(samples);
+        logger.warning("Operation found:" + op.getSamples().length);
+        if (op.completed()) {
+          KademliaObserver.reportOperation(op);
+          logger.warning("Sampling operation completed " + op.getId());
+        }
       }
     }
   }
@@ -322,5 +307,19 @@ public class GossipDASValidator extends GossipDAS {
     m.timestamp = CommonState.getTime();
 
     return m;
+  }
+
+  private void JoinTopic(String topic, int value) {
+
+    if (!topics.contains(topic)) {
+      gossipsub.Join(topic);
+      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      topics.add(topic);
+      List<Long> ops = new ArrayList<>();
+      ops.add((long) value);
+      operationTopicMap.put(topic, ops);
+    } else {
+      operationTopicMap.get(topic).add((long) value);
+    }
   }
 }

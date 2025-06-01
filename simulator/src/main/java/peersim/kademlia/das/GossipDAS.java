@@ -147,6 +147,7 @@ public abstract class GossipDAS implements Cloneable, EDProtocol, GossipEvent {
    */
   public void setGossipProtocol(Node node, GossipSubProtocol prot, GossipTopicMap topicMap) {
     this.gossipsub = prot;
+    this.topicMap = topicMap;
     transport = (BwTransport) (Network.prototype).getProtocol(tid);
     transport.setBw(node, bw);
     this.gossipsub.setTransport(this.transport);

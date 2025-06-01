@@ -52,6 +52,7 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
   private UniformRandomGenerator urg;
 
   private GossipTopicMap topicMap;
+
   public CustomDistributionGossipDas(String prefix) {
     protocolKadID = Configuration.getPid(prefix + "." + PAR_PROT_KAD);
     protocolDasBuilderID = Configuration.getPid(prefix + "." + PAR_PROT_DAS_BUILDER);
@@ -66,7 +67,6 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
     validatorRate = Configuration.getDouble(prefix + "." + PAR_VALIDATOR_RATE, 1.0);
     int numRowsColsTOpic = Configuration.getInt(prefix + "." + PAR_ROWCOL_TOPIC, 1);
     topicMap = new GossipTopicMap(numRowsColsTOpic);
-
   }
 
   public boolean execute() {
@@ -126,7 +126,7 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
         nonValidatorsIds.add(gossipProt.getGossipNode().getId());
       }
 
-      dasProt.setGossipProtocol(generalNode, gossipProt,topicMap);
+      dasProt.setGossipProtocol(generalNode, gossipProt, topicMap);
       dasProt.setProtocolId(protocolDasBuilderID);
       // gossipProt.setEventsCallback(dasProt);
 
