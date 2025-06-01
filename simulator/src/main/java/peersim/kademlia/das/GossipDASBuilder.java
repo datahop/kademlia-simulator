@@ -28,25 +28,33 @@ public class GossipDASBuilder extends GossipDAS {
     if (!started) {
       started = true;
 
+      String rowTopic="",columnTopic="";
       for (int j = 1; j <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; j++) {
-        String topic = "Row" + j;
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
-        topic = "Column" + j;
-        gossipsub.Join(topic);
-        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+        String topic = topicMap.getRowTopic(j);
+        if (rowTopic!=topic) {
+          gossipsub.Join(topic);
+          GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+        }
+        rowTopic=topic;
+
+        topic = topicMap.getColumnTopic(j);
+        if (columnTopic!=topic) {
+          gossipsub.Join(topic);
+          GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+        }
+        columnTopic = topic;
       }
     } else {
       for (int i = 1; i <= KademliaCommonConfigDas.BLOCK_DIM_SIZE; i++) {
         Sample[] samples = currentBlock.getSamplesByRow(i);
-        String topic = "Row" + i;
+        String topic = topicMap.getRowTopic(i);
         Message msg =
             Message.makePublishMessage(topic, Arrays.copyOfRange(samples, 0, samples.length / 2));
         msg.src = this.gossipsub.node;
         gossipsub.Publish(msg, myPid);
 
         samples = currentBlock.getSamplesByColumn(i);
-        topic = "Column" + i;
+        topic = topicMap.getColumnTopic(i);
         msg = Message.makePublishMessage(topic, Arrays.copyOfRange(samples, 0, samples.length / 2));
         msg.src = this.gossipsub.node;
         gossipsub.Publish(msg, myPid);

@@ -126,7 +126,7 @@ public class CustomDistributionGossipDas implements peersim.core.Control {
         nonValidatorsIds.add(gossipProt.getGossipNode().getId());
       }
 
-      dasProt.setGossipProtocol(generalNode, gossipProt);
+      dasProt.setGossipProtocol(generalNode, gossipProt,topicMap);
       dasProt.setProtocolId(protocolDasBuilderID);
       // gossipProt.setEventsCallback(dasProt);
 

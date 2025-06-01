@@ -4,7 +4,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.kademlia.KademliaObserver;
@@ -40,28 +43,44 @@ public class GossipDASValidator extends GossipDAS {
     currentBlock = (Block) m.body;
     logger.warning("Validator Init block");
 
+    Set<String> topics = new HashSet<>();
     if (!started) {
-      String topic;
       started = true;
+      String topic;
       row1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = "Row" + row1;
-      gossipsub.Join(topic);
-      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      topic = topicMap.getRowTopic(row1);
+      if (!topics.contains(topic)){
+        gossipsub.Join(topic);
+        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      }
+      topics.add(topic);
 
       column1 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = "Column" + column1;
-      gossipsub.Join(topic);
-      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      topic = topicMap.getColumnTopic(column1);
+
+      if (!topics.contains(topic)){
+        gossipsub.Join(topic);
+        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      }
+      topics.add(topic);
 
       row2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
-      topic = "Row" + row2;
-      gossipsub.Join(topic);
-      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      topic = topicMap.getRowTopic(row2);
+
+      if (!topics.contains(topic)){
+        gossipsub.Join(topic);
+        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      }
+      topics.add(topic);
 
       column2 = CommonState.r.nextInt(KademliaCommonConfigDas.BLOCK_DIM_SIZE) + 1;
       topic = "Column" + column2;
-      gossipsub.Join(topic);
-      GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      if (!topics.contains(topic)){
+        gossipsub.Join(topic);
+        GossipSubProtocol.getTable().addPeer(topic, gossipsub.getGossipNode().getId());
+      }
+      topics.add(topic);
+
     } else {
       createValidatorSamplingOperation(row1, 0, CommonState.getTime(), null);
       createValidatorSamplingOperation(0, column1, CommonState.getTime(), null);
